@@ -43,7 +43,7 @@ function init () {
 
   var serviceContainer = new ServiceContainer(serviceFactory)
   var services = serviceContainer.services
-  // var config = serviceFactory.getConfigService()
+  var configService = serviceFactory.getConfigService()
 
   // opbeat.com/jahtalab/opbeat-e2e
   // config.setConfig({

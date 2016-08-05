@@ -79,6 +79,7 @@ gulp.task('build:release', function () {
 
   var integrations = [
     { name: 'opbeat-angular', entry: './src/angular/opbeat-angular.js', description: 'Official AngularJS client for logging exceptions, stacktraces and performance data to Opbeat' },
+    { name: 'opbeat-react', entry: './src/react/opbeat-react.js', description: 'Official React client for logging exceptions, stacktraces and performance data to Opbeat' },
     { name: 'opbeat-js', entry: './src/opbeat.js', description: 'This is the official frontend JavaScript module for Opbeat' }
   ]
 

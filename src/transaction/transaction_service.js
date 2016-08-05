@@ -204,6 +204,7 @@ TransactionService.prototype.scheduleTransactionSend = function () {
 
   setInterval(function () {
     var transactions = self.getTransactions()
+
     if (transactions.length === 0) {
       return
     }
