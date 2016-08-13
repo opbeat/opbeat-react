@@ -7,6 +7,8 @@ var rename = require('gulp-rename')
 var browserify = require('browserify')
 var buffer = require('vinyl-buffer')
 var uglify = require('gulp-uglify')
+var sourcemaps = require('gulp-sourcemaps')
+
 var taskListing = require('gulp-task-listing')
 var awspublish = require('gulp-awspublish')
 var injectVersion = require('gulp-inject-version')
@@ -17,6 +19,10 @@ var runSequence = require('run-sequence')
 var webdriver = require('gulp-webdriver')
 var selenium = require('selenium-standalone')
 
+var webpack = require("webpack");
+var glob = require("glob")
+
+var path = require('path')
 var connect = require('gulp-connect')
 
 require('gulp-release-tasks')(gulp)
@@ -46,7 +52,7 @@ function createBuildStream (mainFilePath) {
     entries: [mainFilePath],
     standalone: '',
     insertGlobalVars: { define: function () { return 'undefined'; }, process: function () { return 'undefined'; } }
-  })
+  }).ignore('react').ignore('react-dom').ignore('redux').ignore('react/lib/ReactUpdates')
     .bundle()
     .pipe(source(mainFilePath))
     .pipe(rename({ dirname: '' }))
@@ -70,7 +76,33 @@ function getMajorVersion () {
   return majorVersion
 }
 
-gulp.task('build:release', function () {
+
+gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
+  var dirNeedsBuilding = [
+    './test/e2e/react/redux',
+    './test/e2e/react/router',
+    './test/e2e/fetch'
+  ]
+
+  var left = dirNeedsBuilding.length
+  dirNeedsBuilding.map(function(dir) {
+    console.log('Building', dir)
+    var webpackConfig = require(dir + '/webpack.config.js')
+    var myConfig = Object.create(webpackConfig)
+    
+    // run webpack
+    webpack(myConfig).run(function(err, stats) {
+        if(err) console.log(err); //throw err;
+        if(stats.hasErrors()) console.log("!! there were errors building", dir)
+        left--
+        if (left === 0) {
+          done();
+        }
+    })
+  })
+})
+
+gulp.task('build:release', ['apply-prod-environment'], function () {
   var version = require('./package').version
   var majorVersion = version.match(/^(\d).(\d).(\d)/)[1]
 
@@ -114,10 +146,15 @@ gulp.task('build:release', function () {
   return es.merge.apply(null, tasks)
 })
 
-gulp.task('build', function () {
+gulp.task('apply-prod-environment', function() {
+    process.env.NODE_ENV = 'production';
+});
+
+gulp.task('build', ['apply-prod-environment'], function () {
   var sourceTargets = [
     './src/opbeat.js',
     './src/angular/opbeat-angular.js',
+    './src/react/opbeat-react.js',
     './test/e2e/angular/opbeat-angular.e2e.js'
   ]
 
@@ -127,7 +164,8 @@ gulp.task('build', function () {
       .pipe(rename({
         extname: '.min.js'
       }))
-      .pipe(uglify())
+      // .pipe(uglify())
+      .pipe(sourcemaps.init())
       .pipe(gulp.dest('./dist/dev/'))
   })
 

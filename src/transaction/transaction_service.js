@@ -190,8 +190,8 @@ TransactionService.prototype.removeTask = function (taskId) {
 }
 
 TransactionService.prototype.detectFinish = function () {
-  var tr = this._zoneService.get('transaction')
-  if (!utils.isUndefined(tr) && !tr.ended) {
+  var tr = this.getCurrentTransaction()
+  if (tr) {
     tr.detectFinish()
     this._logger.debug('TransactionService.detectFinish')
   }

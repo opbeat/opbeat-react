@@ -1,13 +1,12 @@
 var ReactUpdates = require('react/lib/ReactUpdates')
 var ReactReconciler = require('react/lib/ReactReconciler')
-var patchMethod = require('../common/patchUtils').patchMethod
+var patchMethod = require('../../common/patchUtils').patchMethod
 
 var reactDom = require('react-dom')
 
 module.exports = function patchReact (serviceContainer) {
   var batchedUpdatePatch = function (delegate) {
     return function (self, args) {
-      var serviceContainer = window.__opbeat_services
       var ret
       try {
         serviceContainer.services.zoneService.set('componentsRendered', [])
@@ -26,8 +25,6 @@ module.exports = function patchReact (serviceContainer) {
 
   var componentRenderPatch = function (delegate) {
     return function (self, args) {
-      var serviceContainer = window.__opbeat_services
-
       if (args[0] && args[0].getName) {
         var components = serviceContainer.services.zoneService.get('componentsRendered') || []
         components.push(args[0].getName())
@@ -44,6 +41,7 @@ module.exports = function patchReact (serviceContainer) {
       var out
       serviceContainer.services.zoneService.zone.run(function () {
         out = delegate.apply(self, args)
+        serviceContainer.services.transactionService.detectFinish()
       })
       return out
     }

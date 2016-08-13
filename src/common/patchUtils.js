@@ -36,11 +36,23 @@ module.exports = {
     return newArgs
   },
   opbeatSymbol: opbeatSymbol,
-  patchMethod: patchMethod
+  patchMethod: patchMethod,
+  patchObject: patchObject
 }
 
 function opbeatSymbol (name) {
   return '__opbeat_symbol__' + name
+}
+
+
+function patchObject (target, name, patchFn) {
+  var delegateName = opbeatSymbol(name)
+  var delegate = target[delegateName]
+  if (!delegate) {
+    delegate = target[delegateName] = target[name]
+    target[name] = createNamedFn(name, patchFn(delegate, delegateName, name))
+  }
+  return delegate
 }
 
 function patchMethod (target, name, patchFn) {
