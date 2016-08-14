@@ -1,6 +1,6 @@
 
 var redux = require('redux')
-var patchMethod = require('../../common/patchUtils').patchMethod
+var patchMethod = require('../common/patchUtils').patchMethod
 
 function createCreateStore(serviceContainer) {
   return function createStoreWrapper (reducer, initialState, enhancer) {

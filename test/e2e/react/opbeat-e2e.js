@@ -28,16 +28,11 @@ var transport = serviceFactory.getTransport()
 var transportMock = new TransportMock(transport)
 serviceFactory.services['Transport'] = transportMock
 
-window.opbeat = initOpbeat({
+var opbeat = initOpbeat({
   'debug': true,
   'logLevel': 'trace',
   'orgId': '470d9f31bc7b4f4395143091fe752e8c',
   'appId': '9aac8591bb'
 }, serviceFactory) // Override service factory
 window.opbeatTransport = transportMock
-
-const createStore = createCreateStore(opbeat)
-
-module.exports = {
-  createStore
-}
+window.opbeat = opbeat

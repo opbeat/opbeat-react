@@ -1,8 +1,9 @@
-import { createStore } from '../opbeat-e2e'
-
+import '../opbeat-e2e'
+import { createCreateStore } from  '../../../../src/react/redux'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
+const createStore = createCreateStore(window.opbeat)
 
 function counter(state, action) {
   if (typeof state === 'undefined') {

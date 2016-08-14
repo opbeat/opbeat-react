@@ -1,22 +1,11 @@
-// import initOpbeat from  '../../../src/react/opbeat-react'
 import '../opbeat-e2e'
-
-
-// const opbeat = initOpbeat({
-//   'debug': true,
-//   'logLevel': 'trace',
-//   'orgId': '470d9f31bc7b4f4395143091fe752e8c',
-//   'appId': '9aac8591bb'
-// })
-
+import { useRouter } from  '../../../../src/react/router'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
 import { Router, Route, IndexRoute, Link, IndexLink, browserHistory } from 'react-router'
 
-// function withExampleBasename(history, dirname) {
-  // return useBasename(() => history)({ basename: `/${dirname}` })
-// }
+useRouter(window.opbeat)
 
 const ACTIVE = { color: 'red' }
 

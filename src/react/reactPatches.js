@@ -1,6 +1,6 @@
 var ReactUpdates = require('react/lib/ReactUpdates')
 var ReactReconciler = require('react/lib/ReactReconciler')
-var patchMethod = require('../../common/patchUtils').patchMethod
+var patchMethod = require('../common/patchUtils').patchMethod
 
 var reactDom = require('react-dom')
 

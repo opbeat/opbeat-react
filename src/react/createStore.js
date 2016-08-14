@@ -1,2 +1,2 @@
-var createCreateStore = require('./patches/redux').createCreateStore
+var createCreateStore = require('./redux').createCreateStore
 module.exports = createCreateStore
