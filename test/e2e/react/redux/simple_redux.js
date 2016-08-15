@@ -1,5 +1,5 @@
 import '../opbeat-e2e'
-import { createCreateStore } from  '../../../../src/react/redux'
+import { createCreateStore } from  '../../../../dist/opbeat-react/redux'
 import React from 'react'
 import ReactDOM from 'react-dom'
 

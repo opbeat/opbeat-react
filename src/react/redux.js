@@ -1,4 +1,3 @@
-
 var redux = require('redux')
 var patchMethod = require('../common/patchUtils').patchMethod
 

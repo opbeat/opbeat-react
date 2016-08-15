@@ -8,6 +8,7 @@ var browserify = require('browserify')
 var buffer = require('vinyl-buffer')
 var uglify = require('gulp-uglify')
 var sourcemaps = require('gulp-sourcemaps')
+var replacePath = require('gulp-replace-path');
 
 var taskListing = require('gulp-task-listing')
 var awspublish = require('gulp-awspublish')
@@ -108,6 +109,26 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   })
 })
 
+gulp.task('build:release:react', ['apply-prod-environment'], function () {
+  var version = require('./package').version
+  var majorVersion = version.match(/^(\d).(\d).(\d)/)[1]
+  var prodPath = './dist/opbeat-react'
+
+  gulp.src(['src/react/**/*.js'])
+    .pipe(replacePath(/\.\.\//g, './lib/'))
+    .pipe(gulp.dest(prodPath))
+
+  gulp.src(['src/react/README.md', 'src/react/package.json'])
+    .pipe(gulp.dest(prodPath))
+
+  gulp.src(['src/**/*.js'], {ignore: ['**/angular/**', '**/react/**']})
+    .pipe(gulp.dest(prodPath + '/lib'))
+
+  var license = gulp.src(['LICENSE'])
+      .pipe(gulp.dest(prodPath))
+    
+})
+
 gulp.task('build:release', ['apply-prod-environment'], function () {
   var version = require('./package').version
   var majorVersion = version.match(/^(\d).(\d).(\d)/)[1]
@@ -117,7 +138,9 @@ gulp.task('build:release', ['apply-prod-environment'], function () {
 
   var integrations = require('./release/integrations')
 
-  var tasks = Object.keys(integrations).map(function (key) {
+  var tasks = Object.keys(integrations)
+      .filter(function(key) { return key !== 'opbeat-react'})
+      .map(function (key) {
     var integration = integrations[key]
     var integrationName = key
     var mainStream = createBuildStream(integration.entry, integration.version)

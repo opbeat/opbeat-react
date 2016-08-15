@@ -2,8 +2,9 @@ var ServiceFactory = require('../common/ServiceFactory')
 var ServiceContainer = require('../common/ServiceContainer')
 var utils = require('../lib/utils')
 
-var patchAll = require('./patchAll')
-var createStore = 1
+var patchReact = require('./reactPatches')
+var patchCommon = require('../common/patchCommon')
+
 
 function init (config, serviceFactory) {
   if (utils.isUndefined(serviceFactory)) {
@@ -12,7 +13,9 @@ function init (config, serviceFactory) {
   var serviceContainer = new ServiceContainer(serviceFactory)
   serviceContainer.services.configService.setConfig(config)
 
-  patchAll(serviceContainer)
+  patchCommon(serviceContainer)
+  patchReact(serviceContainer)
+
 
   return serviceContainer
 }

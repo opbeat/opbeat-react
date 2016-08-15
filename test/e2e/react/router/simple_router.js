@@ -1,5 +1,5 @@
 import '../opbeat-e2e'
-import { useRouter } from  '../../../../src/react/router'
+import { useRouter } from  '../../../../dist/opbeat-react/router'
 import React from 'react'
 import ReactDOM from 'react-dom'
 

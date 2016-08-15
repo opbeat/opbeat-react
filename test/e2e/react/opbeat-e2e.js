@@ -1,5 +1,5 @@
-import createCreateStore from '../../../src/react/createStore'
-import initOpbeat from  '../../../src/react/opbeat-react'
+import initOpbeat from  '../../../dist/opbeat-react'
+
 import ServiceFactory from '../../../src/common/serviceFactory'
 
 function TransportMock (transport) {
@@ -34,5 +34,6 @@ var opbeat = initOpbeat({
   'orgId': '470d9f31bc7b4f4395143091fe752e8c',
   'appId': '9aac8591bb'
 }, serviceFactory) // Override service factory
+
 window.opbeatTransport = transportMock
 window.opbeat = opbeat
