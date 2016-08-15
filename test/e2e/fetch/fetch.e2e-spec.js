@@ -22,7 +22,7 @@ describe('simple-fetch-app', function () {
         // console.log(transactions)
         expect(transactions.traces.groups.length).toBe(2)
 
-        expect(transactions.traces.groups[1].kind).toBe('ext.Http')
+        expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
         expect(transactions.traces.groups[1].signature).toBe('GET ./test.json')
 
         done()

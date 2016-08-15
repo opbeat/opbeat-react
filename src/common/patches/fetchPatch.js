@@ -48,7 +48,7 @@ function patchFetch (serviceContainer) {
           return delegate.apply(self, args)
         }
         var url = args[0]
-        var trace = transactionService.startTrace('GET ' + url, 'ext.Http')
+        var trace = transactionService.startTrace('GET ' + url, 'ext.HttpRequest.fetch')
 
         var promise = delegate.apply(self, args)
         patchPromise(promise, trace)
