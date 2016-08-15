@@ -110,8 +110,6 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
 })
 
 gulp.task('build:release:react', ['apply-prod-environment'], function () {
-  var version = require('./package').version
-  var majorVersion = version.match(/^(\d).(\d).(\d)/)[1]
   var prodPath = './dist/opbeat-react'
 
   gulp.src(['src/react/**/*.js'])
@@ -126,10 +124,9 @@ gulp.task('build:release:react', ['apply-prod-environment'], function () {
 
   var license = gulp.src(['LICENSE'])
       .pipe(gulp.dest(prodPath))
-    
 })
 
-gulp.task('build:release', ['apply-prod-environment'], function () {
+gulp.task('build:release', ['build:release:react'], function () {
   var version = require('./package').version
   var majorVersion = version.match(/^(\d).(\d).(\d)/)[1]
 
