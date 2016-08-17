@@ -11,7 +11,6 @@ describe('simple-fetch-app', function () {
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(transactions) {
-          console.log("BLEH")
           cb(transactions)
         })
         // document.getElementById('incr').click()
@@ -20,10 +19,13 @@ describe('simple-fetch-app', function () {
     ).then(function (response) {
         var transactions = response.value
         // console.log(transactions)
-        expect(transactions.traces.groups.length).toBe(2)
+        expect(transactions.traces.groups.length).toBe(3)
 
         expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
         expect(transactions.traces.groups[1].signature).toBe('GET ./test.json')
+
+        expect(transactions.traces.groups[2].signature).toBe('important custom trace')
+        expect(transactions.traces.groups[2].kind).toBe('template.custom')
 
         done()
       }, function (error) {

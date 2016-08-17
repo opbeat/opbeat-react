@@ -1,6 +1,9 @@
-var ReactUpdates = require('react/lib/ReactUpdates')
+// var ReactUpdates = require('react/lib/ReactUpdates')
+var ReactDefaultBatchingStrategy = require('react/lib/ReactDefaultBatchingStrategy') 
 var ReactReconciler = require('react/lib/ReactReconciler')
 var patchMethod = require('../common/patchUtils').patchMethod
+
+var ReactInjection = require('react/lib/ReactInjection')
 
 var reactDom = require('react-dom')
 
@@ -10,24 +13,46 @@ module.exports = function patchReact (serviceContainer) {
       var ret
       try {
         serviceContainer.services.zoneService.set('componentsRendered', [])
+        serviceContainer.services.zoneService.set('tagsRendered', [])
         var tr = serviceContainer.services.transactionService.startTrace('batchedUpdates', 'template.update')
         ret = delegate.apply(self, args)
-        tr.signature = 'Render ' + serviceContainer.services.zoneService.get('componentsRendered').length + ' components'
+        var components = serviceContainer.services.zoneService.get('componentsRendered')
+        var tags = serviceContainer.services.zoneService.get('tagsRendered')
+        var text = ''
+        if (components.length === 0) {
+          text = tags.length + ' tags'
+        }else{
+          text = components.length + ' components (' + tags.length + ' tags)'
+        }
+        tr.signature = 'Render ' + text
         tr.end()
       } finally {
         serviceContainer.services.zoneService.set('componentsRendered', [])
+        serviceContainer.services.zoneService.set('tagsRendered', [])
       }
       return ret
     }
   }
-  patchMethod(ReactUpdates, 'batchedUpdates', batchedUpdatePatch)
-  patchMethod(ReactUpdates, 'ReactDefaultBatchingStrategy', batchedUpdatePatch)
+
+  // var OpbeatAwareBatching = {
+    
+  // }
+  // patchMethod(ReactUpdates, 'batchedUpdates', batchedUpdatePatch)
+  patchMethod(ReactDefaultBatchingStrategy, 'batchedUpdates', batchedUpdatePatch)
+
+  // ReactInjection.Updates.injectBatchingStrategy()
 
   var componentRenderPatch = function (delegate) {
     return function (self, args) {
       if (args[0] && args[0].getName) {
         var components = serviceContainer.services.zoneService.get('componentsRendered') || []
         components.push(args[0].getName())
+      }else if (args[0] && args[0]._tag) {
+        var tags = serviceContainer.services.zoneService.get('tagsRendered') || []
+        tags.push(args[0]._tag)
+      }else{
+        var tags = serviceContainer.services.zoneService.get('tagsRendered') || []
+        tags.push("unknown")
       }
       return delegate.apply(self, args)
     }

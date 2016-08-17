@@ -10,7 +10,11 @@ var component = React.createClass({
     this.fetchData()
   },
   fetchData: function() {
-    fetch('./test.json').then((resp) => resp.json()).then((json) => this.setState({fetchedData: json}))
+    fetch('./test.json').then((resp) => resp.json().then((json) => {
+      var trace = window.opbeat.services.transactionService.startTrace('important custom trace', 'template.custom')
+      this.setState({fetchedData: json})
+      trace.end()
+    }))
   },
   render: function() {
     const { fetchedData } = this.state

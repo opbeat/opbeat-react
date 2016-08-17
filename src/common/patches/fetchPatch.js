@@ -7,38 +7,73 @@ var fetchCounter = 0
 function patchFetch (serviceContainer) {
   var transactionService = serviceContainer.services.transactionService
 
-  var patch = function(trace) {
-    return function (delegate) {
-      return function (self, args) { // resolve, reject
-        var task = {taskId: 'fetchTask' + fetchTasks++}
-        transactionService.addTask(task.taskId)
-        var resolve = args[0]
-        args[0] = function () {
-          if (!trace.ended) {
-            trace.end()
-          }
-          var ret = resolve.apply(this, arguments)
-          transactionService.removeTask(task.taskId)
-          transactionService.detectFinish()
-          return ret
-        }
+  // var then = function(trace) {
+    
+  // }
 
-        var newPromise = delegate.apply(self, args)
-        patchPromise(newPromise, trace)
-        return newPromise
+  var patchList = ['json', 'text', 'formData', 'blob', 'arrayBuffer', 'redirect', 'error']
+
+  function patchResponse (response, trace) {
+    var myTrace = trace
+    patchList.forEach(function(funcName) { 
+      if (!utils.isUndefined(response[funcName])) {
+        patchObject(response, funcName, function(delegate) {
+          return function(self, args) {
+            var promise = delegate.apply(self, args)
+            
+            patchObject(promise, 'then', function (delegate) {
+              return function (self, args) { // resolve, reject
+                var task = {taskId: 'fetchTask' + fetchTasks++}
+                transactionService.addTask(task.taskId)
+                var resolve = args[0]
+                args[0] = function () {
+                  var ret = resolve.apply(this, arguments)
+                  transactionService.removeTask(task.taskId)
+                  transactionService.detectFinish()
+                  return ret
+                }
+                return delegate.apply(self, args)
+                // patchThen(newPromise, trace)
+                // return newPromise
+              }
+            })
+
+            return promise
+          }
+        })
       }
-    }
+    })
   }
 
-  function patchPromise (promise, trace) {
+  function patchThen (promise, trace) {
     var myTrace = trace
-    if (utils.isUndefined(promise.then)) {
-      return
-    }
-    var fetchCounterLocal = fetchCounter
-    fetchCounter++
+    if (!utils.isUndefined(promise.then)) {
+      patchObject(promise, 'then', function (delegate) {
+        return function (self, args) { // resolve, reject
+          var task = {taskId: 'fetchTask' + fetchTasks++}
+          transactionService.addTask(task.taskId)
+          var resolve = args[0]
+          args[0] = function () {
+            if (!trace.ended) {
+              trace.end()
+            }
 
-    patchObject(promise, 'then', patch(trace))
+            if (arguments.length > 0 && arguments[0]) {
+              patchResponse(arguments[0], trace)
+            }
+
+            var ret = resolve.apply(this, arguments)
+            transactionService.removeTask(task.taskId)
+            transactionService.detectFinish()
+            return ret
+          }
+
+          var newPromise = delegate.apply(self, args)
+          patchThen(newPromise, trace)
+          return newPromise
+        }
+      })
+    }
   }
 
   if (window.fetch) {
@@ -51,7 +86,7 @@ function patchFetch (serviceContainer) {
         var trace = transactionService.startTrace('GET ' + url, 'ext.HttpRequest.fetch')
 
         var promise = delegate.apply(self, args)
-        patchPromise(promise, trace)
+        patchThen(promise, trace)
         return promise
       }
     })
