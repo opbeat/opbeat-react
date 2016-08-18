@@ -1,11 +1,13 @@
-// var ReactUpdates = require('react/lib/ReactUpdates')
-var ReactDefaultBatchingStrategy = require('react/lib/ReactDefaultBatchingStrategy') 
+// Require react-dom early because it will inject the wrong default batching strategy
+// We'll inject our own and override later
+var reactDom = require('react-dom')
+
 var ReactReconciler = require('react/lib/ReactReconciler')
 var patchMethod = require('../common/patchUtils').patchMethod
 
+var ReactDefaultBatchingStrategy = require('react/lib/ReactDefaultBatchingStrategy') 
 var ReactInjection = require('react/lib/ReactInjection')
 
-var reactDom = require('react-dom')
 
 module.exports = function patchReact (serviceContainer) {
   var batchedUpdatePatch = function (delegate) {
@@ -39,8 +41,7 @@ module.exports = function patchReact (serviceContainer) {
   // }
   // patchMethod(ReactUpdates, 'batchedUpdates', batchedUpdatePatch)
   patchMethod(ReactDefaultBatchingStrategy, 'batchedUpdates', batchedUpdatePatch)
-
-  // ReactInjection.Updates.injectBatchingStrategy()
+  ReactInjection.Updates.injectBatchingStrategy(ReactDefaultBatchingStrategy)
 
   var componentRenderPatch = function (delegate) {
     return function (self, args) {

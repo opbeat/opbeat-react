@@ -1,9 +1,11 @@
 import '../opbeat-e2e'
-import { createCreateStore } from  '../../../../dist/opbeat-react/redux'
+import { wrapStore } from  '../../../../dist/opbeat-react/redux'
 import React from 'react'
+import { createStore } from 'redux'
 import ReactDOM from 'react-dom'
 
-const createStore = createCreateStore(window.opbeat)
+var store = createStore(counter)
+store = wrapStore(store, window.opbeat)
 
 function counter(state, action) {
   if (typeof state === 'undefined') {
@@ -53,13 +55,13 @@ var component = React.createClass({
   }
 })
 
-var store = createStore(counter)
-
 function render() {
   ReactDOM.render(
     React.createElement(component, {
       value: store.getState(),
-      onIncrement: function() { store.dispatch({ type: 'INCREMENT' })},
+      onIncrement: function() {
+        store.dispatch({ type: 'INCREMENT' })
+      },
       onDecrement: function() { store.dispatch({ type: 'DECREMENT' })}
     }),
     document.getElementById('reactMount')

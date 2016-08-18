@@ -13,12 +13,9 @@ const opbeat = initOpbeat({
 
 // enable react-router instrumentation
 import { useRouer } from 'opbeat-react/router'
-useRedux(opbeat)
+useRouter(opbeat)
 
 // enable redux instrumentation
-import { createCreateStore } from 'opbeat-react/redux'
-const createStore = createCreateStore(opbeat)
-
-// use as usual
-var store = createStore(myState)
+import { wrapStore } from 'opbeat-react/redux'
+const store = wrapStore(opbeat, store)
 ```
