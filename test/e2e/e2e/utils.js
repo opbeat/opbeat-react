@@ -6,8 +6,9 @@ var logLevels = {
   SEVERE: {value: 1000},
   OFF: {value: Number.MAX_VALUE}
 }
-module.exports = {
-  verifyNoBrowserErrors: function (done) {
+
+var allowSomeBrowserErrors = function(allowedErrorText) {
+  return function (done) {
     // TODO: Bug in ChromeDriver: Need to execute at least one command
     // so that the browser logs can be read out!
     browser.execute('1+1')
@@ -17,7 +18,7 @@ module.exports = {
       var browserLog = response.value
       for (var i = 0; i < browserLog.length; i++) {
         var logEntry = browserLog[i]
-        if (logLevels[logEntry.level].value > logLevels.WARNING.value) {
+        if (logLevels[logEntry.level].value > logLevels.WARNING.value && (!allowedErrorText || logEntry.message.indexOf(allowedErrorText) > 0)) {
           filteredLog.push(logEntry)
         } else if (logLevels[logEntry.level].value >= logLevels.INFO.value) {
           infoLogs.push(logEntry)
@@ -33,7 +34,15 @@ module.exports = {
         done()
       }
     })
-  },
+  }
+}
+
+
+var verifyNoBrowserErrors = allowSomeBrowserErrors()
+
+module.exports = {
+  verifyNoBrowserErrors: verifyNoBrowserErrors,
+  allowSomeBrowserErrors: allowSomeBrowserErrors,
   expectTraceInGroups: function expectTraceInGroups (signature, count, groups) {
     var filtered = groups.filter(function (g) {
       return g.signature === signature

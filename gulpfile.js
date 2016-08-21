@@ -58,7 +58,7 @@ function createBuildStream (mainFilePath, version) {
     entries: [mainFilePath],
     standalone: '',
     insertGlobalVars: { define: function () { return 'undefined'; }, process: function () { return 'undefined'; } }
-  }).ignore('react').ignore('react-dom').ignore('redux').ignore('react/lib/ReactUpdates')
+  }).ignore('react').ignore('react-dom').ignore('redux').ignore('react/lib/ReactUpdates').ignore('react/lib/ReactDefaultBatchingStrategy')
     .bundle()
     .pipe(source(mainFilePath))
     .pipe(rename({ dirname: '' }))
@@ -86,6 +86,7 @@ function getMajorVersion () {
 
 gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   var dirNeedsBuilding = [
+    './test/e2e/react/react',
     './test/e2e/react/redux',
     './test/e2e/react/router',
     './test/e2e/fetch'
@@ -202,7 +203,7 @@ gulp.task('build', ['apply-prod-environment'], function () {
 gulp.task('watch', [], function (cb) {
   gulp.run(
     'build',
-    'server'
+    'examples:serve'
   )
 
   // Watch JS files

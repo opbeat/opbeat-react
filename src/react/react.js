@@ -16,7 +16,6 @@ function init (config, serviceFactory) {
   patchCommon(serviceContainer)
   patchReact(serviceContainer)
 
-
   return serviceContainer
 }
 

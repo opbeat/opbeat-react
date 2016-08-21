@@ -3,35 +3,104 @@ var utils = require('../e2e/utils')
 
 describe('simple-fetch-app', function () {
   // build the app
-  beforeEach(utils.verifyNoBrowserErrors)
 
-  it('should have correct number of transactions and traces', function (done) {
+  it('should intercept regular fetch', function (done) {
     browser.url('/fetch/index.html')
 
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(transactions) {
-          cb(transactions)
+
+          var fetchedResult = document.getElementById('fetchResult').textContent
+
+          cb({transactions: transactions, fetchedResult: fetchedResult})
         })
-        // document.getElementById('incr').click()
-        // console.log('clicked')
+        document.getElementById('fetch-data').click()
       }
     ).then(function (response) {
-        var transactions = response.value
-        // console.log(transactions)
-        expect(transactions.traces.groups.length).toBe(3)
+      var transactions = response.value.transactions
+      var fetchedResult = response.value.fetchedResult
+      
+      expect(fetchedResult).toBe('some-data')
+      expect(transactions.traces.groups.length).toBe(3)
+      
+      expect(transactions.traces.groups[0].transaction).toBe('fetchData')
+      expect(transactions.traces.groups[0].kind).toBe('transaction')
 
-        expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
-        expect(transactions.traces.groups[1].signature).toBe('GET ./test.json')
-
-        expect(transactions.traces.groups[2].signature).toBe('important custom trace')
-        expect(transactions.traces.groups[2].kind).toBe('template.custom')
-
-        done()
-      }, function (error) {
-        browser.log(error)
-      })
+      expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
+      expect(transactions.traces.groups[1].signature).toBe('GET ./test.json')
+      
+      expect(transactions.traces.groups[2].signature).toBe('important custom trace')
+      expect(transactions.traces.groups[2].kind).toBe('template.custom')
+      
+      utils.verifyNoBrowserErrors(done)
+    }, function (error) {
+      browser.log(error)
+    })
   })
 
-  afterEach(utils.verifyNoBrowserErrors)
+  it('should intercept rejected fetch', function (done) {
+    browser.url('/fetch/index.html')
+    browser.refresh()
+
+    browser.executeAsync(
+      function(cb) {
+        window.opbeatTransport.subscribe(function(transactions) {
+          cb({transactions: transactions})
+        })
+        document.getElementById('fail-fetch-data').click()
+      }
+    ).then(function (response) {
+      try{
+        var transactions = response.value.transactions
+
+        expect(transactions.traces.groups[0].transaction).toBe('failFetchData')
+        expect(transactions.traces.groups[0].kind).toBe('transaction')
+
+        expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
+        expect(transactions.traces.groups[1].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
+
+        expect(transactions.traces.groups[2].signature).toBe('important reject trace')
+        expect(transactions.traces.groups[2].kind).toBe('template.custom')
+
+        utils.allowSomeBrowserErrors(
+          'http://non-existing-host.opbeat/non-existing-file.json'
+          )(done)
+
+      }catch(e) {
+        console.log(e)
+      }
+    }, function (error) {
+      browser.log(error)
+    })
+  })
+
+  it('should intercept catched fetch', function (done) {
+    browser.url('/fetch/index.html')
+    browser.refresh()
+
+    browser.executeAsync(
+      function(cb) {
+        window.opbeatTransport.subscribe(function(transactions) {
+          cb({transactions: transactions})
+        })
+        document.getElementById('fail-fetch-data-catch').click()
+      }
+    ).then(function (response) {
+      var transactions = response.value.transactions
+      expect(transactions.traces.groups.length).toBe(3)
+
+      expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
+      expect(transactions.traces.groups[1].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
+
+      expect(transactions.traces.groups[2].signature).toBe('important catched trace')
+      expect(transactions.traces.groups[2].kind).toBe('template.custom')
+      utils.allowSomeBrowserErrors(
+          'http://non-existing-host.opbeat/non-existing-file.json'
+          )(done)
+    }, function (error) {
+      browser.log(error)
+    })
+  })
+
 })

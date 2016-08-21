@@ -1,4 +1,4 @@
-var makeSignatureFromRoutes = require('../../src/react/patches/router').makeSignatureFromRoutes
+var makeSignatureFromRoutes = require('../../src/react/router').makeSignatureFromRoutes
 
 describe("makeSignatureFromRoutes", function() {
   it("should correctly join paths", function() {

@@ -3,77 +3,145 @@ var patchObject = require('../patchUtils').patchObject
 
 var fetchTasks = 0
 
-var fetchCounter = 0
-function patchFetch (serviceContainer) {
-  var transactionService = serviceContainer.services.transactionService
+var patchList = ['json', 'text', 'formData', 'blob', 'arrayBuffer', 'redirect', 'error']
 
-  // var then = function(trace) {
-    
-  // }
+function patchResponse (transactionService, response, trace) {
+  var myTrace = trace
+  patchList.forEach(function(funcName) { 
+    if (!utils.isUndefined(response[funcName])) {
+      patchObject(response, funcName, function(delegate) {
+        return function(self, args) {
+          var promise = delegate.apply(self, args)
+          patchPromise(transactionService, promise, trace, false)
+          return promise
+        }
+      })
+    }
+  })
+}
 
-  var patchList = ['json', 'text', 'formData', 'blob', 'arrayBuffer', 'redirect', 'error']
+function patchPromise (transactionService, promise, trace, shouldPatchResponse, thenTasksCarried) {
+  var myTrace = trace
+  var thenTasks = thenTasksCarried || []
+  var catchTasks = []
 
-  function patchResponse (response, trace) {
-    var myTrace = trace
-    patchList.forEach(function(funcName) { 
-      if (!utils.isUndefined(response[funcName])) {
-        patchObject(response, funcName, function(delegate) {
-          return function(self, args) {
-            var promise = delegate.apply(self, args)
-            
-            patchObject(promise, 'then', function (delegate) {
-              return function (self, args) { // resolve, reject
-                var task = {taskId: 'fetchTask' + fetchTasks++}
-                transactionService.addTask(task.taskId)
-                var resolve = args[0]
-                args[0] = function () {
-                  var ret = resolve.apply(this, arguments)
-                  transactionService.removeTask(task.taskId)
-                  transactionService.detectFinish()
-                  return ret
-                }
-                return delegate.apply(self, args)
-                // patchThen(newPromise, trace)
-                // return newPromise
-              }
-            })
-
-            return promise
-          }
-        })
-      }
+  function removeTaskList(taskList) {
+    taskList.forEach(function(item) {
+      transactionService.removeTask(item)
     })
   }
 
-  function patchThen (promise, trace) {
-    var myTrace = trace
-    if (!utils.isUndefined(promise.then)) {
-      patchObject(promise, 'then', function (delegate) {
-        return function (self, args) { // resolve, reject
-          var task = {taskId: 'fetchTask' + fetchTasks++}
-          transactionService.addTask(task.taskId)
-          var resolve = args[0]
+  if (!utils.isUndefined(promise.then)) {
+    patchObject(promise, 'then', function (delegate) {
+      return function (self, args) { // resolve, reject
+        var taskId = 'fetchTask' + fetchTasks++
+
+        var resolve = args[0]
+        var reject = args[1]
+
+        if (resolve || reject) {
+          transactionService.addTask(taskId)
+        }
+
+        if (resolve) {
+          thenTasks.push(taskId)
           args[0] = function () {
             if (!trace.ended) {
               trace.end()
             }
 
-            if (arguments.length > 0 && arguments[0]) {
+            if (shouldPatchResponse && arguments.length > 0 && arguments[0]) {
               patchResponse(arguments[0], trace)
             }
 
-            var ret = resolve.apply(this, arguments)
-            transactionService.removeTask(task.taskId)
-            transactionService.detectFinish()
-            return ret
+            try{
+              return resolve.apply(this, arguments)
+            }finally{
+              transactionService.removeTask(taskId)
+              removeTaskList(catchTasks)
+              transactionService.detectFinish()
+            }
+          
           }
-
-          var newPromise = delegate.apply(self, args)
-          patchThen(newPromise, trace)
-          return newPromise
         }
-      })
-    }
+
+        if (reject) {
+          catchTasks.push(taskId)
+          args[1] = function () {
+            if (!trace.ended) {
+              trace.end()
+            }
+
+            if (shouldPatchResponse && arguments.length > 0 && arguments[0]) {
+              patchResponse(arguments[0], trace)
+            }
+            try{
+              return reject.apply(this, arguments)
+            }finally{
+              transactionService.removeTask(taskId)
+              removeTaskList(thenTasks)
+              transactionService.detectFinish()
+            }
+          }
+        }
+
+        var newPromise = delegate.apply(self, args)
+
+        /*
+          Promise wtf:
+
+          p is a rejected promise
+          p.then(a).catch(c)
+          c gets called
+
+          c never called:
+          p.then(a, b).catch(c)
+        */
+        if (reject) {
+          patchPromise(transactionService, newPromise, trace, false)
+        }else{
+          patchPromise(transactionService, newPromise, trace, false, thenTasks)
+        }
+        
+        return newPromise
+      }
+    })
+  }
+
+  if (!utils.isUndefined(promise.catch)) {
+    patchObject(promise, 'catch', function (delegate) {
+      return function (self, args) { // resolve, reject
+        var taskId = 'fetchTask-catch' + fetchTasks++
+        transactionService.addTask(taskId)
+
+        catchTasks.push(taskId)
+        var resolve = args[0]
+
+        args[0] = function () {
+          if (!trace.ended) {
+            trace.end()
+          }
+          try{
+            return resolve.apply(this, arguments)
+          }finally{
+            transactionService.removeTask(taskId)
+            removeTaskList(thenTasks)
+            transactionService.detectFinish()
+          }
+        }
+
+        var newPromise = delegate.apply(self, args)
+        patchPromise(transactionService, newPromise, trace, false)
+        return newPromise
+      }
+    })
+  }
+}
+function patchFetch (serviceContainer) {
+  var transactionService = serviceContainer.services.transactionService
+
+  var patchPromiseWithTransactionService = function(promise, trace, shouldPatchResponse) {
+    return patchPromise(transactionService, promise, trace, shouldPatchResponse)
   }
 
   if (window.fetch) {
@@ -86,10 +154,13 @@ function patchFetch (serviceContainer) {
         var trace = transactionService.startTrace('GET ' + url, 'ext.HttpRequest.fetch')
 
         var promise = delegate.apply(self, args)
-        patchThen(promise, trace)
+        patchPromiseWithTransactionService(promise, trace, true)
         return promise
       }
     })
   }
 }
-module.exports = patchFetch
+module.exports = {
+  patchFetch: patchFetch,
+  patchPromise: patchPromise
+} 

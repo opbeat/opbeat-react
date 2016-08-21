@@ -122,12 +122,11 @@ function ZoneService (zone, logger, config) {
         spec.onBeforeInvokeTask(task[opbeatTaskSymbol])
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
         spec.onInvokeTask(task[opbeatTaskSymbol])
+      } else if(task.type == "eventTask") {
+        result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
+        spec.onInvokeTask({taskId: -1})
       } else {
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
-
-        if (task.type == 'eventTask') {
-          spec.onInvokeTask(task)
-        }
       }
       return result
     },
