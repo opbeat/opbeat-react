@@ -7,8 +7,8 @@ This is the official Opbeat module for React, redux and react-router.
 import initOpbeat from 'opbeat-react'
 
 const opbeat = initOpbeat({
-  'orgId': '470d9f31bc7b4f4395143091fe752e8c',
-  'appId': '9aac8591bb'
+  'orgId': '470e8f31bc7b4f4395143091fe752e8c',
+  'appId': '9aac8591cc'
 })
 
 // enable react-router instrumentation
