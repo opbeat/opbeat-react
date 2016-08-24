@@ -15,7 +15,17 @@ const opbeat = initOpbeat({
 import { useRouer } from 'opbeat-react/router'
 useRouter(opbeat)
 
-// enable redux instrumentation
-import { wrapStore } from 'opbeat-react/redux'
-const store = wrapStore(opbeat, store)
+// enable redux instrumentation using the middleware
+// NOTE: make sure you put the opbeat middleware last!
+import { opbeatMiddleware } from 'opbeat-react/redux'
+
+var store = createStore(
+  reducer,
+  applyMiddleware(
+    thunk,
+    opbeatMiddleware(opbeat),  // make sure this is the last one
+  )
+)
+
+
 ```

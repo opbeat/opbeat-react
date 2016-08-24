@@ -76,13 +76,15 @@ describe('ZoneService', function () {
       expect(zoneService.spec.onScheduleTask).toHaveBeenCalled()
     }
     zoneService.spec.onInvokeTask = function (task) {
-      expect(response).toBeDefined()
-      expect(zoneService.spec.onBeforeInvokeTask).toHaveBeenCalled()
+      if (task) {
+        expect(response).toBeDefined()
+        expect(zoneService.spec.onBeforeInvokeTask).toHaveBeenCalled()
 
-      // should call done asynchronously since we're spying in this function in multiple tests
-      setTimeout(function () {
-        done()
-      })
+        // should call done asynchronously since we're spying in this function in multiple tests
+        setTimeout(function () {
+          done()
+        })
+      }
     }
 
     spyOn(zoneService.spec, 'onScheduleTask').and.callThrough()

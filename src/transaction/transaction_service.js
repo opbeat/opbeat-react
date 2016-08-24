@@ -40,7 +40,10 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   zoneService.spec.onScheduleTask = onScheduleTask
 
   function onInvokeTask (task) {
-    transactionService.removeTask(task.taskId)
+    if (task) {
+      transactionService.removeTask(task.taskId)
+    }
+    
     transactionService.detectFinish()
   }
   zoneService.spec.onInvokeTask = onInvokeTask

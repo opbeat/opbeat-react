@@ -15,31 +15,27 @@ module.exports = function patchReact (serviceContainer) {
       var ret
       try {
         serviceContainer.services.zoneService.set('componentsRendered', [])
-        serviceContainer.services.zoneService.set('tagsRendered', [])
+        // serviceContainer.services.zoneService.set('tagsRendered', [])
         var tr = serviceContainer.services.transactionService.startTrace('batchedUpdates', 'template.update')
         ret = delegate.apply(self, args)
         var components = serviceContainer.services.zoneService.get('componentsRendered')
-        var tags = serviceContainer.services.zoneService.get('tagsRendered')
+        // var tags = serviceContainer.services.zoneService.get('tagsRendered')
         var text = ''
-        if (components.length === 0) {
-          text = tags.length + ' tags'
-        }else{
-          text = components.length + ' components (' + tags.length + ' tags)'
-        }
+        // if (components.length === 0) {
+          // text = tags.length + ' tags'
+        // }else{
+        text = components.length + ' components'
+        // }
         tr.signature = 'Render ' + text
         tr.end()
       } finally {
         serviceContainer.services.zoneService.set('componentsRendered', [])
-        serviceContainer.services.zoneService.set('tagsRendered', [])
+        // serviceContainer.services.zoneService.set('tagsRendered', [])
       }
       return ret
     }
   }
 
-  // var OpbeatAwareBatching = {
-    
-  // }
-  // patchMethod(ReactUpdates, 'batchedUpdates', batchedUpdatePatch)
   patchMethod(ReactDefaultBatchingStrategy, 'batchedUpdates', batchedUpdatePatch)
   ReactInjection.Updates.injectBatchingStrategy(ReactDefaultBatchingStrategy)
 

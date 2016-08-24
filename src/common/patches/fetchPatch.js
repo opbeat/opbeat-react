@@ -51,7 +51,7 @@ function patchPromise (transactionService, promise, trace, shouldPatchResponse, 
             }
 
             if (shouldPatchResponse && arguments.length > 0 && arguments[0]) {
-              patchResponse(arguments[0], trace)
+              patchResponse(transactionService, arguments[0], trace)
             }
 
             try{

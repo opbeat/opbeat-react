@@ -10,12 +10,15 @@ var XHR = window.XMLHttpRequest
 
 var opbeatDataSymbol = patchUtils.opbeatSymbol('opbeatData')
 
-function ZoneService (zone, logger, config) {
-  this.events = new Subscription()
+var testTransactionAfterEvents = ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'keydown', 'keypress', 'keyup' ]
+var testTransactionAfterEventsObj = {}
+testTransactionAfterEvents.forEach(function(ev) {
+  testTransactionAfterEventsObj[ev] = 1
+})
 
+function ZoneService (zone, logger, config) {
   var nextId = 0
 
-  this.events = new Subscription()
   // var zoneService = this
   function noop () { }
   var spec = this.spec = {
@@ -122,12 +125,14 @@ function ZoneService (zone, logger, config) {
         spec.onBeforeInvokeTask(task[opbeatTaskSymbol])
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
         spec.onInvokeTask(task[opbeatTaskSymbol])
-      } else if(task.type == "eventTask") {
+      } else if(task.type == 'eventTask' && task.data && task.data.eventName in testTransactionAfterEventsObj) {
+        // clear traces on the zone transaction
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
-        spec.onInvokeTask({taskId: -1})
+        spec.onInvokeTask()
       } else {
-        result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
+        result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)        
       }
+
       return result
     },
     onCancelTask: function (parentZoneDelegate, currentZone, targetZone, task) {
@@ -182,9 +187,9 @@ ZoneService.prototype.get = function (key) {
   return window.Zone.current.get(key)
 }
 
-ZoneService.prototype.getCurrentZone = function () {
-  return window.zone
-}
+// ZoneService.prototype.getCurrentZone = function () {
+//   return window.zone
+// }
 
 ZoneService.prototype.runOuter = function (fn) {
   return this.outer.run(fn)

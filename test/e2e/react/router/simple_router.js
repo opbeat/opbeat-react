@@ -1,11 +1,35 @@
 import '../opbeat-e2e'
 import { useRouter } from  '../../../../dist/opbeat-react/router'
+import { opbeatMiddleware } from  '../../../../dist/opbeat-react/redux'
+
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { createStore, applyMiddleware, combineReducers } from 'redux'
+import thunk from 'redux-thunk'
+
+import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
 
 import { Router, Route, IndexRoute, Link, IndexLink, browserHistory } from 'react-router'
 
+const reducers = {
+  state1: (state) => state ? state : {}
+}
+
+var store = createStore(
+  combineReducers({
+  ...reducers,
+  routing: routerReducer
+  }),
+  applyMiddleware(
+    opbeatMiddleware(window.opbeat),
+    thunk
+  )
+)
+
 useRouter(window.opbeat)
+
+const history = syncHistoryWithStore(browserHistory, store)
+
 
 const ACTIVE = { color: 'red' }
 
@@ -62,7 +86,7 @@ const About = () => (
 )
 
 ReactDOM.render((
-  <Router history={browserHistory}>
+  <Router history={history}>
     <Route path="/" component={App}>
       <IndexRoute component={Index}/>
       <Route path="/about" component={About}/>

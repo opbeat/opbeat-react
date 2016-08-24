@@ -1,6 +1,6 @@
 var makeSignatureFromRoutes = require('../../src/react/router').makeSignatureFromRoutes
 
-describe("makeSignatureFromRoutes", function() {
+describe("react: makeSignatureFromRoutes", function() {
   it("should correctly join paths", function() {
 
     var routes = [

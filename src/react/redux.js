@@ -1,41 +1,37 @@
 var patchMethod = require('../common/patchUtils').patchMethod
 
-function wrapStore(store, serviceContainer) {
+function opbeatMiddleware(serviceContainer){
   var transactionService = serviceContainer.services.transactionService
-  function patchStore (store) {
-    patchMethod(store, 'dispatch', function (delegate) {
-      return function (self, args) {
+  return function() {
+    return function(next) {
+      return function (action) {
         var tr
         var transaction
-        if (args.length === 1) {
-          var action = args[0]
-          var currTrans = transactionService.getCurrentTransaction()
-          if (currTrans && currTrans.name !== 'ZoneTransaction') {
-            if (action.type) {
-              tr = transactionService.startTrace('dispatch ' + action.type, 'app.action')
-            } else {
-              tr = transactionService.startTrace('dispatch', 'app.action')
-            }
+        var ret
+
+        var currTrans = transactionService.getCurrentTransaction()
+        if (currTrans && currTrans.name !== 'ZoneTransaction') {
+          if (action.type) {
+            tr = transactionService.startTrace('dispatch ' + action.type, 'app.action')
           } else {
-            if (action.type) {
-              transaction = transactionService.startTransaction(action.type, 'spa.action')
-            }
+            tr = transactionService.startTrace('dispatch', 'app.action')
+          }
+        } else {
+          if (action.type && !action.type.startsWith("@@")) {
+            transaction = transactionService.startTransaction(action.type, 'spa.action')
           }
         }
 
-        var ret = delegate.apply(self, args)
+        ret = next(action)
+      
         if (tr) {
           tr.end()
         }
 
-        if (transaction) {
-          transaction.detectFinish()
-        }
         return ret
       }
-    })
-    return store
+    }
   }
-  return patchStore(store)
 }
-module.exports = {wrapStore: wrapStore}
+          
+module.exports = {opbeatMiddleware: opbeatMiddleware}

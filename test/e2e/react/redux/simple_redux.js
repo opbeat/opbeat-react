@@ -1,11 +1,18 @@
 import '../opbeat-e2e'
-import { wrapStore } from  '../../../../dist/opbeat-react/redux'
+import { opbeatMiddleware } from  '../../../../dist/opbeat-react/redux'
 import React from 'react'
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'
 import ReactDOM from 'react-dom'
 
-var store = createStore(counter)
-store = wrapStore(store, window.opbeat)
+var store = window.store = createStore(
+  counter,
+  applyMiddleware(
+    thunk,
+    opbeatMiddleware(window.opbeat),
+  )
+)
+
 
 function counter(state, action) {
   if (typeof state === 'undefined') {

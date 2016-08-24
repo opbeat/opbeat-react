@@ -89,7 +89,7 @@ describe('simple-fetch-app', function () {
     ).then(function (response) {
       var transactions = response.value.transactions
       expect(transactions.traces.groups.length).toBe(3)
-
+      
       expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
       expect(transactions.traces.groups[1].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
 

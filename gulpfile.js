@@ -433,7 +433,7 @@ gulp.task('test:e2e:selenium', function (done) {
 })
 
 gulp.task('test:e2e:start-local', ['test:e2e:serve', 'test:e2e:selenium'])
-gulp.task('test:e2e:run-local', function(done) {
+gulp.task('test:e2e:react-run', function(done) {
   runSequence('build:release', 'build:e2e', 'test:e2e:start-local', 'test:e2e:run', function(err) {
     if (err) {
       return taskFailed(err)

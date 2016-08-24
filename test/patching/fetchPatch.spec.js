@@ -81,19 +81,20 @@ describe('patchPromise', function () {
     p1 = p.then(
       function(result) { expect(result).toBe('success') }, // never runs
       function(err) { 
-        funcs.rejected(err) 
+        funcs.rejected(err)
+        return 'test'
       }
     )
   })
 
   it('should not mess with standard functionality', function (done) {
-    p1.then(function() {
+    p1.then(function(arg) {
       // call rejected the right number of times
       expect(funcs.rejected.calls.count()).toEqual(1)
-      done()
-    }).catch(function() {
-      // call rejected the right number of times
-      expect(funcs.rejected.calls.count()).toEqual(1)
+      expect(arg).toEqual('test')
+      return 1
+    }).then(function(value) {
+      expect(value).toEqual(1)
       done()
     })
 
@@ -138,6 +139,7 @@ describe('patchPromise', function () {
     resolve('success')
   })
 
+
   it('should clear pending tasks (resolve) when a callback throws', function (done) {
     transactionService = new MockTransactionService()
     spyOn(transactionService, 'addTask').and.callThrough()
@@ -153,7 +155,6 @@ describe('patchPromise', function () {
     })
 
     patchPromise(transactionService, p, trace, false)
-    
 
     // wont get called, but we need to make sure we clean up the task even
     // when the first callback throws
@@ -232,8 +233,8 @@ describe('patchPromise', function () {
 
     // chain on the previous promise
     p1 = p.then(function(){ console.log('never-called') })
-    p2 = p1.catch(function() {
-       expect(transactionService.tasks.length).toEqual(4)
+    p2 = p1.catch(function(err) {
+      expect(transactionService.tasks.length).toEqual(4)
     })
 
     Promise.all([p2]).then(
