@@ -1,9 +1,9 @@
 function init () {
-  var app = window.angular.module('simple_app', ['ngRoute', 'ngOpbeat'])
+  var app = window.angular.module('semantic_ui', ['ngRoute'])
   app.config(function ($routeProvider) {
     var routeConfig = {
       controller: 'MainCtrl',
-      templateUrl: 'simple_app/main_ctrl.html'
+      templateUrl: 'semantic_ui/main_ctrl.html'
     }
 
     $routeProvider
@@ -17,6 +17,16 @@ function init () {
       template: '<div ng-bind="test"></div>',
       link: function link (scope, element, attrs, controller, transcludeFn) {
         scope.test = 'customDirective'
+      }
+    }
+  })
+
+  app.directive('uiDropdown', function () {
+    return {
+      restrict: 'EA',
+      link: function link (scope, element, attrs, controller, transcludeFn) {
+        window.$(element).dropdown()
+        console.log('dropdown')
       }
     }
   })
@@ -47,7 +57,7 @@ function init () {
 
     var repeatArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-    $http.get('simple_app/confirmation.json').then(function (response) {
+    $http.get('semantic_ui/confirmation.json').then(function (response) {
       $scope.confirmation(response.data)
       $scope.repeatArray = exponentialize(repeatArray, 8)
     }, function () {
@@ -56,16 +66,16 @@ function init () {
   })
 }
 function bootstrap (element) {
-  window.angular.bootstrap(element, ['simple_app'])
+  window.angular.bootstrap(element, ['semantic_ui'])
 }
 
-var simple_app = {
+var semantic_ui = {
   init: init,
   bootstrap: bootstrap,
-  appName: 'simple_app'
+  appName: 'semantic_ui'
 }
 if (typeof module !== 'undefined') {
-  module.exports = simple_app
+  module.exports = semantic_ui
 } else {
-  window.simple_app = simple_app
+  window.semantic_ui = semantic_ui
 }

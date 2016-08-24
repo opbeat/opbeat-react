@@ -10,15 +10,46 @@ function setup () {
     console.log(e)
   }
 
+  function importDependencies (dependencies) {
+    var promises = dependencies.map(function (d) {
+      return System.import(d)
+    })
+
+    return Promise.all(promises)
+      .then(function (resolvedDependencies) {
+        return resolvedDependencies
+      }, logError)
+  }
+
+  function sequentialImport (dependencies) {
+    var results = []
+    return dependencies
+      .reduce(function (p, dep) {
+        return p.then(function () {
+          if (typeof dep === 'string') {
+            return System.import(dep).then(function (r) {
+              results.push(r)
+              return results
+            }, logError)
+          } else {
+            return importDependencies()
+              .then(function (rs) {
+                results = results.concat(rs)
+                return results
+              }, logError)
+          }
+        })
+      }, Promise.resolve())
+  }
+
   var utils = {
     loadDependencies: function loadDependencies (dependencies, callback) {
-      var promises = dependencies.map(function (d) {
-        return System.import(d)
-      })
-
-      return Promise.all(promises).then(function (modules) {
+      var promise = sequentialImport(dependencies)
+      return promise.then(function (modules) {
         console.log('Dependencies resolved.')
-        callback(modules)
+        if (typeof callback === 'function') {
+          callback(modules)
+        }
         return modules
       }, logError)
     },
@@ -42,61 +73,98 @@ function setup () {
       document.body.appendChild(div)
       System.import(path).then(function (module) {
         utils.loadDependencies(deps, function (modules) {
+          var useNgApp = options.useNgApp
+          // if (typeof useNgApp === 'undefined') {
+          //   useNgApp = (window.angular.version.major >= 1 && window.angular.version.minor >= 3)
+          // }
           if (options.beforeInit) {
             options.beforeInit(module, modules)
           } else {
             module.init(options.opbeatConfig)
           }
-          if (options.useNgApp) {
+
+          if (useNgApp) {
+            console.log('using ngapp')
             window.angular.resumeBootstrap()
           } else {
             module.bootstrap(document)
           }
         })
-      })
+      }, logError)
     },
     getNextTransaction: function getNextTransaction (cb) {
       var cancelFn = window.e2e.transactionService.subscribe(function (tr) {
         cb(tr)
         cancelFn()
       })
+    },
+    chooseBootstrap: function chooseBootstrap (options, bootstrap) {
+      var useNgApp
+      if (typeof useNgApp === 'undefined') {
+        useNgApp = (window.angular.version.major >= 1 && window.angular.version.minor >= 3)
+      }
+
+      var div = document.createElement('div')
+
+      if (useNgApp) {
+        div.setAttribute('ng-app', options.appName)
+      }
+
+      if (options.uiRouter) {
+        div.innerHTML = '<div ui-view></div>'
+      } else {
+        div.innerHTML = '<div ng-view></div>'
+      }
+      document.body.appendChild(div)
+
+      if (!useNgApp) {
+        bootstrap(div)
+      }
     }
   }
 
-  window.loadDependencies = utils.loadDependencies
-  window.loadFixture = utils.loadFixture
-  window.getNextTransaction = utils.getNextTransaction
-  window.runFixture = utils.runFixture
+  window.e2eUtils = utils
 
-  // window.__httpInterceptor = {
-  //   requests: []
-  // }
-  // var _XHR = window.XMLHttpRequest
-  // window.XMLHttpRequest = function () {
-  //   var xhr = new _XHR()
-  //   var originalOpen = xhr.open
-  //   var lastMethod
-  //   var lastURL
-  //   xhr.open = function () {
-  //     lastMethod = arguments[0]
-  //     lastURL = arguments[1]
-  //     originalOpen.apply(xhr, arguments)
-  //   }
+  // config systemjs
 
-  //   // var originalSend = xhr.send
-  //   // xhr.send = function(){
-  //   //   return originalSend.apply(xhr, arguments)
-  //   // }
-
-//   xhr.addEventListener('load', function () {
-//     window.__httpInterceptor.requests.push({
-//       requestedMethod: lastMethod.toUpperCase(),
-//       requestedURL: lastURL,
-//       xhr: this
-//     })
-//   })
-//   return xhr
-// }
+  window.System.config({
+    map: {
+      css: '/node_modules/systemjs-plugin-css/css.js'
+    },
+    paths: {
+      'opbeat-angular': '../src/angular/opbeat-angular.js',
+      'zone.js': '/node_modules/zone.js/dist/zone.js',
+      'semantic-ui-dropdown': '/node_modules/semantic-ui-dropdown/dropdown.js',
+      'semantic-ui-transition': '/node_modules/semantic-ui-transition/transition.js',
+      '*': '/node_modules/*'
+    },
+    meta: {
+      '*.css': { loader: 'css' },
+      'offline-js': {
+        deps: ['opbeat-angular']
+      },
+      './app.js': {
+        format: 'cjs'
+      },
+      '../dist/dev/opbeat-angular.e2e.js': {
+        format: 'cjs'
+      },
+      '../dist/dev/opbeat-angular.e2e.min.js': {
+        format: 'cjs'
+      },
+      '../dist/dev/opbeat-angular.js': {
+        format: 'cjs'
+      },
+      '/node_modules/semantic-ui-dropdown/dropdown.js': {
+        deps: ['jquery', '/node_modules/semantic-ui-dropdown/dropdown.css', 'semantic-ui-transition']
+      },
+      '/node_modules/semantic-ui-transition/transition.js': {
+        deps: ['jquery', '/node_modules/semantic-ui-transition/transition.css']
+      }
+    },
+    packageConfigPaths: ['/node_modules/*/package.json'],
+    'defaultJSExtensions': true
+  })
 }
 
 setup()
