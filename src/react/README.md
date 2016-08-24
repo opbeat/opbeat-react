@@ -3,7 +3,7 @@
 This is the official Opbeat module for React, redux and react-router.
 
 ## Usage
-```
+```js
 import initOpbeat from 'opbeat-react'
 
 const opbeat = initOpbeat({
