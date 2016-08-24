@@ -5,7 +5,6 @@ var utils = require('../lib/utils')
 var patchReact = require('./reactPatches')
 var patchCommon = require('../common/patchCommon')
 
-
 function init (config, serviceFactory) {
   if (utils.isUndefined(serviceFactory)) {
     serviceFactory = new ServiceFactory()
@@ -19,6 +18,5 @@ function init (config, serviceFactory) {
 
   return serviceContainer
 }
-
 
 module.exports = init

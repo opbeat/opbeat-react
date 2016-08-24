@@ -44,7 +44,6 @@ function opbeatSymbol (name) {
   return '__opbeat_symbol__' + name
 }
 
-
 function patchObject (target, name, patchFn) {
   var delegateName = opbeatSymbol(name)
   var delegate = target[delegateName]

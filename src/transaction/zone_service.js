@@ -1,4 +1,3 @@
-var Subscription = require('../common/subscription')
 var patchUtils = require('../common/patchUtils')
 var opbeatTaskSymbol = patchUtils.opbeatSymbol('taskData')
 
@@ -9,9 +8,9 @@ var XMLHttpRequest_send = 'XMLHttpRequest.send'
 
 var opbeatDataSymbol = patchUtils.opbeatSymbol('opbeatData')
 
-var testTransactionAfterEvents = ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'keydown', 'keypress', 'keyup' ]
+var testTransactionAfterEvents = ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'keydown', 'keypress', 'keyup']
 var testTransactionAfterEventsObj = {}
-testTransactionAfterEvents.forEach(function(ev) {
+testTransactionAfterEvents.forEach(function (ev) {
   testTransactionAfterEventsObj[ev] = 1
 })
 
@@ -124,12 +123,12 @@ function ZoneService (zone, logger, config) {
         spec.onBeforeInvokeTask(task[opbeatTaskSymbol])
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
         spec.onInvokeTask(task[opbeatTaskSymbol])
-      } else if(task.type == 'eventTask' && task.data && task.data.eventName in testTransactionAfterEventsObj) {
+      } else if (task.type === 'eventTask' && task.data && task.data.eventName in testTransactionAfterEventsObj) {
         // clear traces on the zone transaction
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
         spec.onInvokeTask()
       } else {
-        result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)        
+        result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
       }
 
       return result

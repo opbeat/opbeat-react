@@ -6,11 +6,10 @@ var fetchTasks = 0
 var patchList = ['json', 'text', 'formData', 'blob', 'arrayBuffer', 'redirect', 'error']
 
 function patchResponse (transactionService, response, trace) {
-  var myTrace = trace
-  patchList.forEach(function(funcName) { 
+  patchList.forEach(function (funcName) {
     if (!utils.isUndefined(response[funcName])) {
-      patchObject(response, funcName, function(delegate) {
-        return function(self, args) {
+      patchObject(response, funcName, function (delegate) {
+        return function (self, args) {
           var promise = delegate.apply(self, args)
           patchPromise(transactionService, promise, trace, false)
           return promise
@@ -21,12 +20,11 @@ function patchResponse (transactionService, response, trace) {
 }
 
 function patchPromise (transactionService, promise, trace, shouldPatchResponse, thenTasksCarried) {
-  var myTrace = trace
   var thenTasks = thenTasksCarried || []
   var catchTasks = []
 
-  function removeTaskList(taskList) {
-    taskList.forEach(function(item) {
+  function removeTaskList (taskList) {
+    taskList.forEach(function (item) {
       transactionService.removeTask(item)
     })
   }
@@ -54,14 +52,13 @@ function patchPromise (transactionService, promise, trace, shouldPatchResponse, 
               patchResponse(transactionService, arguments[0], trace)
             }
 
-            try{
+            try {
               return resolve.apply(this, arguments)
-            }finally{
+            } finally {
               transactionService.removeTask(taskId)
               removeTaskList(catchTasks)
               transactionService.detectFinish()
             }
-          
           }
         }
 
@@ -75,9 +72,10 @@ function patchPromise (transactionService, promise, trace, shouldPatchResponse, 
             if (shouldPatchResponse && arguments.length > 0 && arguments[0]) {
               patchResponse(arguments[0], trace)
             }
-            try{
+
+            try {
               return reject.apply(this, arguments)
-            }finally{
+            } finally {
               transactionService.removeTask(taskId)
               removeTaskList(thenTasks)
               transactionService.detectFinish()
@@ -99,10 +97,10 @@ function patchPromise (transactionService, promise, trace, shouldPatchResponse, 
         */
         if (reject) {
           patchPromise(transactionService, newPromise, trace, false)
-        }else{
+        } else {
           patchPromise(transactionService, newPromise, trace, false, thenTasks)
         }
-        
+
         return newPromise
       }
     })
@@ -121,9 +119,9 @@ function patchPromise (transactionService, promise, trace, shouldPatchResponse, 
           if (!trace.ended) {
             trace.end()
           }
-          try{
+          try {
             return resolve.apply(this, arguments)
-          }finally{
+          } finally {
             transactionService.removeTask(taskId)
             removeTaskList(thenTasks)
             transactionService.detectFinish()
@@ -140,7 +138,7 @@ function patchPromise (transactionService, promise, trace, shouldPatchResponse, 
 function patchFetch (serviceContainer) {
   var transactionService = serviceContainer.services.transactionService
 
-  var patchPromiseWithTransactionService = function(promise, trace, shouldPatchResponse) {
+  var patchPromiseWithTransactionService = function (promise, trace, shouldPatchResponse) {
     return patchPromise(transactionService, promise, trace, shouldPatchResponse)
   }
 
@@ -163,4 +161,4 @@ function patchFetch (serviceContainer) {
 module.exports = {
   patchFetch: patchFetch,
   patchPromise: patchPromise
-} 
+}

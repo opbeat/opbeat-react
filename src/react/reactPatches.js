@@ -5,9 +5,8 @@ var reactDom = require('react-dom')
 var ReactReconciler = require('react/lib/ReactReconciler')
 var patchMethod = require('../common/patchUtils').patchMethod
 
-var ReactDefaultBatchingStrategy = require('react/lib/ReactDefaultBatchingStrategy') 
+var ReactDefaultBatchingStrategy = require('react/lib/ReactDefaultBatchingStrategy')
 var ReactInjection = require('react/lib/ReactInjection')
-
 
 module.exports = function patchReact (serviceContainer) {
   var batchedUpdatePatch = function (delegate) {
@@ -44,12 +43,12 @@ module.exports = function patchReact (serviceContainer) {
       if (args[0] && args[0].getName) {
         var components = serviceContainer.services.zoneService.get('componentsRendered') || []
         components.push(args[0].getName())
-      }else if (args[0] && args[0]._tag) {
+      } else if (args[0] && args[0]._tag) {
         var tags = serviceContainer.services.zoneService.get('tagsRendered') || []
         tags.push(args[0]._tag)
-      }else{
+      } else {
         var tags = serviceContainer.services.zoneService.get('tagsRendered') || []
-        tags.push("unknown")
+        tags.push('unknown')
       }
       return delegate.apply(self, args)
     }
