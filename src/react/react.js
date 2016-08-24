@@ -11,6 +11,7 @@ function init (config, serviceFactory) {
     serviceFactory = new ServiceFactory()
   }
   var serviceContainer = new ServiceContainer(serviceFactory)
+  serviceContainer.initialize()
   serviceContainer.services.configService.setConfig(config)
 
   patchCommon(serviceContainer)
