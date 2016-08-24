@@ -1,6 +1,6 @@
 # opbeat-react
 
-This is the official [Opbeat](https://opbeat.com) module for React, redux and react-router.
+This is the official Opbeat module for React, redux and react-router.
 
 ## Usage
 ```
@@ -26,6 +26,4 @@ var store = createStore(
     opbeatMiddleware(opbeat),  // make sure this is the last one
   )
 )
-
-
 ```
