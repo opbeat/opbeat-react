@@ -22,7 +22,6 @@ var selenium = require('selenium-standalone')
 var replace = require('gulp-replace')
 
 var webpack = require("webpack");
-var glob = require("glob")
 
 var path = require('path')
 var connect = require('gulp-connect')
