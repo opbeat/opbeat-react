@@ -12,7 +12,7 @@ const opbeat = initOpbeat({
 })
 
 // enable react-router instrumentation
-import { useRouer } from 'opbeat-react/router'
+import { useRouter } from 'opbeat-react/router'
 useRouter(opbeat)
 
 // enable redux instrumentation using the middleware
