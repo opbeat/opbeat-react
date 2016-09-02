@@ -1,5 +1,5 @@
-var ServiceFactory = require('../common/ServiceFactory')
-var ServiceContainer = require('../common/ServiceContainer')
+var ServiceFactory = require('../common/serviceFactory')
+var ServiceContainer = require('../common/serviceContainer')
 var utils = require('../lib/utils')
 
 var patchReact = require('./reactPatches')
