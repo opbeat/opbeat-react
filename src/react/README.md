@@ -19,7 +19,7 @@ useRouter(opbeat)
 // NOTE: make sure you put the opbeat middleware last!
 import { opbeatMiddleware } from 'opbeat-react/redux'
 
-var store = createStore(
+const store = createStore(
   reducer,
   applyMiddleware(
     thunk,
