@@ -1,7 +1,7 @@
 var patchObject = require('../common/patchUtils').patchObject
 var Router = require('react-router').Router
 
-function makeSignatureFromRoutes (routes) {
+function makeSignatureFromRoutes (routes, location) {
   if (routes.length < 1) {
     return 'unknown'
   }
@@ -13,11 +13,16 @@ function makeSignatureFromRoutes (routes) {
                     ? routes[i].path.slice(1) : routes[i].path
     }
   }
+
+  if (location.action === "REPLACE") {
+    fullRoute += " (REPLACE)"
+  }
+
   return fullRoute
 }
 
-function routeChange (transactionService, routes) {
-  var fullRoute = makeSignatureFromRoutes(routes)
+function routeChange (transactionService, state) {
+  var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
   transactionService.startTransaction(fullRoute, 'spa.route-change')
 }
 
@@ -27,15 +32,18 @@ function useRouter (serviceContainer) {
       patchObject(self, 'createRouterObjects', function (delegate) {
         return function (self, args) {
           var out = delegate.apply(self, args)
-          var orgListen = out.transitionManager.listen
-          out.transitionManager.listen = function (listener) {
-            orgListen(function () {
-              if (arguments.length === 2) {
-                routeChange(serviceContainer.services.transactionService, arguments[1].routes)
+          patchObject(out.transitionManager, 'listen', function (delegate) {
+            return function (self, args) {
+              if (args.length == 1) {
+                return delegate.call(self, function () {
+                  if (arguments.length === 2) { // error, nextState
+                    routeChange(serviceContainer.services.transactionService, arguments[1])
+                  }
+                  return args[0].apply(self, arguments)
+                })
               }
-              return listener.apply(this, arguments)
-            })
-          }
+            }
+          })
           return out
         }
       })
