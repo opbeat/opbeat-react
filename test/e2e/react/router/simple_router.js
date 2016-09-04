@@ -17,8 +17,8 @@ const reducers = {
 
 var store = createStore(
   combineReducers({
-  ...reducers,
-  routing: routerReducer
+    ...reducers,
+    routing: routerReducer
   }),
   applyMiddleware(
     opbeatMiddleware(window.opbeat),
@@ -29,7 +29,6 @@ var store = createStore(
 useRouter(window.opbeat)
 
 const history = syncHistoryWithStore(browserHistory, store)
-
 
 const ACTIVE = { color: 'red' }
 
