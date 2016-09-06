@@ -12,25 +12,17 @@ module.exports = function patchReact (serviceContainer) {
   var batchedUpdatePatch = function (delegate) {
     return function (self, args) {
       var ret
-      try {
-        serviceContainer.services.zoneService.set('componentsRendered', [])
-        // serviceContainer.services.zoneService.set('tagsRendered', [])
-        var tr = serviceContainer.services.transactionService.startTrace('batchedUpdates', 'template.update')
-        ret = delegate.apply(self, args)
-        var components = serviceContainer.services.zoneService.get('componentsRendered')
-        // var tags = serviceContainer.services.zoneService.get('tagsRendered')
-        var text = ''
-        // if (components.length === 0) {
-          // text = tags.length + ' tags'
-        // }else{
-        text = components.length + ' components'
-        // }
-        tr.signature = 'Render ' + text
-        tr.end()
-      } finally {
-        serviceContainer.services.zoneService.set('componentsRendered', [])
-        // serviceContainer.services.zoneService.set('tagsRendered', [])
-      }
+      serviceContainer.services.zoneService.set('componentsRendered', [])
+
+      var tr = serviceContainer.services.transactionService.startTrace('batchedUpdates', 'template.update')
+      
+      ret = delegate.apply(self, args)
+      
+      var components = serviceContainer.services.zoneService.get('componentsRendered')
+      var text = components.length + ' components'
+
+      tr.signature = 'Render ' + text
+      tr.end()
       return ret
     }
   }
@@ -43,12 +35,6 @@ module.exports = function patchReact (serviceContainer) {
       if (args[0] && args[0].getName) {
         var components = serviceContainer.services.zoneService.get('componentsRendered') || []
         components.push(args[0].getName())
-      } else if (args[0] && args[0]._tag) {
-        var tags = serviceContainer.services.zoneService.get('tagsRendered') || []
-        tags.push(args[0]._tag)
-      } else {
-        var tags = serviceContainer.services.zoneService.get('tagsRendered') || []
-        tags.push('unknown')
       }
       return delegate.apply(self, args)
     }
