@@ -8,11 +8,11 @@ module.exports = {
   // even for requires in "src". This is required for the patches to work
   // otherwise, we'll patch two different instances of React.
   resolve: {
-    modulesDirectories: [path.resolve('../../node_modules'), 'node_modules'],
+    modulesDirectories: [path.resolve(__dirname, '../../node_modules'), 'node_modules'],
     // root: path.resolve('../../node_modules')
   },
   resolveLoader: {
-    modulesDirectories: [path.resolve('../../node_modules')]
+    modulesDirectories: [path.resolve(__dirname, '../../node_modules')]
   },
   module: {
     loaders: [
