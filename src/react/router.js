@@ -1,17 +1,31 @@
 var patchObject = require('../common/patchUtils').patchObject
 var Router = require('react-router').Router
 
+function combineRoutes(routes) {
+  var pathParts = []
+
+  for (var i = 0; i < routes.length; i++) {
+    if (routes[i].path) {
+      pathParts.push(routes[i].path.slice(
+        routes[i].path[0] === '/' ? 1 : 0,
+        routes[i].path[routes[i].path.length-1] === '/' ? -1 : routes[i].path.length
+        )
+      )
+    }
+  }
+
+  return pathParts.join('/')
+}
+
 function makeSignatureFromRoutes (routes, location) {
   if (routes.length < 1) {
     return 'unknown'
   }
-
-  var fullRoute = routes[0].path
-  for (var i = 1; i < routes.length; i++) {
-    if (routes[i].path) {
-      fullRoute += (fullRoute[fullRoute.length-1] === '/' && routes[i].path[0] === '/')
-                    ? routes[i].path.slice(1) : routes[i].path
-    }
+  
+  if(routes.length == 1) {
+    fullRoute = routes[0].path
+  }else{
+    fullRoute = combineRoutes(routes)
   }
 
   if (location.action === "REPLACE") {
