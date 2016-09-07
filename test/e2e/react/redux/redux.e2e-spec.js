@@ -1,11 +1,10 @@
 var utils = require('../../e2e/utils')
 
 describe('redux-app', function () {
-  // build the app
   beforeEach(utils.verifyNoBrowserErrors)
 
   it('should have correct number of transactions and traces', function (done) {
-    browser.url('/react/redux/index.html')//wait(until.elementLocated(By.id('incr')))
+    browser.url('/react/redux/index.html')
 
     browser.executeAsync(
       function(cb) {
@@ -34,7 +33,7 @@ describe('redux-app', function () {
 
 
   it('dispatch outside render should work', function (done) {
-    browser.url('/react/redux/index.html')//wait(until.elementLocated(By.id('incr')))
+    browser.url('/react/redux/index.html')
 
     browser.executeAsync(
       function(cb) {
