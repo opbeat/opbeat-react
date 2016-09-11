@@ -80,6 +80,13 @@ module.exports = function (config) {
         var proxyquire = require('proxyquireify')
         bundle
           .plugin(proxyquire.plugin)
+
+        // required for `enzyme` to work
+        bundle.on('prebundle', function() {
+          bundle.external('react/addons')
+                .external('react/lib/ReactContext')
+                .external('react/lib/ExecutionEnvironment')
+        });
       }
     },
     sauceLabs: {
@@ -144,6 +151,10 @@ module.exports = function (config) {
     cfg.reporters = ['dots', 'saucelabs']
     cfg.browsers = Object.keys(customLaunchers)
     cfg.transports = ['polling']
+  }
+
+  if (config.grep) {
+    cfg.client = {args: ['--grep', config.grep]}
   }
 
   config.set(cfg)

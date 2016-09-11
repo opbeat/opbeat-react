@@ -3,6 +3,7 @@ var Router = require('react-router').Router
 
 function combineRoutes(routes) {
   var pathParts = []
+  var combinedRoute
 
   for (var i = 0; i < routes.length; i++) {
     if (routes[i].path) {
@@ -14,7 +15,10 @@ function combineRoutes(routes) {
     }
   }
 
-  return pathParts.join('/')
+  combinedRoute = pathParts.join('/')
+
+  // prepend a / if necessary
+  return combinedRoute[0] !== '/' ? '/' + combinedRoute : combinedRoute
 }
 
 function makeSignatureFromRoutes (routes, location) {
@@ -40,8 +44,8 @@ function routeChange (transactionService, state) {
   transactionService.startTransaction(fullRoute, 'spa.route-change')
 }
 
-function useRouter (serviceContainer) {
-  patchObject(Router.prototype, 'componentWillMount', function (delegate) {
+function patchRouter(router, serviceContainer) {
+  patchObject(router, 'componentWillMount', function (delegate) {
     return function (self, args) {
       patchObject(self, 'createRouterObjects', function (delegate) {
         return function (self, args) {
@@ -66,20 +70,14 @@ function useRouter (serviceContainer) {
       return out
     }
   })
+}
 
-  // react.createClass = function (objSpec) {
-  //   console.log("createClass")
-  //   if (objSpec.displayName === 'Router') {
-  //     var orgCreateRouterObjects = objSpec.createRouterObjects
-  //     objSpec.createRouterObjects = function () {
-  //     }
-  //   }
-
-  //   return origCreateClass(objSpec)
-  // }
+function useRouter (serviceContainer) {
+  patchRouter(Router.prototype, serviceContainer)
 }
 
 module.exports = {
   useRouter: useRouter,
-  makeSignatureFromRoutes: makeSignatureFromRoutes
+  makeSignatureFromRoutes: makeSignatureFromRoutes,
+  patchRouter: patchRouter
 }

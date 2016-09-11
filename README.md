@@ -28,6 +28,7 @@ Use `npm run karma` to continuously run unit tests during development
 
 Use `npm test` to run both unit tests and e2e tests
 
+Use `./node_modules/.bin/tav` to run a matrix test.
 
 ## License
 MIT
