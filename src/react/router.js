@@ -41,6 +41,14 @@ function makeSignatureFromRoutes (routes, location) {
 
 function routeChange (transactionService, state) {
   var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
+
+  // end any transactions currently ongoing
+  var transaction = transactionService.getCurrentTransaction()
+
+  if(transaction && transaction.name !== 'ZoneTransaction'){
+    transaction.end()
+  }
+
   transactionService.startTransaction(fullRoute, 'spa.route-change')
 }
 

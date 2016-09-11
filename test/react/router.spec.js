@@ -17,7 +17,16 @@ var browserHistory = ReactRouter.browserHistory,
     Redirect = ReactRouter.Redirect
 
 
-describe("react-router: makeSignatureFromRoutes", function() {
+var LoginComponent = React.createClass({
+  componentDidMount: function() {
+    browserHistory.push('/new-path')
+  },
+  render: function() {
+    return React.createElement('div');
+  }
+})
+
+describe("react: makeSignatureFromRoutes", function() {
   it("should correctly join paths", function() {
     var pushLocation = {
       action: 'PUSH'
@@ -55,28 +64,35 @@ describe("react-router: makeSignatureFromRoutes", function() {
   })
 })
 
-describe("react-router: captureRouteChange", function() {
-  serviceContainer = new ServiceContainer(new ServiceFactory())
-  serviceContainer.initialize()
-
-  var originalRouterPrototype = Router.prototype
+describe("react: captureRouteChange", function() {
   var transactionService
 
+  beforeAll(function() {
+    serviceContainer = new ServiceContainer(new ServiceFactory())
+    serviceContainer.initialize()
 
-  var tree = React.createElement(
-    Router, {history: browserHistory},
-      [
-        React.createElement(Redirect, {from: '/old-path', to: '/new-path'}),
-        React.createElement(Route, {path: '/mypath'}),
-        React.createElement(Route, {path: '/new-path'})
-      ]
-  )
+    // Get rid of warning 'Location "/context.html"'
+    browserHistory.push('/')
+
+    transactionService = serviceContainer.services.transactionService
+    patchRouter(Router.prototype, serviceContainer)
+    
+    var tree = React.createElement(
+      Router, {history: browserHistory},
+        [
+          React.createElement(Route, {path: '/', key: '0'}),
+          React.createElement(Redirect, {from: '/old-path', to: '/new-path', key: '1'}),
+          React.createElement(Route, {path: '/mypath', key: '2'}),
+          React.createElement(Route, {path: '/new-path', key: '3'}),
+          React.createElement(Route, {path: '/login', component: LoginComponent, key: '4'})
+        ]
+    )
+
+    var wrapper = mount(tree);
+  })
 
   beforeEach(function () {
-    transactionService = serviceContainer.services.transactionService
     spyOn(transactionService, 'startTransaction').and.callThrough()
-    patchRouter(Router.prototype, serviceContainer)
-    var wrapper = mount(tree);
   })
 
   it('should capture router change', function () {
@@ -86,7 +102,22 @@ describe("react-router: captureRouteChange", function() {
     expect(transactionService.startTransaction).toHaveBeenCalledWith('/mypath', 'spa.route-change')
   })
 
-  afterEach(function() {
-    Router.prototype = originalRouterPrototype
+  it('should handle redirects', function () {
+    browserHistory.push('/login')
+
+    expect(transactionService.startTransaction.calls.count()).toBe(2)
+    expect(transactionService.startTransaction.calls.allArgs()).toEqual(
+      [['/login', 'spa.route-change'], ['/new-path', 'spa.route-change']]
+      )
+
+    console.log()
   })
+
+  afterAll(function() {
+    if(transactionService) {
+      var trans = transactionService.getCurrentTransaction()
+      if (trans) trans.end()
+    }
+  })
+
 })
