@@ -3,7 +3,8 @@ var React = require('react')
 var mount = require('enzyme').mount
 
 var makeSignatureFromRoutes = require('../../src/react/router').makeSignatureFromRoutes
-var pushLocation = {action: 'PUSH'}, replaceLocation = {action: 'REPLACE'}
+var pushLocation = {action: 'PUSH'}
+var replaceLocation = {action: 'REPLACE'}
 var patchRouter = require('../../src/react/router').patchRouter
 
 
@@ -11,84 +12,82 @@ var ServiceContainer = require('../../src/common/serviceContainer')
 var ServiceFactory = require('../../src/common/serviceFactory')
 
 var ReactRouter = require('react-router')
-var browserHistory = ReactRouter.browserHistory,
-    Router = ReactRouter.Router,
-    Route = ReactRouter.Route,
-    Redirect = ReactRouter.Redirect
+var browserHistory = ReactRouter.browserHistory
+var Router = ReactRouter.Router
+var Route = ReactRouter.Route
+var Redirect = ReactRouter.Redirect
 
 
 var LoginComponent = React.createClass({
-  componentDidMount: function() {
+  componentDidMount: function () {
     browserHistory.push('/new-path')
   },
-  render: function() {
-    return React.createElement('div');
+  render: function () {
+    return React.createElement('div')
   }
 })
 
-describe("react: makeSignatureFromRoutes", function() {
-  it("should correctly join paths", function() {
+describe('react: makeSignatureFromRoutes', function () {
+  it('should correctly join paths', function () {
     var pushLocation = {
       action: 'PUSH'
     }
 
-    var routes = [{path: "/"} ]
-    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe("/")
+    var routes = [{path: '/'}]
+    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe('/')
 
-    routes = [{path: "/"}, {path: "/something"}, ]
-    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe("/something")
-    
-    routes = [{path: "/"}, {path: "something"}]
-    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe("/something")
+    routes = [{path: '/'}, {path: '/something'}]
+    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe('/something')
+
+    routes = [{path: '/'}, {path: 'something'}]
+    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe('/something')
   })
 
-  it("should handle zero routes", function() {
-    expect(makeSignatureFromRoutes([], pushLocation)).toBe("unknown")
+  it('should handle zero routes', function () {
+    expect(makeSignatureFromRoutes([], pushLocation)).toBe('unknown')
   })
 
-  it("should handle REPLACE routes", function() {
+  it('should handle REPLACE routes', function () {
+    var routes = [{path: '/'}, {path: 'something'}]
+    expect(makeSignatureFromRoutes(routes, replaceLocation)).toBe('/something (REPLACE)')
+  })
+
+  it('should handle nested routes', function () {
     var routes = [
-      {path: "/"}, {path: "something"}, 
-    ]
-    expect(makeSignatureFromRoutes(routes, replaceLocation)).toBe("/something (REPLACE)")
-  })
-
-  it("should handle nested routes", function() {
-    var routes = [
-      {path: "company"},
-      {path: ":companyId/tasks"},
-      {path: ":taskListId"}
+      {path: 'company'},
+      {path: ':companyId/tasks'},
+      {path: ':taskListId'}
     ]
 
-    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe("/company/:companyId/tasks/:taskListId")
+    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe('/company/:companyId/tasks/:taskListId')
   })
 })
 
-describe("react: captureRouteChange", function() {
+describe('react: captureRouteChange', function () {
   var transactionService
+  var serviceContainer
 
-  beforeAll(function() {
+  beforeAll(function () {
     serviceContainer = new ServiceContainer(new ServiceFactory())
     serviceContainer.initialize()
 
-    // Get rid of warning 'Location "/context.html"'
+    // Get rid of warning 'Location '/context.html''
     browserHistory.push('/')
 
     transactionService = serviceContainer.services.transactionService
     patchRouter(Router.prototype, serviceContainer)
-    
+
     var tree = React.createElement(
-      Router, {history: browserHistory},
-        [
-          React.createElement(Route, {path: '/', key: '0'}),
-          React.createElement(Redirect, {from: '/old-path', to: '/new-path', key: '1'}),
-          React.createElement(Route, {path: '/mypath', key: '2'}),
-          React.createElement(Route, {path: '/new-path', key: '3'}),
-          React.createElement(Route, {path: '/login', component: LoginComponent, key: '4'})
-        ]
+      Router, {history: browserHistory}, [
+        React.createElement(Route, {path: '/', key: '0'}),
+        React.createElement(Redirect, {from: '/old-path', to: '/new-path', key: '1'}),
+        React.createElement(Route, {path: '/mypath', key: '2'}),
+        React.createElement(Route, {path: '/new-path', key: '3'}),
+        React.createElement(Route, {path: '/login', component: LoginComponent, key: '4'})
+      ]
     )
 
-    var wrapper = mount(tree);
+    mount(tree)
   })
 
   beforeEach(function () {
@@ -113,11 +112,10 @@ describe("react: captureRouteChange", function() {
     console.log()
   })
 
-  afterAll(function() {
-    if(transactionService) {
+  afterAll(function () {
+    if (transactionService) {
       var trans = transactionService.getCurrentTransaction()
       if (trans) trans.end()
     }
   })
-
 })

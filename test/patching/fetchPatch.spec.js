@@ -1,11 +1,6 @@
 var patchPromise = require('../../src/common/patches/fetchPatch').patchPromise
-// var TransactionService = require('../../src/transaction/transaction_service.js')
 
-var patchUtils = require('../../src/common/patchUtils')
-var urlSympbol = patchUtils.opbeatSymbol('url')
-var methodSymbol = patchUtils.opbeatSymbol('method')
-
-function MockTrace(transactionService, signature, kind) {
+function MockTrace (transactionService, signature, kind) {
   this.ended = false
   this.transactionService = transactionService
 
@@ -13,12 +8,12 @@ function MockTrace(transactionService, signature, kind) {
   this.kind = kind
 }
 
-MockTrace.prototype.end = function() {
+MockTrace.prototype.end = function () {
   this.ended = true
   this.transactionService.removeTrace(this)
 }
 
-function MockTransactionService() {
+function MockTransactionService () {
   this.traces = []
   this.tasks = []
 }
@@ -31,7 +26,7 @@ MockTransactionService.prototype.startTrace = function (signature, kind) {
 }
 
 MockTransactionService.prototype.removeTrace = function (trace) {
-  this.traces.splice(this.traces.indexOf(trace), 1);
+  this.traces.splice(this.traces.indexOf(trace), 1)
 }
 
 MockTransactionService.prototype.addTask = function (taskId) {
@@ -40,12 +35,12 @@ MockTransactionService.prototype.addTask = function (taskId) {
 
 MockTransactionService.prototype.removeTask = function (taskId) {
   if (this.tasks.indexOf(taskId) > -1) {
-    this.tasks.splice(this.tasks.indexOf(taskId), 1);
+    this.tasks.splice(this.tasks.indexOf(taskId), 1)
   }
 }
 
 MockTransactionService.prototype.detectFinish = function () {
-  return this.tasks.length == 0 && this.traces.length == 0
+  return this.tasks.length === 0 && this.traces.length === 0
 }
 
 
@@ -57,9 +52,9 @@ describe('patchPromise', function () {
   var p1
   var resolve, reject
 
-  beforeEach(function() {
+  beforeEach(function () {
     funcs = {
-      rejected: function(err) {
+      rejected: function (err) {
         expect(err).toBe('failure')
       }
     }
@@ -67,7 +62,7 @@ describe('patchPromise', function () {
     transactionService = new MockTransactionService()
     trace = transactionService.startTrace('promise-start', 'promise')
 
-    p = new Promise(function(onRes, onRej) {
+    p = new Promise(function (onRes, onRej) {
       resolve = onRes
       reject = onRej
     })
@@ -79,8 +74,8 @@ describe('patchPromise', function () {
     spyOn(transactionService, 'addTask').and.callThrough()
 
     p1 = p.then(
-      function(result) { expect(result).toBe('success') }, // never runs
-      function(err) { 
+      function (result) { expect(result).toBe('success') }, // never runs
+      function (err) { 
         funcs.rejected(err)
         return 'test'
       }
@@ -88,12 +83,12 @@ describe('patchPromise', function () {
   })
 
   it('should not mess with standard functionality', function (done) {
-    p1.then(function(arg) {
+    p1.then(function (arg) {
       // call rejected the right number of times
       expect(funcs.rejected.calls.count()).toEqual(1)
       expect(arg).toEqual('test')
       return 1
-    }).then(function(value) {
+    }).then(function (value) {
       expect(value).toEqual(1)
       done()
     })
@@ -102,10 +97,10 @@ describe('patchPromise', function () {
   })
 
   it('should work then "resolved" is null', function (done) {
-    // Register some failure  
+    // Register some failure
     var p2 = p.then(null, funcs.rejected)
 
-    Promise.all([p1, p2]).then(function() { 
+    Promise.all([p1, p2]).then(function () { 
       expect(funcs.rejected.calls.count()).toEqual(2)
       done()
     })
@@ -113,10 +108,10 @@ describe('patchPromise', function () {
   })
 
   it('should clear pending tasks (reject)', function (done) {
-    // Register some failure  
-    var p2 = p.then(function() {}, function() {})
+    // Register some failure
+    var p2 = p.then(function () {}, function () {})
 
-    Promise.all([p1, p2]).then(function() {
+    Promise.all([p1, p2]).then(function () {
       expect(transactionService.addTask.calls.count()).toEqual(4)
       expect(transactionService.tasks.length).toEqual(0)
       done()
@@ -127,10 +122,10 @@ describe('patchPromise', function () {
 
 
   it('should clear pending tasks (resolve)', function (done) {
-    // Register some failure  
-    var p2 = p.catch(funcs.rejected) // wont get called
+    // Register some failure
+    p.catch(funcs.rejected) // wont get called
 
-    Promise.all([p1]).then(function() {
+    Promise.all([p1]).then(function () {
       expect(transactionService.addTask.calls.count()).toEqual(4)
       expect(transactionService.tasks.length).toEqual(0)
       done()
@@ -149,7 +144,7 @@ describe('patchPromise', function () {
     expect(transactionService.tasks.length).toEqual(0)
 
     // fresh promise with no pending listeners
-    p = new Promise(function(onRes, onRej) {
+    p = new Promise(function (onRes, onRej) {
       resolve = onRes
       reject = onRej
     })
@@ -160,11 +155,11 @@ describe('patchPromise', function () {
     // when the first callback throws
     p1 = p.catch(funcs.rejected)
 
-    p2 = p.then(function() { throw "Ouch!" }).catch(function() { })
+    var p2 = p.then(function () { throw "Ouch!" }).catch(function () { })
 
     // We can't use chaining here, because that would leave some tasks
     // thus, we use Promise.all
-    Promise.all([p2]).then(function() {
+    Promise.all([p2]).then(function () {
       expect(transactionService.addTask.calls.count()).toEqual(6)
       expect(transactionService.tasks.length).toEqual(0)
       done()
@@ -179,7 +174,7 @@ describe('patchPromise', function () {
     var p2 = p.then(null, funcs.rejected)
     var p3 = p.catch(funcs.rejected)
 
-    Promise.all([p1, p2, p3]).then(function() {
+    Promise.all([p1, p2, p3]).then(function () {
       expect(transactionService.detectFinish.calls.count()).toEqual(4)
       expect(transactionService.tasks.length).toEqual(0)
       done()
@@ -194,7 +189,7 @@ describe('patchPromise', function () {
     var p2 = p.then(null, funcs.rejected)
     var p3 = p.catch(funcs.rejected)
 
-    Promise.all([p1, p2, p3]).then(function() {
+    Promise.all([p1, p2, p3]).then(function () {
       expect(transactionService.detectFinish.calls.count()).toEqual(7)
       expect(transactionService.tasks.length).toEqual(0)
       done()
@@ -207,7 +202,7 @@ describe('patchPromise', function () {
   it('should handle null functions correctly', function (done) {
     var p2 = p.then(null, null)
 
-    Promise.all([p1, p2]).then(function() {
+    Promise.all([p1, p2]).then(function () {
       expect(transactionService.detectFinish.calls.count()).toEqual(3)
       expect(transactionService.tasks.length).toEqual(0)
       done()
@@ -224,7 +219,7 @@ describe('patchPromise', function () {
     expect(transactionService.tasks.length).toEqual(0)
 
     // fresh promise with no pending listeners
-    p = new Promise(function(onRes, onRej) {
+    p = new Promise(function (onRes, onRej) {
       resolve = onRes
       reject = onRej
     })
@@ -232,20 +227,19 @@ describe('patchPromise', function () {
     patchPromise(transactionService, p, trace, false)
 
     // chain on the previous promise
-    p1 = p.then(function(){ console.log('never-called') })
-    p2 = p1.catch(function(err) {
+    p1 = p.then(function () { console.log('never-called') })
+    var p2 = p1.catch(function () {
       expect(transactionService.tasks.length).toEqual(4)
     })
 
     Promise.all([p2]).then(
-      function() {
+      function () {
         // call rejected the right number of times
         expect(transactionService.tasks.length).toEqual(0)
         done()
       }
     )
-    
+
     reject('failure')
   })
-
 })

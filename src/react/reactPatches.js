@@ -15,9 +15,7 @@ module.exports = function patchReact (serviceContainer) {
       serviceContainer.services.zoneService.set('componentsRendered', [])
 
       var tr = serviceContainer.services.transactionService.startTrace('batchedUpdates', 'template.update')
-      
       ret = delegate.apply(self, args)
-      
       var components = serviceContainer.services.zoneService.get('componentsRendered')
       var text = components.length + ' components'
 
