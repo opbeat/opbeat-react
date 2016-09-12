@@ -8,7 +8,7 @@ var browserify = require('browserify')
 var buffer = require('vinyl-buffer')
 var uglify = require('gulp-uglify')
 var sourcemaps = require('gulp-sourcemaps')
-var replacePath = require('gulp-replace-path');
+var replacePath = require('gulp-replace-path')
 
 var taskListing = require('gulp-task-listing')
 var awspublish = require('gulp-awspublish')
@@ -21,7 +21,7 @@ var webdriver = require('gulp-webdriver')
 var selenium = require('selenium-standalone')
 var replace = require('gulp-replace')
 
-var webpack = require("webpack");
+var webpack = require('webpack')
 
 var path = require('path')
 var connect = require('gulp-connect')
@@ -82,7 +82,6 @@ function getMajorVersion () {
   return majorVersion
 }
 
-
 gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   var dirNeedsBuilding = [
     './test/e2e/react/react',
@@ -92,19 +91,26 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   ]
 
   var left = dirNeedsBuilding.length
-  dirNeedsBuilding.map(function(dir) {
+  dirNeedsBuilding.map(function (dir) {
     console.log('Building', dir)
     var webpackConfig = require(dir + '/webpack.config.js')
     var myConfig = Object.create(webpackConfig)
-    
+
     // run webpack
-    webpack(myConfig).run(function(err, stats) {
-        if(err) console.log(err); //throw err;
-        if(stats.hasErrors()) console.log("!! there were errors building", dir)
-        left--
-        if (left === 0) {
-          done();
-        }
+    webpack(myConfig).run(function (err, stats) {
+      if (err) console.log(err) // throw err
+      if (stats.hasErrors()) console.log('!! there were errors building', dir)
+      var jsonStats = stats.toJson()
+      if (jsonStats.errors.length > 0) {
+        jsonStats.errors.forEach(function (error) {
+          console.log('Error:', error)
+        })
+      }
+
+      left--
+      if (left === 0) {
+        done()
+      }
     })
   })
 })
@@ -123,7 +129,7 @@ gulp.task('build:release:react', ['apply-prod-environment'], function () {
     .pipe(gulp.dest(prodPath + '/lib'))
 
   var license = gulp.src(['LICENSE'])
-      .pipe(gulp.dest(prodPath))
+    .pipe(gulp.dest(prodPath))
 })
 
 gulp.task('build:release', ['build:release:react'], function () {
@@ -136,43 +142,43 @@ gulp.task('build:release', ['build:release:react'], function () {
   var integrations = require('./release/integrations')
 
   var tasks = Object.keys(integrations)
-      .filter(function(key) { return key !== 'opbeat-react'})
-      .map(function (key) {
-    var integration = integrations[key]
-    var integrationName = key
-    var mainStream = createBuildStream(integration.entry, integration.version)
-      .pipe(gulp.dest(versionPath))
-      .pipe(gulp.dest(prodPath))
-      .pipe(gulp.dest(prodPath + integrationName))
-      .pipe(rename({
-        extname: '.min.js'
-      }))
-      .pipe(uglify())
-      .pipe(gulp.dest(versionPath))
-      .pipe(gulp.dest(prodPath))
-      .pipe(gulp.dest(prodPath + integrationName))
+    .filter(function (key) { return key !== 'opbeat-react'})
+    .map(function (key) {
+      var integration = integrations[key]
+      var integrationName = key
+      var mainStream = createBuildStream(integration.entry, integration.version)
+        .pipe(gulp.dest(versionPath))
+        .pipe(gulp.dest(prodPath))
+        .pipe(gulp.dest(prodPath + integrationName))
+        .pipe(rename({
+          extname: '.min.js'
+        }))
+        .pipe(uglify())
+        .pipe(gulp.dest(versionPath))
+        .pipe(gulp.dest(prodPath))
+        .pipe(gulp.dest(prodPath + integrationName))
 
-    var filename = integration.entry.split('/')
-    filename = filename[filename.length - 1]
+      var filename = integration.entry.split('/')
+      filename = filename[filename.length - 1]
 
-    var packagejson = gulp.src(['./release/templates/*.json'])
-      .pipe(jeditor({
-        'name': integrationName,
-        'version': integration.version,
-        'main': filename,
-        'description': integration.description
-      }))
-      .pipe(gulp.dest(prodPath + integrationName))
+      var packagejson = gulp.src(['./release/templates/*.json'])
+        .pipe(jeditor({
+          'name': integrationName,
+          'version': integration.version,
+          'main': filename,
+          'description': integration.description
+        }))
+        .pipe(gulp.dest(prodPath + integrationName))
 
-    return es.merge.apply(null, [mainStream, packagejson, gulp.src(['LICENSE']).pipe(gulp.dest(prodPath + integrationName))])
-  })
+      return es.merge.apply(null, [mainStream, packagejson, gulp.src(['LICENSE']).pipe(gulp.dest(prodPath + integrationName))])
+    })
 
   return es.merge.apply(null, tasks)
 })
 
-gulp.task('apply-prod-environment', function() {
-    process.env.NODE_ENV = 'production';
-});
+gulp.task('apply-prod-environment', function () {
+  process.env.NODE_ENV = 'production'
+})
 
 gulp.task('build', ['apply-prod-environment'], function () {
   var integrations = require('./release/integrations')
@@ -432,8 +438,8 @@ gulp.task('test:e2e:selenium', function (done) {
 })
 
 gulp.task('test:e2e:start-local', ['test:e2e:serve', 'test:e2e:selenium'])
-gulp.task('test:e2e:react-run', function(done) {
-  runSequence('build:release', 'build:e2e', 'test:e2e:start-local', 'test:e2e:run', function(err) {
+gulp.task('test:e2e:react-run', function (done) {
+  runSequence('build:release', 'build:e2e', 'test:e2e:start-local', 'test:e2e:run', function (err) {
     if (err) {
       return taskFailed(err)
     } else {
