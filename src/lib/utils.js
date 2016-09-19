@@ -221,8 +221,17 @@ module.exports = {
       return s ? '-' + p.substr(0, 4) + '-' + p.substr(4, 4) : p
     }
     return _p8() + _p8(true) + _p8(true) + _p8()
-  }
+  },
 
+  friendlyNodeName: function (domNode) {
+    var tag = domNode.tagName ? domNode.tagName.toLowerCase() : ''
+    var idName = domNode.getAttribute('id')
+    idName = idName ? idName.trim() : ''
+
+    var classes = (domNode.getAttribute('class') || '').trim().split(/\s+/).join('.')
+
+    return tag + (idName ? '#' + idName : (classes ? '.' + classes : ''))
+  }
 }
 
 function isObject (value) {

@@ -82,11 +82,12 @@ module.exports = function (config) {
           .plugin(proxyquire.plugin)
 
         // required for `enzyme` to work
-        bundle.on('prebundle', function() {
+        bundle.on('prebundle', function () {
           bundle.external('react/addons')
                 .external('react/lib/ReactContext')
                 .external('react/lib/ExecutionEnvironment')
-        });
+        })
+        bundle.transform('reactify')
       }
     },
     sauceLabs: {
@@ -107,6 +108,7 @@ module.exports = function (config) {
   cfg.preprocessors[specPattern] = ['browserify']
 
   var isTravis = process.env.TRAVIS
+  var doCoverage = process.env.COVERAGE
   var isSauce = process.env.MODE && process.env.MODE.startsWith('saucelabs')
   var buildId
   var version = require('./package').version
@@ -123,7 +125,9 @@ module.exports = function (config) {
     buildId = 'OpbeatJS@' + version
     cfg.plugins.push('karma-chrome-launcher')
     cfg.browsers.push('Chrome')
+  }
 
+  if (doCoverage) {
     // istanbul code coverage
     cfg.plugins.push('karma-coverage')
     var istanbul = require('browserify-istanbul')

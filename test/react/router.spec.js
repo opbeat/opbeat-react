@@ -27,7 +27,7 @@ var LoginComponent = React.createClass({
   }
 })
 
-describe('react: makeSignatureFromRoutes', function () {
+describe('react-router: makeSignatureFromRoutes', function () {
   it('should correctly join paths', function () {
     var pushLocation = {
       action: 'PUSH'
@@ -63,7 +63,7 @@ describe('react: makeSignatureFromRoutes', function () {
   })
 })
 
-describe('react: captureRouteChange', function () {
+describe('react-router: captureRouteChange', function () {
   var transactionService
   var serviceContainer
 
@@ -108,8 +108,6 @@ describe('react: captureRouteChange', function () {
     expect(transactionService.startTransaction.calls.allArgs()).toEqual(
       [['/login', 'spa.route-change'], ['/new-path', 'spa.route-change']]
       )
-
-    console.log()
   })
 
   afterAll(function () {

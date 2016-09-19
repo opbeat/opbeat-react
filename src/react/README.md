@@ -30,4 +30,4 @@ const store = createStore(
 
 ## Support
 
-`opbeat-react` works with `react-router` 2.0+ and `react`
+`opbeat-react` works with `react-router` 2.x and `react` 15.x

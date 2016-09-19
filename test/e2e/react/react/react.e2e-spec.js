@@ -17,8 +17,6 @@ describe('react-app', function () {
     ).then(function (response) {
         var transactions = response.value
         expect(transactions.traces.groups.length).toBe(2)
-
-        expect(transactions.traces.groups.length).toBe(2)
         expect(transactions.traces.groups[1].kind).toBe("template.update")
 
         expect(transactions.traces.raw.length).toBe(1)

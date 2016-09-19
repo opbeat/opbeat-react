@@ -20,22 +20,20 @@ describe('simple-fetch-app', function () {
     ).then(function (response) {
       var transactions = response.value.transactions
       var fetchedResult = response.value.fetchedResult
-      
+
       expect(fetchedResult).toBe('some-data')
-      expect(transactions.traces.groups.length).toBe(4)
-      
+      expect(transactions.traces.groups.length).toBe(4) // 4 is signature: 'Render 0 components'
+
       expect(transactions.traces.groups[0].transaction).toBe('fetchData')
       expect(transactions.traces.groups[0].kind).toBe('transaction')
 
-      expect(transactions.traces.groups[1].kind).toBe('template.update')
-      expect(transactions.traces.groups[1].signature).toBe('Render 0 components')
-      
-      expect(transactions.traces.groups[2].kind).toBe('ext.HttpRequest.fetch')
-      expect(transactions.traces.groups[2].signature).toBe('GET ./test.json')
-      
-      expect(transactions.traces.groups[3].signature).toBe('important custom trace')
-      expect(transactions.traces.groups[3].kind).toBe('template.custom')
-      
+      expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
+      expect(transactions.traces.groups[1].signature).toBe('GET ./test.json')
+
+      expect(transactions.traces.groups[2].signature).toBe('important custom trace')
+      expect(transactions.traces.groups[2].kind).toBe('template.custom')
+      console.log("transactions.traces.groups[3]", transactions.traces.groups[3])
+
       utils.verifyNoBrowserErrors(done)
     }, function (error) {
       browser.log(error)
@@ -57,26 +55,24 @@ describe('simple-fetch-app', function () {
       try{
         var transactions = response.value.transactions
 
+        expect(transactions.traces.groups.length).toBe(3)
         expect(transactions.traces.groups[0].transaction).toBe('failFetchData')
         expect(transactions.traces.groups[0].kind).toBe('transaction')
 
+        expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
+        expect(transactions.traces.groups[1].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
 
-        expect(transactions.traces.groups[1].kind).toBe('template.update')
-        expect(transactions.traces.groups[1].signature).toBe('Render 0 components')
-        
-
-        expect(transactions.traces.groups[2].kind).toBe('ext.HttpRequest.fetch')
-        expect(transactions.traces.groups[2].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
-
-        expect(transactions.traces.groups[3].signature).toBe('important reject trace')
-        expect(transactions.traces.groups[3].kind).toBe('template.custom')
+        console.log(transactions.traces.groups[2])
+        console.log(transactions.traces.groups.length)
+        expect(transactions.traces.groups[2].signature).toBe('important reject trace')
+        expect(transactions.traces.groups[2].kind).toBe('template.custom')
 
         utils.allowSomeBrowserErrors(
           'http://non-existing-host.opbeat/non-existing-file.json'
           )(done)
 
       }catch(e) {
-        console.log(e)
+        console.log(e, e.stack)
       }
     }, function (error) {
       browser.log(error)
@@ -96,19 +92,16 @@ describe('simple-fetch-app', function () {
       }
     ).then(function (response) {
       var transactions = response.value.transactions
-      expect(transactions.traces.groups.length).toBe(4)
+      expect(transactions.traces.groups.length).toBe(3)
       
       expect(transactions.traces.groups[0].transaction).toBe('failFetchDataWithCatch')
       expect(transactions.traces.groups[0].kind).toBe('transaction')
-
-      expect(transactions.traces.groups[1].kind).toBe('template.update')
-      expect(transactions.traces.groups[1].signature).toBe('Render 0 components')
       
-      expect(transactions.traces.groups[2].kind).toBe('ext.HttpRequest.fetch')
-      expect(transactions.traces.groups[2].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
+      expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
+      expect(transactions.traces.groups[1].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
 
-      expect(transactions.traces.groups[3].signature).toBe('important catched trace')
-      expect(transactions.traces.groups[3].kind).toBe('template.custom')
+      expect(transactions.traces.groups[2].signature).toBe('important catched trace')
+      expect(transactions.traces.groups[2].kind).toBe('template.custom')
       utils.allowSomeBrowserErrors(
           'http://non-existing-host.opbeat/non-existing-file.json'
           )(done)

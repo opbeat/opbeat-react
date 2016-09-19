@@ -30,6 +30,9 @@ function ZoneService (zone, logger, config) {
   var zoneConfig = {
     name: 'opbeatRootZone',
     onScheduleTask: function (parentZoneDelegate, currentZone, targetZone, task) {
+      var taskId
+      var opbeatTask
+
       if (task.type === 'eventTask' && task.data.eventName === 'opbeatImmediatelyFiringEvent') {
         task.data.handler(task.data)
         return task
@@ -43,8 +46,9 @@ function ZoneService (zone, logger, config) {
       logger.trace('zoneservice.onScheduleTask', task.source, ' type:', task.type)
       if (task.type === 'macroTask') {
         logger.trace('Zone: ', targetZone.name)
-        var taskId = nextId++
-        var opbeatTask = {
+        taskId = nextId++
+
+        opbeatTask = {
           taskId: task.source + taskId,
           source: task.source,
           type: task.type
@@ -100,11 +104,12 @@ function ZoneService (zone, logger, config) {
       logger.trace('zoneservice.onInvokeTask', task.source, ' type:', task.type)
       var hasTarget = task.data && task.data.target
       var result
+      var opbeatTask
 
       if (hasTarget && task.data.target[opbeatDataSymbol].typeName === 'XMLHttpRequest') {
         var opbeatData = task.data.target[opbeatDataSymbol]
         logger.trace('opbeatData', opbeatData)
-        var opbeatTask = opbeatData.task
+        opbeatTask = opbeatData.task
 
         if (opbeatTask && task.data.eventName === 'readystatechange' && task.data.target.readyState === task.data.target.DONE) {
           opbeatData.registeredEventListeners['readystatechange'].resolved = true
@@ -123,10 +128,19 @@ function ZoneService (zone, logger, config) {
         spec.onBeforeInvokeTask(task[opbeatTaskSymbol])
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
         spec.onInvokeTask(task[opbeatTaskSymbol])
-      } else if (task.type === 'eventTask' && task.data && task.data.eventName in testTransactionAfterEventsObj) {
+      } else if (task.type === 'eventTask' && hasTarget && task.data.eventName in testTransactionAfterEventsObj) {
+        var taskId = nextId++
+        opbeatTask = {
+          taskId: task.source + taskId,
+          source: task.source,
+          type: task.type
+        }
+
+        spec.onScheduleTask(opbeatTask)
         // clear traces on the zone transaction
+        // console.log(task.data.eventName, task)
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
-        spec.onInvokeTask()
+        spec.onInvokeTask(opbeatTask)
       } else {
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
       }

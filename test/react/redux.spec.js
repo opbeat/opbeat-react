@@ -2,7 +2,7 @@ var initOpbeat = require('../../src/react/react')
 var opbeatMiddleware = require('../../src/react/redux').opbeatMiddleware
 var createStore = require('redux').createStore
 
-describe('react: opbeatMiddleware', function () {
+describe('react-redux: opbeatMiddleware', function () {
   var transactionService
   var opbeat
   var store

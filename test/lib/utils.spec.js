@@ -23,3 +23,28 @@ describe('lib/utils', function () {
     expect(deepMerged).toEqual(Object({a: null, b: 'b'}))
   })
 })
+
+describe('lib/utils - friendlyNodeName', function () {
+  function testHTMLFriendlyName (html, friendlyName) {
+    var div = document.createElement('div')
+    div.innerHTML = html
+    var element = div.firstChild
+    expect(utils.friendlyNodeName(element)).toEqual(friendlyName)
+  }
+
+  it('should get a simple friendly name with id', function () {
+    testHTMLFriendlyName('<button id="button1">text</button>', 'button#button1')
+  })
+
+  it('should get a simple friendly name with classes', function () {
+    testHTMLFriendlyName('<button class="class1 class2">text</button>', 'button.class1.class2')
+  })
+
+  it('should get a simple friendly name with nothing', function () {
+    testHTMLFriendlyName('<button>text</button>', 'button')
+  })
+
+  it('should get a simple friendly with weirdness', function () {
+    testHTMLFriendlyName('<button id="  " class=" ">text</button>', 'button')
+  })
+})

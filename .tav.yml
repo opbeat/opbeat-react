@@ -1,0 +1,6 @@
+react:
+  versions: ^15.0.1
+  commands: 'node node_modules/karma/bin/karma start --single-run --grep react:'
+# react-router:
+#   versions: ^2.0.0
+#   commands: node node_modules/karma/bin/karma start --single-run --grep react-router

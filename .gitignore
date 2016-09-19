@@ -15,3 +15,5 @@ errorShots
 e2e_test/libs
 
 coverage
+
+bundle.js

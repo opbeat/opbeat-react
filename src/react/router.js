@@ -1,7 +1,7 @@
 var patchObject = require('../common/patchUtils').patchObject
 var Router = require('react-router').Router
 
-function combineRoutes(routes) {
+function combineRoutes (routes) {
   var pathParts = []
   var combinedRoute
 
@@ -9,7 +9,7 @@ function combineRoutes(routes) {
     if (routes[i].path) {
       pathParts.push(routes[i].path.slice(
         routes[i].path[0] === '/' ? 1 : 0,
-        routes[i].path[routes[i].path.length-1] === '/' ? -1 : routes[i].path.length
+        routes[i].path[routes[i].path.length - 1] === '/' ? -1 : routes[i].path.length
         )
       )
     }
@@ -25,15 +25,15 @@ function makeSignatureFromRoutes (routes, location) {
   if (routes.length < 1) {
     return 'unknown'
   }
-  
-  if(routes.length == 1) {
+  var fullRoute
+  if (routes.length === 1) {
     fullRoute = routes[0].path
-  }else{
+  } else {
     fullRoute = combineRoutes(routes)
   }
 
-  if (location.action === "REPLACE") {
-    fullRoute += " (REPLACE)"
+  if (location.action === 'REPLACE') {
+    fullRoute += ' (REPLACE)'
   }
 
   return fullRoute
@@ -45,14 +45,14 @@ function routeChange (transactionService, state) {
   // end any transactions currently ongoing
   var transaction = transactionService.getCurrentTransaction()
 
-  if(transaction && transaction.name !== 'ZoneTransaction'){
+  if (transaction && transaction.name !== 'ZoneTransaction') {
     transaction.end()
   }
 
   transactionService.startTransaction(fullRoute, 'spa.route-change')
 }
 
-function patchRouter(router, serviceContainer) {
+function patchRouter (router, serviceContainer) {
   patchObject(router, 'componentWillMount', function (delegate) {
     return function (self, args) {
       patchObject(self, 'createRouterObjects', function (delegate) {
@@ -60,7 +60,7 @@ function patchRouter(router, serviceContainer) {
           var out = delegate.apply(self, args)
           patchObject(out.transitionManager, 'listen', function (delegate) {
             return function (self, args) {
-              if (args.length == 1) {
+              if (args.length === 1) {
                 return delegate.call(self, function () {
                   if (arguments.length === 2) { // error, nextState
                     routeChange(serviceContainer.services.transactionService, arguments[1])

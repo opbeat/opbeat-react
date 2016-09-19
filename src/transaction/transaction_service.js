@@ -31,6 +31,10 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   zoneService.spec.onBeforeInvokeTask = onBeforeInvokeTask
 
   function onScheduleTask (task) {
+    if (!transactionService.getCurrentTransaction()) {
+      transactionService.startZoneTransaction()
+    }
+
     if (task.source === 'XMLHttpRequest.send') {
       var trace = transactionService.startTrace(task['XHR']['method'] + ' ' + task['XHR']['url'], 'ext.HttpRequest.xhr', {'enableStackFrames': false})
       task.trace = trace
@@ -40,7 +44,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   zoneService.spec.onScheduleTask = onScheduleTask
 
   function onInvokeTask (task) {
-    if (task) {
+    if (task && task.taskId) {
       transactionService.removeTask(task.taskId)
     }
 
@@ -129,6 +133,15 @@ TransactionService.prototype.startTransaction = function (name, type) {
   return tr
 }
 
+TransactionService.prototype.startZoneTransaction = function () {
+  var perfOptions = this._config.get('performance')
+  if (!perfOptions.enable) {
+    return
+  }
+
+  return this.createTransaction('ZoneTransaction', 'transaction', perfOptions)
+}
+
 TransactionService.prototype.startTrace = function (signature, type, options) {
   var perfOptions = this._config.get('performance')
   if (!perfOptions.enable) {
@@ -140,7 +153,7 @@ TransactionService.prototype.startTrace = function (signature, type, options) {
   if (trans) {
     this._logger.debug('TransactionService.startTrace', signature, type)
   } else {
-    trans = this.createTransaction('ZoneTransaction', 'transaction', perfOptions)
+    trans = this.startZoneTransaction(perfOptions)
     this._logger.debug('TransactionService.startTrace - ZoneTransaction', signature, type)
   }
 
