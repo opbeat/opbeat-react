@@ -20,7 +20,8 @@ function Config () {
       enable: true,
       enableStackFrames: false,
       groupSimilarTraces: true,
-      similarTraceThreshold: 0.05
+      similarTraceThreshold: 0.05,
+      eventWhiteList: ['click', 'contextmenu', 'dblclick', 'mousedown', 'keydown', 'keypress', 'keyup']
     },
     libraryPathPattern: '(node_modules|bower_components|webpack)',
     context: {

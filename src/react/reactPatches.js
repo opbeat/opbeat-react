@@ -6,8 +6,6 @@ var EventPluginUtils = require('react/lib/EventPluginUtils')
 
 var getEventTarget = require('react/lib/getEventTarget')
 
-
-
 var patchMethod = require('../common/patchUtils').patchMethod
 var nodeName = require('./utils').nodeName
 
@@ -56,6 +54,14 @@ module.exports = function patchReact (serviceContainer) {
   patchMethod(ReactReconciler, 'performUpdateIfNecessary', componentRenderPatch)
 
   patchMethod(EventPluginUtils, 'executeDispatchesInOrder', function (delegate) {
+    // for quick lookup, make this into an object
+    var eventWhiteList = {}
+    var performance = serviceContainer.services.configService.get('performance')
+    var configWhiteList = performance.eventWhiteList || []
+    configWhiteList.forEach(function (ev) {
+      eventWhiteList[ev] = 1
+    })
+
     return function (self, args) {
       if (args[0] && args[0]._dispatchListeners && args[0].nativeEvent) {
         var nativeEventTarget = getEventTarget(args[0].nativeEvent)
@@ -68,7 +74,7 @@ module.exports = function patchReact (serviceContainer) {
           // because of ZoneTransactions, any trace started already will be
           // transferred.
           var trans = transactionService.getCurrentTransaction()
-          if (trans && trans.name === 'ZoneTransaction') {
+          if (trans && trans.name === 'ZoneTransaction' && args[0].nativeEvent.type in eventWhiteList) {
             var reactNode = nodeName(nativeEventTarget)
             transactionService.startTransaction(reactNode + ':' + args[0].nativeEvent.type, 'spa.action')
           }
