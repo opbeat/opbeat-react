@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom'
 var CompositeComponent = React.createClass({
   render: function() {
     return (
-      <span>Composite component</span>
+      <span onClick={() => console.log('asd') }>Composite component</span>
     )
   }
 })
@@ -14,14 +14,14 @@ var CompositeComponent = React.createClass({
 class ES6Component extends React.Component {
   render() {
     return (
-      <span>es6 component</span>
+      <span id="ES6Component">es6 component</span>
     )
   }
 }
 
 var FuncComponent = () => <span>func Component</span> 
 
-function render() {
+window.render = function () {
   window.opbeat.services.transactionService.startTransaction('demo')
   ReactDOM.render(
     (
@@ -34,5 +34,3 @@ function render() {
     document.getElementById('reactMount')
   )
 }
-
-render()

@@ -137,8 +137,8 @@ function ZoneService (zone, logger, config) {
         }
 
         spec.onScheduleTask(opbeatTask)
+
         // clear traces on the zone transaction
-        // console.log(task.data.eventName, task)
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
         spec.onInvokeTask(opbeatTask)
       } else {

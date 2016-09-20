@@ -32,7 +32,6 @@ describe('simple-fetch-app', function () {
 
       expect(transactions.traces.groups[2].signature).toBe('important custom trace')
       expect(transactions.traces.groups[2].kind).toBe('template.custom')
-      console.log("transactions.traces.groups[3]", transactions.traces.groups[3])
 
       utils.verifyNoBrowserErrors(done)
     }, function (error) {
@@ -62,8 +61,6 @@ describe('simple-fetch-app', function () {
         expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
         expect(transactions.traces.groups[1].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
 
-        console.log(transactions.traces.groups[2])
-        console.log(transactions.traces.groups.length)
         expect(transactions.traces.groups[2].signature).toBe('important reject trace')
         expect(transactions.traces.groups[2].kind).toBe('template.custom')
 

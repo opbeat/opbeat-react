@@ -11,9 +11,9 @@ function opbeatMiddleware (serviceContainer) {
           if (!action.type.startsWith('@@')) {
             if (currTrans && currTrans.name !== 'ZoneTransaction') {
               if (action.type) {
-                tr = transactionService.startTrace('dispatch ' + action.type, 'app.action')
+                tr = transactionService.startTrace('dispatch ' + action.type, 'spa.dispatch')
               } else {
-                tr = transactionService.startTrace('dispatch', 'app.action')
+                tr = transactionService.startTrace('dispatch', 'app.dispatch')
               }
             } else {
               if (action.type) {
@@ -28,7 +28,6 @@ function opbeatMiddleware (serviceContainer) {
           if (currTrans) {
             currTrans.detectFinish()
           }
-
         })
 
         if (tr) {
