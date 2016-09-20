@@ -15,5 +15,14 @@ describe('react: nodeName', function () {
 
     var p = wrapper.find('p').node
     expect(nodeName(p)).toBe('ListOfLists div p#paragraph')
+
+    // nested madness
+    var span = wrapper.find('span.span1').node
+    expect(span).toBeTruthy()
+    expect(nodeName(span)).toBe('Link span.span1')
+
+    var span2 = wrapper.find('span.span2').node
+    expect(span2).toBeTruthy()
+    expect(nodeName(span2)).toBe('Value div span.span2')
   })
 })
