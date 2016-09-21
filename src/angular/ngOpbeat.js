@@ -3,6 +3,7 @@ var patchCompile = require('./patches/compilePatch')
 var patchRootScope = require('./patches/rootScopePatch')
 var patchDirectives = require('./patches/directivesPatch')
 var patchExceptionHandler = require('./patches/exceptionHandlerPatch')
+var patchInteractions = require('./patches/interactionsPatch')
 
 function NgOpbeatProvider (logger, configService, exceptionHandler) {
   this.config = function config (properties) {
@@ -56,6 +57,7 @@ function patchAll ($provide, transactionService) {
   patchCompile($provide, transactionService)
   patchRootScope($provide, transactionService)
   patchDirectives($provide, transactionService)
+  patchInteractions($provide, transactionService)
 }
 
 function noop () {}
@@ -64,6 +66,12 @@ function registerOpbeatModule (transactionService, logger, configService, except
   function moduleRun ($rootScope) {
     configService.set('isInstalled', true)
     configService.set('opbeatAgentName', 'opbeat-angular')
+    configService.set('platform.framework', 'angular/' + window.angular.version.full)
+
+    var platform = getPlatform()
+    if (platform) {
+      configService.set('platform.platform', platform)
+    }
 
     logger.debug('Agent:', configService.getAgentName())
 
@@ -98,7 +106,16 @@ function registerOpbeatModule (transactionService, logger, configService, except
     patchAll($provide, transactionService)
   }
 
-  if (window.angular) {
+  function getPlatform () {
+    var isCordovaApp = (typeof window.cordova !== 'undefined')
+    if (isCordovaApp) {
+      return 'cordova'
+    } else {
+      return 'browser'
+    }
+  }
+
+  if (window.angular && typeof window.angular.module === 'function') {
     if (!configService.isPlatformSupported()) {
       window.angular.module('ngOpbeat', [])
         .provider('$opbeat', new NgOpbeatProvider(logger, configService, exceptionHandler))
@@ -111,6 +128,7 @@ function registerOpbeatModule (transactionService, logger, configService, except
         .run(['$rootScope', moduleRun])
     }
     window.angular.module('opbeat-angular', ['ngOpbeat'])
+    return true
   }
 }
 

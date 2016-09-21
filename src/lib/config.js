@@ -21,13 +21,12 @@ function Config () {
       enableStackFrames: false,
       groupSimilarTraces: true,
       similarTraceThreshold: 0.05,
-      eventWhiteList: ['click', 'contextmenu', 'dblclick', 'mousedown', 'keydown', 'keypress', 'keyup']
+      eventWhiteList: ['click', 'contextmenu', 'dblclick', 'mousedown', 'keydown', 'keypress', 'keyup'],
+      captureInteractions: false
     },
     libraryPathPattern: '(node_modules|bower_components|webpack)',
-    context: {
-      user: {},
-      extra: null
-    }
+    context: {},
+    platform: {}
   }
 
   this._changeSubscription = new Subscription()
@@ -40,7 +39,7 @@ Config.prototype.init = function () {
 
 Config.prototype.get = function (key) {
   return utils.arrayReduce(key.split('.'), function (obj, i) {
-    return obj[i]
+    return obj && obj[i]
   }, this.config)
 }
 
@@ -125,11 +124,11 @@ Config.prototype.VERSION = '%%VERSION%%'
 
 Config.prototype.isPlatformSupported = function () {
   return typeof Array.prototype.forEach === 'function' &&
-  typeof JSON.stringify === 'function' &&
-  typeof Function.bind === 'function' &&
-  window.performance &&
-  typeof window.performance.now === 'function' &&
-  utils.isCORSSupported()
+    typeof JSON.stringify === 'function' &&
+    typeof Function.bind === 'function' &&
+    window.performance &&
+    typeof window.performance.now === 'function' &&
+    utils.isCORSSupported()
 }
 
 module.exports = new Config()

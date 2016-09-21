@@ -8,10 +8,10 @@
     "Hamidreza Jahtalab",
     "Kenneth Auchenberg"
   ],
-  "main": "src/opbeat.js",
+  "main": "src/opbeat-js/opbeat.js",
   "scripts": {
     "build": "gulp build:release",
-    "karma": "node node_modules/karma/bin/karma start",
+    "karma": "node node_modules/karma/bin/karma start --coverage",
     "test": "node node_modules/standard/bin/cmd.js src/**/* && gulp test:unit:sauce && gulp test:e2e",
     "prepublish": "npm run build"
   },
@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "angular": "^1.5.0",
+    "angular-mocks": "^1.5.8",
     "angular-resource": "^1.5.0",
     "babel-preset-es2015": "^6.14.0",
     "babel-preset-react": "^6.11.1",

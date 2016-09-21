@@ -231,7 +231,7 @@ describe('ZoneService', function () {
     })
   })
 
-  it('should call registered event listeners for requestAnimationFrame', function (done) {
+  xit('should call registered event listeners for requestAnimationFrame', function (done) {
     var callbackFlag = false
     // zoneService = new ZoneService(window.Zone.current.parent, logger)
     resetZoneCallbacks(zoneService)
@@ -259,6 +259,14 @@ describe('ZoneService', function () {
       zoneService.runOuter(function () {
         expect(window.Zone.current.name).toBe('<root>')
       })
+    })
+  })
+
+  it('should work with synchronous XMLHttpRequest', function () {
+    window.Zone.current.fork({}).run(function () {
+      var req = new window.XMLHttpRequest()
+      req.open('get', '/', false)
+      req.send()
     })
   })
 

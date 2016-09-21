@@ -57,6 +57,7 @@ module.exports = function (config) {
       'node_modules/angular/angular.js',
       'node_modules/angular-resource/angular-resource.js',
       'node_modules/zone.js/dist/zone.js',
+      'node_modules/angular-mocks/angular-mocks.js',
       specPattern,
       { pattern: 'test/exceptions/data/*.js', included: false, watched: false },
       { pattern: 'src/**/*.js', included: false, watched: true }
@@ -126,26 +127,26 @@ module.exports = function (config) {
     buildId = 'OpbeatJS@' + version
     cfg.plugins.push('karma-chrome-launcher')
     cfg.browsers.push('Chrome')
-  }
 
-  if (doCoverage) {
-    // istanbul code coverage
-    cfg.plugins.push('karma-coverage')
-    var istanbul = require('browserify-istanbul')
-    cfg.browserify.transform = [istanbul]
+    if (config.coverage) {
+      // istanbul code coverage
+      cfg.plugins.push('karma-coverage')
+      var istanbul = require('browserify-istanbul')
+      cfg.browserify.transform = [istanbul]
 
-    cfg.coverageReporter = {
-      includeAllSources: true,
-      reporters: [
-        {type: 'html', dir: 'coverage/'},
-        {type: 'text-summary'}
-      ],
-      dir: 'coverage/'
+      cfg.coverageReporter = {
+        includeAllSources: true,
+        reporters: [
+          {type: 'html', dir: 'coverage/'},
+          {type: 'text-summary'}
+        ],
+        dir: 'coverage/'
+      }
+
+      cfg.preprocessors['src/**/*.js'] = ['coverage']
+
+      cfg.reporters.push('coverage')
     }
-
-    cfg.preprocessors['src/**/*.js'] = ['coverage']
-
-    cfg.reporters.push('coverage')
   // cfg.plugins.push('karma-phantomjs2-launcher')
   // cfg.browsers.push('PhantomJS2')
   }
