@@ -5,7 +5,7 @@ var List = React.createClass({
   render: function () {
     return (
         <ul>
-            <li className='item1' onClick={() => { console.log('clicked') }}>Item</li>
+            <li className='item1' onClick={console.log('clicked')}>Item</li>
             <li><Value value={nameJSX}/></li>
             <li>Item</li>
         </ul>

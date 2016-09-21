@@ -2,7 +2,6 @@ var ReactDOMComponentTree = require('react/lib/ReactDOMComponentTree')
 
 var utils = require('../lib/utils')
 
-
 function nodeName (domNode) {
   var reactElem = ReactDOMComponentTree.getClosestInstanceFromNode(domNode)
   var elements = []
@@ -22,7 +21,6 @@ function nodeName (domNode) {
   elements.reverse()
   return elements.join(' ')
 }
-
 
 module.exports = {
   nodeName: nodeName

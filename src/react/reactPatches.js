@@ -9,7 +9,6 @@ var getEventTarget = require('react/lib/getEventTarget')
 var patchMethod = require('../common/patchUtils').patchMethod
 var nodeName = require('./utils').nodeName
 
-
 module.exports = function patchReact (serviceContainer) {
   var transactionService = serviceContainer.services.transactionService
   var batchedUpdatePatch = function (delegate) {

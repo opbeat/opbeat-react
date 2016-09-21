@@ -1,6 +1,6 @@
 var React = require('react')
 
-var components = require('./components')
+var components = require('./components.jsx')
 var nodeName = require('../../src/react/utils').nodeName
 
 var ListOfLists = components.ListOfLists

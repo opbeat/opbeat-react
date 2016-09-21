@@ -8,7 +8,7 @@ function opbeatMiddleware (serviceContainer) {
         serviceContainer.services.zoneService.zone.run(function () {
           var currTrans
           currTrans = transactionService.getCurrentTransaction()
-          if (!action.type.startsWith('@@')) {
+          if (action.type.indexOf('@@') !== 0) { // doesn't start with
             if (currTrans && currTrans.name !== 'ZoneTransaction') {
               if (action.type) {
                 tr = transactionService.startTrace('dispatch ' + action.type, 'spa.dispatch')
@@ -23,7 +23,6 @@ function opbeatMiddleware (serviceContainer) {
           }
 
           ret = next(action)
-
 
           if (currTrans) {
             currTrans.detectFinish()

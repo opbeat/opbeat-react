@@ -87,7 +87,7 @@ module.exports = function (config) {
                 .external('react/lib/ReactContext')
                 .external('react/lib/ExecutionEnvironment')
         })
-        bundle.transform('reactify')
+        bundle.transform('babelify', {presets: ['es2015', 'react']})
       }
     },
     sauceLabs: {
@@ -106,6 +106,7 @@ module.exports = function (config) {
 
   cfg.preprocessors = {}
   cfg.preprocessors[specPattern] = ['browserify']
+  cfg.preprocessors['*.jsx'] = ['browserify']
 
   var isTravis = process.env.TRAVIS
   var doCoverage = process.env.COVERAGE
