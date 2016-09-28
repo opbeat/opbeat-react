@@ -22,7 +22,7 @@ describe('react-app', function () {
         expect(transactions.traces.groups[1].kind).toBe("template.update")
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(3)
+        expect(transactions.traces.raw[0].length).toBe(4)
 
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('demo')
@@ -52,7 +52,7 @@ describe('react-app', function () {
         expect(transactions.traces.groups[1].kind).toBe("template.update")
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(3)
+        expect(transactions.traces.raw[0].length).toBe(4)
 
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('demo')
