@@ -21,8 +21,10 @@ class ES6Component extends React.Component {
 
 var FuncComponent = () => <span>func Component</span> 
 
-window.render = function () {
-  window.opbeat.services.transactionService.startTransaction('demo')
+  window.render = function () {
+  if (window.opbeat.services) {
+    window.opbeat.services.transactionService.startTransaction('demo')
+  }
   ReactDOM.render(
     (
       <div>

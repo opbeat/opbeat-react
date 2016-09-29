@@ -28,8 +28,10 @@ var simpleThunkDispatcher = function () {
     // that also dispatches
     // we're testing that we'll capture traces in the same
     // task just before the dispatch
-    var trace = window.opbeat.services.transactionService.startTrace('predispatch trace', 'custom')
-    trace.end()
+    if (window.opbeat.services) {
+      var trace = window.opbeat.services.transactionService.startTrace('predispatch trace', 'custom')
+      trace.end()
+    }
 
     dispatch(increment())
     setTimeout(() => { dispatch(decrement()) }, 0)
@@ -42,10 +44,15 @@ var delayedDispatchThunk = function () {
     // when the task runs, it dispatches. Because it happens in a new
     // task, we should not have `predispatch trace` in the "decrement"
     // transaction.
-    var trace = window.opbeat.services.transactionService.startTrace('predispatch trace', 'custom')
-
-    setTimeout(() => { 
-      trace.end()
+    var trace
+    if (window.opbeat.services) {
+      trace = window.opbeat.services.transactionService.startTrace('predispatch trace', 'custom')
+    }
+    setTimeout(() => {
+      if (trace) {
+        trace.end()
+      } 
+      
       dispatch(decrement()) 
     }, 0)
   }

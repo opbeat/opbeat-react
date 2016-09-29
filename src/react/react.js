@@ -13,7 +13,7 @@ function init (config, serviceFactory) {
   var serviceContainer = new ServiceContainer(serviceFactory)
 
   if (!serviceContainer.services.configService.isPlatformSupported()) {
-    serviceContainer.services.logger.warn('Platform is not supported.')
+    serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
     return false  // disable
   } else {
     serviceContainer.initialize()
