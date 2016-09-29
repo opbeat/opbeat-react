@@ -81,7 +81,9 @@ function patchRouter (router, serviceContainer) {
 }
 
 function useRouter (serviceContainer) {
-  patchRouter(Router.prototype, serviceContainer)
+  if (serviceContainer !== false) {
+    patchRouter(Router.prototype, serviceContainer)
+  }
 }
 
 module.exports = {
