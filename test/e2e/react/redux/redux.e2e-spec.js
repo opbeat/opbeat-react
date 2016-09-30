@@ -1,18 +1,18 @@
 var utils = require('../../e2e/utils')
 
 describe('redux-app', function () {
-  beforeEach(utils.verifyNoBrowserErrors)
-
+  browser.url('/react/redux/index.html')
+  browser.executeAsync(function(cb) { db() }) // buuuuug
+  
   it('should have correct number of transactions and traces', function (done) {
     browser.url('/react/redux/index.html')
 
     browser.executeAsync(
       function(cb) {
-        window.opbeatTransport.subscribe(function(transactions) {
-          cb(transactions)
-        })
-        document.getElementById('incr').click()
-        console.log('clicked')
+          window.opbeatTransport.subscribe(function(transactions) {
+            cb(transactions)
+          })
+          document.getElementById('incr').click();
       }
     ).then(function (response) {
         var transactions = response.value
@@ -22,7 +22,7 @@ describe('redux-app', function () {
         expect(transactions.traces.groups[2].kind).toBe('spa.dispatch')
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(4)
+        expect(transactions.traces.raw[0].length).toBe(5)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('IncrDecr p button#incr:click')
         expect(transactions.transactions[0].kind).toBe('spa.action')
