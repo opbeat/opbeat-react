@@ -1,6 +1,6 @@
 import '../opbeat-e2e'
 import { useRouter } from  '../../../../dist/opbeat-react/router'
-import { opbeatMiddleware } from  '../../../../dist/opbeat-react/redux'
+import { createOpbeatMiddleware } from  '../../../../dist/opbeat-react/redux'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
@@ -21,8 +21,8 @@ var store = createStore(
     routing: routerReducer
   }),
   applyMiddleware(
-    opbeatMiddleware(window.opbeat),
-    thunk
+    thunk,
+    createOpbeatMiddleware(),
   )
 )
 

@@ -14,7 +14,10 @@ function init (config, serviceFactory) {
 
   if (!serviceContainer.services.configService.isPlatformSupported()) {
     serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
-    return false  // disable
+
+    // disable
+    window.__opbeat = false
+    return false
   } else {
     serviceContainer.initialize()
 
@@ -22,6 +25,9 @@ function init (config, serviceFactory) {
 
     patchCommon(serviceContainer)
     patchReact(serviceContainer)
+
+    window.__opbeat = serviceContainer
+
     return serviceContainer
   }
 }

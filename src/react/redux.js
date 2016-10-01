@@ -6,9 +6,13 @@ var passThrough = function () {
   }
 }
 
-function opbeatMiddleware (serviceContainer) {
-  if (serviceContainer === false) {
+function createOpbeatMiddleware (serviceContainer) {
+  if (serviceContainer === false || window.__opbeat === false) {
     return passThrough
+  }
+
+  if (!serviceContainer) {
+    serviceContainer = window.__opbeat
   }
 
   var transactionService = serviceContainer.services.transactionService
@@ -51,4 +55,6 @@ function opbeatMiddleware (serviceContainer) {
   }
 }
 
-module.exports = {opbeatMiddleware: opbeatMiddleware}
+module.exports = {
+  createOpbeatMiddleware: createOpbeatMiddleware
+}

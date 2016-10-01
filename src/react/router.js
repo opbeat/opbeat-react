@@ -81,9 +81,13 @@ function patchRouter (router, serviceContainer) {
 }
 
 function useRouter (serviceContainer) {
-  if (serviceContainer !== false) {
-    patchRouter(Router.prototype, serviceContainer)
+  if (serviceContainer === false) {
+    return
   }
+  if (!serviceContainer) {
+    serviceContainer = window.__opbeat
+  }
+  patchRouter(Router.prototype, serviceContainer)
 }
 
 module.exports = {

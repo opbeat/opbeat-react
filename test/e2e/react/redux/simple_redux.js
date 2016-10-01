@@ -1,5 +1,5 @@
 import '../opbeat-e2e'
-import { opbeatMiddleware } from '../../../../dist/opbeat-react/redux'
+import { createOpbeatMiddleware } from '../../../../dist/opbeat-react/redux'
 import React from 'react'
 import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
@@ -9,7 +9,7 @@ var store = window.store = createStore(
   counter,
   applyMiddleware(
     thunk,
-    opbeatMiddleware(window.opbeat)
+    createOpbeatMiddleware()
   )
 )
 

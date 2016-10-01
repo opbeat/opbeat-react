@@ -68,7 +68,7 @@ describe('patchPromise', function () {
     })
 
     patchPromise(transactionService, p, trace, false)
-    
+
     spyOn(funcs, 'rejected').and.callThrough()
     spyOn(transactionService, 'detectFinish').and.callThrough()
     spyOn(transactionService, 'addTask').and.callThrough()
@@ -100,7 +100,7 @@ describe('patchPromise', function () {
     // Register some failure
     var p2 = p.then(null, funcs.rejected)
 
-    Promise.all([p1, p2]).then(function () { 
+    Promise.all([p1, p2]).then(function () {
       expect(funcs.rejected.calls.count()).toEqual(2)
       done()
     })
@@ -155,7 +155,7 @@ describe('patchPromise', function () {
     // when the first callback throws
     p1 = p.catch(funcs.rejected)
 
-    var p2 = p.then(function () { throw "Ouch!" }).catch(function () { })
+    var p2 = p.then(function () { throw 'Ouch!' }).catch(function () { })
 
     // We can't use chaining here, because that would leave some tasks
     // thus, we use Promise.all
