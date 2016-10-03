@@ -36,7 +36,7 @@ Install this plugin:
 This adds `MyComponent.displayName = 'MyComponent'` automatically to compoenents defined in your application.
 Remember to add the plugin to your `.babelrc`:
 ```
-plugins: [
+"plugins": [
   ["babel-plugin-add-react-displayname"]
 ]
 ```
