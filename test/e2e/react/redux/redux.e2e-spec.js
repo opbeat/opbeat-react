@@ -6,7 +6,6 @@ describe('redux-app', function () {
   
   it('should have correct number of transactions and traces', function (done) {
     browser.url('/react/redux/index.html')
-
     browser.executeAsync(
       function(cb) {
           window.opbeatTransport.subscribe(function(transactions) {

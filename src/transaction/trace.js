@@ -10,7 +10,14 @@ function Trace (transaction, signature, type, options) {
   this._parent = null
   this._diff = null
   this._end = null
+  this._options = options
 
+  if (utils.isUndefined(options) || options == null) {
+    this._options = {}
+  }
+}
+
+Trace.prototype.start = function () {
   // Start timers
   this._start = window.performance.now()
 
@@ -18,10 +25,7 @@ function Trace (transaction, signature, type, options) {
     this._markFinishedFunc = resolve
   }.bind(this))
 
-  if (utils.isUndefined(options) || options == null) {
-    options = {}
-  }
-  var shouldGenerateStackFrames = options['enableStackFrames']
+  var shouldGenerateStackFrames = this._options['enableStackFrames']
 
   if (shouldGenerateStackFrames) {
     this.getTraceStackFrames(function (frames) {
@@ -43,7 +47,9 @@ Trace.prototype.calcDiff = function () {
 }
 
 Trace.prototype.end = function () {
-  this._end = window.performance.now()
+  if (!this._end) {
+    this._end = window.performance.now()
+  }
 
   this.calcDiff()
   this.ended = true
@@ -70,12 +76,14 @@ Trace.prototype.startTime = function () {
 }
 
 Trace.prototype.ancestors = function () {
-  var parent = this.parent()
-  if (!parent) {
-    return []
-  } else {
-    return [parent.signature]
+  var parent = this._parent
+  var ancestors = []
+
+  while (parent) {
+    ancestors.push(parent.signature)
+    parent = parent._parent
   }
+  return ancestors.reverse()
 }
 
 Trace.prototype.parent = function () {

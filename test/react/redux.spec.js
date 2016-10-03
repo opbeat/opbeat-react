@@ -1,5 +1,5 @@
 var initOpbeat = require('../../src/react/react')
-var opbeatMiddleware = require('../../src/react/redux').opbeatMiddleware
+var createOpbeatMiddleware = require('../../src/react/redux').createOpbeatMiddleware
 var createStore = require('redux').createStore
 
 describe('react-redux: opbeatMiddleware', function () {
@@ -28,7 +28,7 @@ describe('react-redux: opbeatMiddleware', function () {
     var reducer = function (state, action) { return state }
     store = createStore(reducer, {'hello': 'world'})
 
-    middleware = opbeatMiddleware(opbeat)
+    middleware = createOpbeatMiddleware()
     count = 0
 
     api = {

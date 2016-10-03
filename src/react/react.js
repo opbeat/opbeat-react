@@ -19,6 +19,7 @@ function init (config, serviceFactory) {
     window.__opbeat = false
     return false
   } else {
+    serviceContainer.services.configService.set('opbeatAgentName', 'opbeat-react')
     serviceContainer.initialize()
 
     serviceContainer.services.configService.setConfig(config)

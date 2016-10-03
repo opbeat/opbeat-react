@@ -9,27 +9,81 @@ var getEventTarget = require('react/lib/getEventTarget')
 var patchMethod = require('../common/patchUtils').patchMethod
 var nodeName = require('./utils').nodeName
 
+var Trace = require('../transaction/trace')
+
+function calcAvg (timings) {
+  var sum = 0
+  for (var j = 0; j < timings.length; j++) {
+    sum += timings[j]
+  }
+  return sum / timings.length
+}
+
+
+function genTraces (componentStats, node, transactionService, transaction) {
+  var child
+  for (var i = 0; i < node.children.length; i++) {
+    child = node.children[i]
+    var trace = new Trace(transaction, child.name, 'template.component', {})
+    child.trace = trace // needed to estimate children
+    trace.setParent(transaction._rootTrace)
+    if (child.start) {
+      trace._start = child.start
+      trace._end = child.end
+    } else { // estimate
+      if (i > 0) {
+        // get start from prev child
+        trace._start = node.children[i - 1].trace._end
+      } else {
+        // or parent
+        trace._start = node.trace._start
+      }
+
+      if (!componentStats[child.name].avg) {
+        componentStats[child.name].avg = calcAvg(componentStats[child.name].timings)
+      }
+      trace._end = trace._start + componentStats[child.name].avg
+    }
+
+    trace.end()
+
+    genTraces(componentStats, child, transactionService, transaction)
+  }
+}
+
+function RenderState () {
+  return {
+    'componentStats': {},
+    'currRoot': {'children': []}
+  }
+}
+
+
 module.exports = function patchReact (serviceContainer) {
   var transactionService = serviceContainer.services.transactionService
+
   var batchedUpdatePatch = function (delegate) {
     return function (self, args) {
       var ret
       var trace
 
-      // template rendering
-      serviceContainer.services.zoneService.set('componentsRendered', [])
+      serviceContainer.services.zoneService.set('renderState', new RenderState())
       var batchedUpdatesStart = window.performance.now()
 
       ret = delegate.apply(self, args)
 
-      var components = serviceContainer.services.zoneService.get('componentsRendered')
-      if (components.length > 0) {
-        trace = serviceContainer.services.transactionService.startTrace('batchedUpdates', 'template.update')
+      var renderState = serviceContainer.services.zoneService.get('renderState')
+      var componentTypes = Object.keys(renderState.componentStats)
+      if (componentTypes.length > 0) {
+        trace = transactionService.startTrace('batchedUpdates', 'template.update')
         trace._start = batchedUpdatesStart
 
-        var text = components.length + ' components'
+        var text = componentTypes.length + ' different components'
         trace.signature = 'Render ' + text
         trace.end()
+
+        renderState.currRoot.trace = trace
+        genTraces(renderState.componentStats, renderState.currRoot, transactionService, transactionService.getCurrentTransaction())
       }
       return ret
     }
@@ -41,10 +95,44 @@ module.exports = function patchReact (serviceContainer) {
   var componentRenderPatch = function (delegate) {
     return function (self, args) {
       if (args[0] && args[0].getName) {
-        var components = serviceContainer.services.zoneService.get('componentsRendered') || []
-        components.push(args[0].getName())
+        var name = args[0].getName()
+        if (name === 'TopLevelWrapper') {
+          // TopLevelWrapper doesn't make sense to include here
+          return delegate.apply(self, args)
+        }
+
+        var out
+        var renderState = serviceContainer.services.zoneService.get('renderState')
+
+        if (!renderState.componentStats[name]) {
+          renderState.componentStats[name] = {'count': 0, 'timings': []}
+        }
+        var componentStat = renderState.componentStats[name]
+        componentStat['count']++
+
+        var shouldTrace = componentStat['count'] < 10
+        var node = {'children': [], 'name': name}
+        var parent = renderState.currRoot
+
+        renderState.currRoot.children.push(node)
+        renderState.currRoot = node
+
+        if (shouldTrace) {
+          var start = performance.now()
+          out = delegate.apply(self, args)
+          var end = performance.now()
+          componentStat.timings.push(end - start)
+          node.start = start
+          node.end = end
+        } else {
+          out = delegate.apply(self, args)
+        }
+
+        renderState.currRoot = parent
+        return out
+      } else {
+        return delegate.apply(self, args)
       }
-      return delegate.apply(self, args)
     }
   }
 
@@ -89,7 +177,6 @@ module.exports = function patchReact (serviceContainer) {
       var out
       return serviceContainer.services.zoneService.zone.run(function () {
         out = delegate.apply(self, args)
-        // out = traceComponentRendering(serviceContainer, delegate, self, args)
         serviceContainer.services.transactionService.detectFinish()
         return out
       })

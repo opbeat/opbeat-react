@@ -28,6 +28,19 @@ const store = createStore(
 )
 ```
 
+## Using minification?
+
+Install this plugin:
+`npm install babel-plugin-add-react-displayname`
+
+This adds `MyComponent.displayName = 'MyComponent'` automatically to compoenents defined in your application.
+Remember to add the plugin to your `.babelrc`:
+```
+plugins: [
+  ["babel-plugin-add-react-displayname"]
+]
+```
+
 ## Support
 
-`opbeat-react` works with `react-router` 2.x and `react` 15.x
+`opbeat-react` works with `react-router` 2.x and `react` 0.14.x and 15.x

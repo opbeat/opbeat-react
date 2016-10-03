@@ -46,6 +46,7 @@ Transaction.prototype.startTrace = function (signature, type, options) {
   opts.enableStackFrames = this._options.enableStackFrames === true && opts.enableStackFrames !== false
 
   var trace = new Trace(this, signature, type, opts)
+  trace.start()
   trace.traceId = this.nextId
   this.nextId++
   if (this._rootTrace) {
@@ -135,7 +136,7 @@ Transaction.prototype._finish = function () {
   this._adjustEndToLatestTrace()
 
   var self = this
-  var whenAllTracesFinished = self.traces.map(function (trace) {
+  var whenAllTracesFinished = self.traces.filter(function (trace) { return !!(trace._isFinish) }).map(function (trace) {
     return trace._isFinish
   })
 
