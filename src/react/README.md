@@ -31,7 +31,7 @@ const store = createStore(
 ## Using minification?
 
 Install this plugin:
-`npm install babel-plugin-add-react-displayname`
+`npm install --save babel-plugin-add-react-displayname`
 
 This adds `MyComponent.displayName = 'MyComponent'` automatically to compoenents defined in your application.
 Remember to add the plugin to your `.babelrc`:
