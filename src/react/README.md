@@ -44,3 +44,7 @@ Remember to add the plugin to your `.babelrc`:
 ## Support
 
 `opbeat-react` works with `react-router` 2.x and `react` 0.14.x and 15.x
+
+IE9 and below is not supported. But in general, every modern browser is supported. 
+
+Opbeat will automatically determine if the browser is supported and disable itself if the browser is not supported.
