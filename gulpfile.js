@@ -389,6 +389,16 @@ gulp.task('test:e2e:serve', function () {
     middleware: function (connect, opt) {
       var middlewares = []
       middlewares.push(connect.favicon())
+
+      // used to test truncated XHR traces
+      middlewares.push(function(request, response, next) {
+        if (request.url == '/slow-response') {
+          setTimeout(function() { response.write("Slow!"); response.end()}, 5000)
+        }else{
+          next()
+        }
+      })
+
       return middlewares
     }
   })

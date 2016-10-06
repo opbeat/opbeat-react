@@ -15,13 +15,13 @@ describe('redux-app', function () {
       }
     ).then(function (response) {
         var transactions = response.value
-        expect(transactions.traces.groups.length).toBe(3)
+        expect(transactions.traces.groups.length).toBe(4)
 
         expect(transactions.traces.groups[1].kind).toBe('template.update')
         expect(transactions.traces.groups[2].kind).toBe('spa.dispatch')
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(5)
+        expect(transactions.traces.raw[0].length).toBe(6)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('IncrDecr p button#incr:click')
         expect(transactions.transactions[0].kind).toBe('spa.action')
@@ -45,12 +45,12 @@ describe('redux-app', function () {
       }
     ).then(function (response) {
         var transactions = response.value
-        expect(transactions.traces.groups.length).toBe(2)
+        expect(transactions.traces.groups.length).toBe(3)
 
         expect(transactions.traces.groups[1].kind).toBe('template.update')
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(4)
+        expect(transactions.traces.raw[0].length).toBe(5)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('DECREMENT')
         expect(transactions.transactions[0].kind).toBe('spa.action')
@@ -74,7 +74,7 @@ describe('redux-app', function () {
     ).then(function (response) {
         var transactions = response.value
         
-        expect(transactions.traces.groups.length).toBe(5)
+        expect(transactions.traces.groups.length).toBe(6)
 
         expect(transactions.traces.groups[0].kind).toBe('transaction')
         expect(transactions.traces.groups[0].signature).toBe('transaction')
@@ -88,11 +88,14 @@ describe('redux-app', function () {
         expect(transactions.traces.groups[3].signature).toBe('dispatch INCREMENT')
         expect(transactions.traces.groups[3].kind).toBe('spa.dispatch')
 
-        expect(transactions.traces.groups[4].signature).toBe('dispatch DECREMENT')
-        expect(transactions.traces.groups[4].kind).toBe('spa.dispatch')
+        expect(transactions.traces.groups[4].signature).toBe('IncrDecr')
+        expect(transactions.traces.groups[4].kind).toBe('template.component')
+
+        expect(transactions.traces.groups[5].signature).toBe('dispatch DECREMENT')
+        expect(transactions.traces.groups[5].kind).toBe('spa.dispatch')
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(8)
+        expect(transactions.traces.raw[0].length).toBe(10)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('IncrDecr p button#simpleThunkButton:click')
         expect(transactions.transactions[0].kind).toBe('spa.action')
@@ -120,7 +123,7 @@ describe('redux-app', function () {
         console.log(transactions.traces.raw)
         expect(transactions.transactions.length).toBe(1)
 
-        expect(transactions.traces.groups.length).toBe(4)
+        expect(transactions.traces.groups.length).toBe(5)
 
         // expect(transactions.traces.groups[0].kind).toBe('transaction')
         // expect(transactions.traces.groups[0].signature).toBe('transaction')

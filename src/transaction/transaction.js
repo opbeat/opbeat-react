@@ -146,10 +146,21 @@ Transaction.prototype._finish = function () {
 }
 
 Transaction.prototype._adjustEndToLatestTrace = function () {
-  var latestTrace = findLatestTrace(this.traces)
-  if (typeof latestTrace !== 'undefined') {
+  var latestTrace = findLatestDOMUpdateTrace(this.traces)
+  if (latestTrace) {
     this._rootTrace._end = latestTrace._end
     this._rootTrace.calcDiff()
+
+    // set all traces that now are longer than the transaction to
+    // be truncated traces
+    for (var i = 0; i < this.traces.length; i++) {
+      var trace = this.traces[i]
+      if (trace._end > this._rootTrace._end) {
+        trace._end = this._rootTrace._end
+        trace.calcDiff()
+        trace.type = 'truncated ' + trace.type
+      }
+    }
   }
 }
 
@@ -178,17 +189,17 @@ function getEarliestTrace (traces) {
   return earliestTrace
 }
 
-function findLatestTrace (traces) {
+function findLatestDOMUpdateTrace (traces) {
   var latestTrace = null
 
-  traces.forEach(function (trace) {
-    if (!latestTrace) {
+  for (var i = 0; i < traces.length; i++) {
+    var trace = traces[i]
+    if (trace.type && trace.type.indexOf('ext') === -1 &&
+        trace.type !== 'transaction' &&
+        (!latestTrace || latestTrace._end < trace._end)) {
       latestTrace = trace
     }
-    if (latestTrace && latestTrace._end < trace._end) {
-      latestTrace = trace
-    }
-  })
+  }
 
   return latestTrace
 }
