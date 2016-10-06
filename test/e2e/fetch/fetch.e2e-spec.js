@@ -22,7 +22,7 @@ describe('simple-fetch-app', function () {
       var fetchedResult = response.value.fetchedResult
 
       expect(fetchedResult).toBe('some-data')
-      expect(transactions.traces.groups.length).toBe(4) // 4 is signature: 'Render 0 components'
+      expect(transactions.traces.groups.length).toBe(5)
 
       expect(transactions.traces.groups[0].transaction).toBe('fetchData')
       expect(transactions.traces.groups[0].kind).toBe('transaction')
@@ -32,6 +32,41 @@ describe('simple-fetch-app', function () {
 
       expect(transactions.traces.groups[2].signature).toBe('important custom trace')
       expect(transactions.traces.groups[2].kind).toBe('template.custom')
+
+      utils.verifyNoBrowserErrors(done)
+    }, function (error) {
+      browser.log(error)
+    })
+  })
+
+  it('should intercept fire-and-forget fetch', function (done) {
+    browser.url('/fetch/index.html')
+
+    browser.executeAsync(
+      function(cb) {
+        window.opbeatTransport.subscribe(function(transactions) {
+
+          var fetchedResult = document.getElementById('fetchResult').textContent
+
+          cb({transactions: transactions, fetchedResult: fetchedResult})
+        })
+        document.getElementById('fetch-data-fire-forget').click()
+      }
+    ).then(function (response) {
+      var transactions = response.value.transactions
+      var fetchedResult = response.value.fetchedResult
+
+      // expect(fetchedResult).toBe('some-data')
+      expect(transactions.traces.groups.length).toBe(2)
+
+      expect(transactions.traces.groups[0].transaction).toBe('fetchData')
+      expect(transactions.traces.groups[0].kind).toBe('transaction')
+
+      expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
+      expect(transactions.traces.groups[1].signature).toBe('GET ./test.json')
+
+      // expect(transactions.traces.groups[2].signature).toBe('important custom trace')
+      // expect(transactions.traces.groups[2].kind).toBe('template.custom')
 
       utils.verifyNoBrowserErrors(done)
     }, function (error) {

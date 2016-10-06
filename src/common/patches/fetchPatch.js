@@ -152,6 +152,12 @@ function patchFetch (serviceContainer) {
         var trace = transactionService.startTrace('GET ' + url, 'ext.HttpRequest.fetch')
 
         var promise = delegate.apply(self, args)
+
+        promise.then(function () {
+          trace.end()
+          transactionService.detectFinish()
+        })
+
         patchPromiseWithTransactionService(promise, trace, true)
         return promise
       }

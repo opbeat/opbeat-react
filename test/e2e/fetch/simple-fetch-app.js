@@ -20,6 +20,10 @@ var component = React.createClass({
       trace.end()
     })
   },
+  fetchDataFireAndForget: function() {
+    window.opbeat.services.transactionService.startTransaction('fetchData', 'fake')
+    fetch('./test.json')
+  },
   failFetchData: function() {
     window.opbeat.services.transactionService.startTransaction('failFetchData', 'fake')
     fetch('http://non-existing-host.opbeat/non-existing-file.json')
@@ -49,6 +53,7 @@ var component = React.createClass({
         Current data: <span id="fetchResult">{fetchedDataLabel}</span>
         {' '}
         <button id="fetch-data" onClick={this.fetchData}>Fetch</button>
+        <button id="fetch-data-fire-forget" onClick={this.fetchDataFireAndForget}>Fetch</button>
         <button id="fail-fetch-data" onClick={this.failFetchData}>Fail fetch</button>
         <button id="fail-fetch-data-catch" onClick={this.failFetchDataWithCatch}>Fetch fetch (reject)</button>
       </p>

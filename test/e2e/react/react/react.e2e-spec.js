@@ -18,11 +18,11 @@ describe('react-app', function () {
       }
     ).then(function (response) {
         var transactions = response.value
-        expect(transactions.traces.groups.length).toBe(2)
+        expect(transactions.traces.groups.length).toBe(5)
         expect(transactions.traces.groups[1].kind).toBe("template.update")
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(4)
+        expect(transactions.traces.raw[0].length).toBe(7)
 
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('demo')
@@ -48,11 +48,11 @@ describe('react-app', function () {
       }
     ).then(function (response) {
         var transactions = response.value
-        expect(transactions.traces.groups.length).toBe(2)
+        expect(transactions.traces.groups.length).toBe(5)
         expect(transactions.traces.groups[1].kind).toBe("template.update")
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(4)
+        expect(transactions.traces.raw[0].length).toBe(7)
 
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('demo')
