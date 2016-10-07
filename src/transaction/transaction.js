@@ -158,7 +158,7 @@ Transaction.prototype._adjustEndToLatestTrace = function () {
       if (trace._end > this._rootTrace._end) {
         trace._end = this._rootTrace._end
         trace.calcDiff()
-        trace.type = 'truncated ' + trace.type
+        trace.type = trace.type + '.truncated'
       }
     }
   }

@@ -84,7 +84,7 @@ describe('transaction.Transaction', function () {
         expect(transaction._rootTrace._start).toBe(rootTraceStart)
         expect(transaction._rootTrace._end).toBeCloseTo(shortTemplateTrace._end)
 
-        expect(longTrace.type).toBe('truncated ext.fetch')
+        expect(longTrace.type).toBe('ext.fetch.truncated')
         expect(longTrace._end).toBeCloseTo(transaction._rootTrace._end)
         done()
       })
