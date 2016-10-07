@@ -22,7 +22,8 @@ var component = React.createClass({
   },
   fetchDataFireAndForget: function() {
     window.opbeat.services.transactionService.startTransaction('fetchData', 'fake')
-    fetch('./test.json')
+    fetch('/slow-response')
+    this.setState({fetchedDataLabel: "Sent fire and forget"})
   },
   failFetchData: function() {
     window.opbeat.services.transactionService.startTransaction('failFetchData', 'fake')
@@ -53,7 +54,7 @@ var component = React.createClass({
         Current data: <span id="fetchResult">{fetchedDataLabel}</span>
         {' '}
         <button id="fetch-data" onClick={this.fetchData}>Fetch</button>
-        <button id="fetch-data-fire-forget" onClick={this.fetchDataFireAndForget}>Fetch</button>
+        <button id="fetch-data-fire-forget" onClick={this.fetchDataFireAndForget}>Fetch fire-and-forget</button>
         <button id="fail-fetch-data" onClick={this.failFetchData}>Fail fetch</button>
         <button id="fail-fetch-data-catch" onClick={this.failFetchDataWithCatch}>Fetch fetch (reject)</button>
       </p>
