@@ -15,9 +15,15 @@ function nodeName (domNode) {
 
   elements.unshift(utils.friendlyNodeName(domNode))
 
-  var reactTopLevelName = (owner || reactElem._currentElement._owner).getName()
-  elements.push(reactTopLevelName)
+  if (owner !== null) {
+    elements.push(owner.getName())
+  } else if(reactElem && reactElem._currentElement && reactElem._currentElement._owner) {
+    elements.push(reactElem._currentElement._owner.getName())
+  }
 
+  // TODO: need a good way to get the name of the root component
+  // (when both owner and reactElem._currentElement._owner is null)
+  
   elements.reverse()
   return elements.join(' ')
 }
