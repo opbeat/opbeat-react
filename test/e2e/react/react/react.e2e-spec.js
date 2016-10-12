@@ -1,20 +1,14 @@
 var utils = require('../../e2e/utils')
 
 describe('react-app', function () {
-  // build the app
-  beforeEach(utils.verifyNoBrowserErrors)
-
   it('should have correct number of transactions and traces', function (done) {
     browser.url('/react/react/index.html')//wait(until.elementLocated(By.id('incr')))
 
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(transactions) {
-          console.log("sending!", transactions)
           cb(transactions)
         })
-
-        render()
       }
     ).then(function (response) {
         var transactions = response.value
@@ -38,8 +32,6 @@ describe('react-app', function () {
 
     browser.executeAsync(
       function(cb) {
-        render()
-
         window.opbeatTransport.subscribe(function(transactions) {
           cb(transactions)
         })

@@ -21,7 +21,7 @@ class ES6Component extends React.Component {
 
 var FuncComponent = () => <span>func Component</span> 
 
-  window.render = function () {
+function render () {
   if (window.opbeat.services) {
     window.opbeat.services.transactionService.startTransaction('demo')
   }
@@ -36,3 +36,5 @@ var FuncComponent = () => <span>func Component</span>
     document.getElementById('reactMount')
   )
 }
+
+render()
