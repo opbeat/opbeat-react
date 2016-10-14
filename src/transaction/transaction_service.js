@@ -64,7 +64,7 @@ TransactionService.prototype.getTransaction = function (id) {
 }
 
 TransactionService.prototype.createTransaction = function (name, type, options) {
-  var tr = new Transaction(name, type, options)
+  var tr = new Transaction(name, type, options, this._zoneService.runOuter.bind(this._zoneService))
   this._zoneService.set('transaction', tr)
   if (this._config.get('performance.checkBrowserResponsiveness')) {
     this.startCounter(tr)

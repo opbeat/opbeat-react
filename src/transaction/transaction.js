@@ -1,7 +1,7 @@
 var Trace = require('./trace')
 var utils = require('../lib/utils')
 
-var Transaction = function (name, type, options) {
+var Transaction = function (name, type, options, runOuter) {
   this.metadata = {}
   this.name = name
   this.type = type
@@ -9,6 +9,7 @@ var Transaction = function (name, type, options) {
   this._markDoneAfterLastTrace = false
   this._isDone = false
   this._options = options
+  this._runOuter = runOuter
   if (typeof options === 'undefined') {
     this._options = {}
   }
@@ -140,9 +141,18 @@ Transaction.prototype._finish = function () {
     return trace._isFinish
   })
 
-  Promise.all(whenAllTracesFinished).then(function () {
-    self.donePromise._resolve(self)
-  })
+  var resolveDonePromise = function() {
+    Promise.all(whenAllTracesFinished).then(function () {
+      self.donePromise._resolve(self)
+    })
+  }
+
+  // Tests don't pass this
+  if (this._runOuter) {
+   this._runOuter(resolveDonePromise)
+  }else{
+    resolveDonePromise()
+  }
 }
 
 Transaction.prototype._adjustEndToLatestTrace = function () {

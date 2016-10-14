@@ -5,6 +5,7 @@ import ServiceFactory from '../../../src/common/serviceFactory'
 function TransportMock (transport) {
   this._transport = transport
   this.transactions = []
+  this._queued = []
 }
 
 TransportMock.prototype.sendTransaction = function (transactions) {
@@ -12,6 +13,8 @@ TransportMock.prototype.sendTransaction = function (transactions) {
   this._transport.sendTransaction(transactions).then(function () {
       if (self.callback) {
         self.callback(transactions)
+      }else{
+        self._queued.push(transactions)
       }
     }, function (reason) {
       console.log('Failed to send to opbeat: ', reason)
@@ -20,7 +23,13 @@ TransportMock.prototype.sendTransaction = function (transactions) {
 }
 
 TransportMock.prototype.subscribe = function (fn) {
-  return this.callback = fn
+  this.callback = fn
+  console.log("subscribe")
+
+  if (this._queued.length > 0) {
+    console.log("Sending queued")
+    fn(self._queued[0])
+  }
 }
 
 var serviceFactory = new ServiceFactory()

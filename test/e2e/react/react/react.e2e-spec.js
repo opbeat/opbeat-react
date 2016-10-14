@@ -2,7 +2,7 @@ var utils = require('../../e2e/utils')
 
 describe('react-app', function () {
   it('should have correct number of transactions and traces', function (done) {
-    browser.url('/react/react/index.html')//wait(until.elementLocated(By.id('incr')))
+    browser.url('/react/react/index.html')
 
     browser.executeAsync(
       function(cb) {
@@ -11,16 +11,16 @@ describe('react-app', function () {
         })
       }
     ).then(function (response) {
-        var transactions = response.value
-        expect(transactions.traces.groups.length).toBe(5)
-        expect(transactions.traces.groups[1].kind).toBe("template.update")
+      var transactions = response.value
+      expect(transactions.traces.groups.length).toBe(5)
+      expect(transactions.traces.groups[1].kind).toBe("template.update")
 
-        expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(7)
+      expect(transactions.traces.raw.length).toBe(1)
+      expect(transactions.traces.raw[0].length).toBe(7)
 
-        expect(transactions.transactions.length).toBe(1)
-        expect(transactions.transactions[0].transaction).toBe('demo')
-        done()
+      expect(transactions.transactions.length).toBe(1)
+      expect(transactions.transactions[0].transaction).toBe('demo')
+      done()
       }, function (error) {
         browser.log(error)
       })
@@ -28,7 +28,7 @@ describe('react-app', function () {
 
 
   it('should not create transaction for non-events', function (done) {
-    browser.url('/react/react/index.html')//wait(until.elementLocated(By.id('incr')))
+    browser.url('/react/react/index.html')
 
     browser.executeAsync(
       function(cb) {

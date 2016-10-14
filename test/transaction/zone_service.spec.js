@@ -270,6 +270,27 @@ describe('ZoneService', function () {
     })
   })
 
+
+  it('should work with promises', function (done) {
+    var thenCalled = false
+    // zoneService = new ZoneService(window.Zone.current.parent, logger)
+    resetZoneCallbacks(zoneService)
+    zoneService.spec.onInvokeTask = function (task) {
+      expect(thenCalled).toBe(true)  // actual invoke already happened, so the "then" ran.
+      done()
+    }
+
+    zoneService.spec.onScheduleTask = function (task) {
+      expect(thenCalled).toBe(false)
+      expect(task.taskId).not.toBeUndefined()
+    }
+
+    zoneService.zone.run(function () {
+      var p = new Promise(function (resolve) { resolve() })
+      p.then(function () { thenCalled = true })
+    })
+  })
+
   afterEach(function () {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout
   })
