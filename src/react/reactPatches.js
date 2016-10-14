@@ -96,8 +96,8 @@ module.exports = function patchReact (serviceContainer) {
     return function (self, args) {
       if (args[0] && args[0].getName) {
         var name = args[0].getName()
-        if (name === 'TopLevelWrapper') {
-          // TopLevelWrapper doesn't make sense to include here
+        if (name === 'TopLevelWrapper' || name === null) {
+          // TopLevelWrapper or null components don't make sense to include here
           return delegate.apply(self, args)
         }
 
