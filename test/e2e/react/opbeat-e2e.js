@@ -1,5 +1,4 @@
 import initOpbeat from  '../../../dist/opbeat-react'
-
 import ServiceFactory from '../../../src/common/serviceFactory'
 
 function TransportMock (transport) {
@@ -44,5 +43,7 @@ var opbeat = initOpbeat({
   'appId': '9aac8591bb'
 }, serviceFactory) // Override service factory
 
-window.opbeatTransport = transportMock
-window.opbeat = opbeat
+if(typeof window !== 'undefined') {
+  window.opbeatTransport = transportMock
+  window.opbeat = opbeat
+}

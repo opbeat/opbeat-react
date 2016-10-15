@@ -7,7 +7,7 @@ var passThrough = function () {
 }
 
 function createOpbeatMiddleware (serviceContainer) {
-  if (serviceContainer === false || window.__opbeat === false) {
+  if (typeof window === 'undefined' || serviceContainer === false || window.__opbeat === false) {
     return passThrough
   }
 

@@ -12,6 +12,11 @@ function init (config, serviceFactory) {
 
   var serviceContainer = new ServiceContainer(serviceFactory)
 
+  // no server side support at the moment
+  if(typeof window === 'undefined') {
+    return false
+  }
+
   if (!serviceContainer.services.configService.isPlatformSupported()) {
     serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
 

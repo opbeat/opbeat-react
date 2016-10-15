@@ -33,8 +33,12 @@ function Config () {
 }
 
 Config.prototype.init = function () {
-  var scriptData = _getConfigFromScript()
-  this.setConfig(scriptData)
+  if (typeof document === 'undefined') {
+    this.setConfig({})
+  }else{
+    var scriptData = _getConfigFromScript()
+    this.setConfig(scriptData)
+  }
 }
 
 Config.prototype.get = function (key) {
@@ -93,7 +97,7 @@ Config.prototype.isValid = function () {
 var _getConfigFromScript = function () {
   var script = utils.getCurrentScript()
   var config = _getDataAttributesFromNode(script)
-  return config
+  return config 
 }
 
 function _getDataAttributesFromNode (node) {

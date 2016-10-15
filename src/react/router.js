@@ -81,9 +81,10 @@ function patchRouter (router, serviceContainer) {
 }
 
 function useRouter (serviceContainer) {
-  if (serviceContainer === false) {
+  if (serviceContainer === false || typeof window === 'undefined') {
     return
   }
+
   if (!serviceContainer) {
     serviceContainer = window.__opbeat
   }
