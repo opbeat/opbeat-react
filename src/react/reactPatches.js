@@ -19,14 +19,13 @@ function calcAvg (timings) {
   return sum / timings.length
 }
 
-
 function genTraces (componentStats, node, transactionService, transaction) {
   var child
   for (var i = 0; i < node.children.length; i++) {
     child = node.children[i]
     var trace = new Trace(transaction, child.name, 'template.component', {})
     child.trace = trace // needed to estimate children
-    trace.setParent(transaction._rootTrace)
+    trace.setParent(node.trace)
     if (child.start) {
       trace._start = child.start
       trace._end = child.end
