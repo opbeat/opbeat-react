@@ -31,6 +31,13 @@ TransportMock.prototype.subscribe = function (fn) {
   }
 }
 
+TransportMock.prototype.sendError = function () {
+  this._transport.sendError.apply(this._transport, arguments)
+  if (this.callback) {
+    this.callback(arguments)
+  }
+}
+
 var serviceFactory = new ServiceFactory()
 var transport = serviceFactory.getTransport()
 var transportMock = new TransportMock(transport)

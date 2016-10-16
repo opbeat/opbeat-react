@@ -13,6 +13,9 @@ var store = window.store = createStore(
   )
 )
 
+var ErroneousComponent = () => "NotAnElement"
+ErroneousComponent.displayName = "ErroneousComponent"
+
 // actions
 function increment() {
   return { type: 'INCREMENT' }
@@ -22,7 +25,11 @@ function decrement() {
   return { type: 'DECREMENT' }
 }
 
-var simpleThunkDispatcher = function () {
+function showErroneousComponent() {
+  return { type: 'SHOW_ERRONEOUS_COMPONENT'}
+}
+
+var simpleThunkDispatcher = function bleh () {
   return dispatch => {
     // do something immediately and then dispatch something
     // that also dispatches
@@ -71,6 +78,11 @@ function counter(state, action) {
       return state
   }
 }
+
+function erroneousComponent(state, action) {
+  return !state && action.type == 'SHOW_ERRONEOUS_COMPONENT'
+}
+
 var IncrDecr = React.createClass({
   incrementIfOdd: function() {
     if (this.props.value % 2 !== 0) {
@@ -87,11 +99,14 @@ var IncrDecr = React.createClass({
     event.preventDefault()
     this.props.delayedDispatchThunk()
   },
+  showErroneousComponent: function() {
+    store.dispatch(showErroneousComponent())
+  },
   render: function() {
-    const { value, onIncrement, onDecrement } = this.props
+    const { counter, erroneousComponent, onIncrement, onDecrement } = this.props
     return (
       <p>
-        Clicked: {value} times
+        Clicked: {counter} times
         {' '}
         <button id="incr" onClick={onIncrement}>
           +
@@ -116,6 +131,12 @@ var IncrDecr = React.createClass({
         <button className="delayedThunkButton" onClick={this.delayedDispatchThunk}>
           Delayed thunk dispach
         </button>
+
+        <button className="showErroneousComponent" onClick={this.showErroneousComponent}>
+          Error out
+        </button>
+
+        {erroneousComponent ? <ErroneousComponent /> : <span>NOT SHOWING</span>}
       </p>
     )
   }
