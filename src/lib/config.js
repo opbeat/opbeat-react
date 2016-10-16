@@ -18,7 +18,7 @@ function Config () {
       browserResponsivenessBuffer: 3,
       checkBrowserResponsiveness: true,
       enable: true,
-      enableStackFrames: false,
+      enableStackFrames: true,
       groupSimilarTraces: true,
       similarTraceThreshold: 0.05,
       eventWhiteList: ['click', 'contextmenu', 'dblclick', 'mousedown', 'keydown', 'keypress', 'keyup'],

@@ -44,7 +44,7 @@ var Transaction = function (name, type, options, runOuter) {
 Transaction.prototype.startTrace = function (signature, type, options) {
   // todo: should not accept more traces if the transaction is alreadyFinished
   var opts = typeof options === 'undefined' ? {} : options
-  opts.enableStackFrames = this._options.enableStackFrames === true && opts.enableStackFrames !== false
+  opts.enableStackFrames = this._options.enableStackFrames === true && opts.enableStackFrames === true
 
   var trace = new Trace(this, signature, type, opts)
   trace.start()

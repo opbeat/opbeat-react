@@ -30,7 +30,6 @@ function handleRender(req, res) {
     } else if (redirectLocation) {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search)
     } else if (renderProps) {
-
       const store = createStore()
 
       // You can also check renderProps.components or renderProps.routes for

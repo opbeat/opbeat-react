@@ -39,16 +39,16 @@ describe('config', function () {
 
   it('should deep merge configs', function () {
     expect(config.get('performance.enable')).toBe(true)
-    expect(config.get('performance.enableStackFrames')).toBe(false)
+    expect(config.get('performance.enableStackFrames')).toBe(true)
 
     config.setConfig({
       performance: {
-        enableStackFrames: true
+        enableStackFrames: false
       }
     })
 
     expect(config.get('performance.enable')).toBe(true)
-    expect(config.get('performance.enableStackFrames')).toBe(true)
+    expect(config.get('performance.enableStackFrames')).toBe(false)
   })
 
   it('should return undefined if the config does not exists', function () {

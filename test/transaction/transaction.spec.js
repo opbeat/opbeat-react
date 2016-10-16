@@ -111,12 +111,12 @@ describe('transaction.Transaction', function () {
     var firstTrace = tr.startTrace('first-trace-signature', 'first-trace')
     firstTrace.end()
 
-    var secondTrace = tr.startTrace('second-trace', 'second-trace', {'enableStackFrames': false})
+    var secondTrace = tr.startTrace('second-trace', 'second-trace', {'enableStackFrames': true})
     secondTrace.end()
 
     tr.donePromise.then(function () {
-      expect(firstTrace.frames).not.toBeUndefined()
-      expect(secondTrace.frames).toBeUndefined()
+      expect(firstTrace.frames).toBeUndefined()
+      expect(secondTrace.frames).not.toBeUndefined()
     })
 
     var noStackTrace = new Transaction('/', 'transaction', {'enableStackFrames': false})

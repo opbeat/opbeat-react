@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom'
 var CompositeComponent = React.createClass({
   render: function() {
     return (
-      <span onClick={() => window.fetch('/slow-response') }>Composite component</span>
+      <span onClick={() => console.log('asd') }>Composite component</span>
     )
   }
 })
