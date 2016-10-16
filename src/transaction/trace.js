@@ -21,21 +21,10 @@ Trace.prototype.start = function () {
   // Start timers
   this._start = window.performance.now()
 
-  this._isFinish = new Promise(function (resolve, reject) {
-    this._markFinishedFunc = resolve
-  }.bind(this))
-
   var shouldGenerateStackFrames = this._options['enableStackFrames']
 
   if (shouldGenerateStackFrames) {
-    this.getTraceStackFrames(function (frames) {
-      if (frames) {
-        this.frames = frames.reverse() // Reverse frames to make Opbeat happy
-      }
-      this._markFinishedFunc() // Mark the trace as finished
-    }.bind(this))
-  } else {
-    this._markFinishedFunc() // Mark the trace as finished
+    this.captureTraceRawStackFrames()
   }
 }
 
@@ -107,20 +96,22 @@ Trace.prototype.getFingerprint = function () {
   return key.join('-')
 }
 
-Trace.prototype.getTraceStackFrames = function (callback) {
-  // Use callbacks instead of Promises to keep the stack
+Trace.prototype.captureTraceRawStackFrames = function (callback) {
   var key = this.getFingerprint()
   var traceFrames = traceCache.get(key)
-  if (traceFrames) {
-    callback(traceFrames)
-  } else {
-    frames.getFramesForCurrent().then(function (traceFrames) {
-      traceCache.set(key, traceFrames)
-      callback(traceFrames)
-    })['catch'](function () {
-      callback(null)
-    })
+  if (!traceFrames) {
+    traceFrames = frames.getFramesForCurrent()
+    traceCache.set(key, traceFrames)    
   }
+  this._rawStackTrace = traceFrames 
+}
+
+Trace.prototype.resolveRawStackFrames = function () {
+  var self = this
+  return frames.resolveRawFrames(self._rawStackTrace).then(function(resolvedFrames) {
+      self.frames = resolvedFrames
+      self.frames.reverse() // Opbeat wants them reversed
+  })
 }
 
 module.exports = Trace

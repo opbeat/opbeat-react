@@ -4,45 +4,24 @@ var utils = require('../lib/utils')
 var context = require('./context')
 var stackTrace = require('./stacktrace')
 
-var promiseSequence = function (tasks) {
-  var current = Promise.resolve()
-  var results = []
-
-  for (var k = 0; k < tasks.length; ++k) {
-    results.push(current = current.then(tasks[k]))
-  }
-
-  return Promise.all(results)
-}
-
 module.exports = {
   getFramesForCurrent: function () {
-    return stackTrace.get().then(function (frames) {
-      var tasks = frames.map(function (frame) {
-        return this.buildOpbeatFrame.bind(this, frame)
-      }.bind(this))
-
-      var allFrames = promiseSequence(tasks)
-
-      return allFrames.then(function (opbeatFrames) {
-        return opbeatFrames
-      })
-    }.bind(this))
+    return stackTrace.get()
   },
 
-  buildOpbeatFrame: function buildOpbeatFrame (stack) {
+  buildOpbeatFrame: function buildOpbeatFrame (rawFrame) {
     return new Promise(function (resolve, reject) {
-      if (!stack.fileName && !stack.lineNumber) {
+      if (!rawFrame.fileName && !rawFrame.lineNumber) {
         // Probably an stack from IE, return empty frame as we can't use it.
         return resolve({})
       }
 
-      if (!stack.columnNumber && !stack.lineNumber) {
+      if (!rawFrame.columnNumber && !rawFrame.lineNumber) {
         // We can't use frames with no columnNumber & lineNumber, so ignore for now
         return resolve({})
       }
 
-      var filePath = this.cleanFilePath(stack.fileName)
+      var filePath = this.cleanFilePath(rawFrame.fileName)
       var fileName = this.filePathToFileName(filePath)
 
       if (this.isFileInline(filePath)) {
@@ -52,10 +31,10 @@ module.exports = {
       // Build Opbeat frame data
       var frame = {
         'filename': fileName,
-        'lineno': stack.lineNumber,
-        'colno': stack.columnNumber,
-        'function': stack.functionName || '<anonymous>',
-        'abs_path': stack.fileName,
+        'lineno': rawFrame.lineNumber,
+        'colno': rawFrame.columnNumber,
+        'function': rawFrame.functionName || '<anonymous>',
+        'abs_path': rawFrame.fileName,
         'in_app': this.isFileInApp(filePath)
       }
 
@@ -66,9 +45,9 @@ module.exports = {
         frame.sourcemap_url = sourceMapUrl
         resolve(frame)
       }, function () {
-        // // Resolve contexts if no source map
-        var filePath = this.cleanFilePath(stack.fileName)
-        var contextsResolver = context.getExceptionContexts(filePath, stack.lineNumber)
+        // Resolve contexts if no source map
+        var filePath = this.cleanFilePath(rawFrame.fileName)
+        var contextsResolver = context.getExceptionContexts(filePath, rawFrame.lineNumber)
 
         contextsResolver.then(function (contexts) {
           frame.pre_context = contexts.preContext
@@ -82,14 +61,16 @@ module.exports = {
     }.bind(this))
   },
 
+  resolveRawFrames: function resolveRawFrames (rawFrames) {
+    return Promise.all(rawFrames.map(function(rawFrame) {
+      return this.buildOpbeatFrame(rawFrame)
+    }.bind(this)))
+  },
+
   stackInfoToOpbeatException: function (stackInfo) {
     return new Promise(function (resolve, reject) {
       if (stackInfo.stack && stackInfo.stack.length) {
-        var tasks = stackInfo.stack.map(function (frame) {
-          return this.buildOpbeatFrame.bind(this, frame)
-        }.bind(this))
-
-        var allFrames = promiseSequence(tasks)
+        var allFrames = this.resolveRawFrames(stackInfo.stack)
 
         allFrames.then(function (frames) {
           stackInfo.frames = frames

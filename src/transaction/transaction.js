@@ -1,5 +1,6 @@
 var Trace = require('./trace')
 var utils = require('../lib/utils')
+var frames = require('../exceptions/frames')
 
 var Transaction = function (name, type, options, runOuter) {
   this.metadata = {}
@@ -23,7 +24,6 @@ var Transaction = function (name, type, options, runOuter) {
 
   Promise.call(this.donePromise = Object.create(Promise.prototype), function (resolve, reject) {
     this._resolve = resolve
-    this._reject = reject
   }.bind(this.donePromise))
 
   // A transaction should always have a root trace spanning the entire transaction.
@@ -137,22 +137,31 @@ Transaction.prototype._finish = function () {
   this._adjustEndToLatestTrace()
 
   var self = this
-  var whenAllTracesFinished = self.traces.filter(function (trace) { return !!(trace._isFinish) }).map(function (trace) {
-    return trace._isFinish
-  })
+
+  // var whenAllTracesFinished = self.traces.filter(function (trace) { return !!(trace._isFinish) }).map(function (trace) {
+    // return trace._isFinish
+  // })
 
   var resolveDonePromise = function() {
-    Promise.all(whenAllTracesFinished).then(function () {
-      self.donePromise._resolve(self)
-    })
+    self._resolveStacktraces(self.donePromise._resolve)
   }
 
-  // Tests don't pass this
+  // Tests don't pass this in
   if (this._runOuter) {
    this._runOuter(resolveDonePromise)
   }else{
     resolveDonePromise()
   }
+}
+
+Transaction.prototype._resolveStacktraces = function(cb) {
+  var resolvedStacktraces = this.traces
+             .filter(function(trace) { return !!trace._rawStackTrace })
+             .map(function(trace){
+               return trace.resolveRawStackFrames()
+              })
+  
+  return Promise.all(resolvedStacktraces).then(cb)
 }
 
 Transaction.prototype._adjustEndToLatestTrace = function () {

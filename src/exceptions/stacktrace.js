@@ -2,6 +2,9 @@ var ErrorStackParser = require('error-stack-parser')
 var StackGenerator = require('stack-generator')
 var utils = require('../lib/utils')
 
+// V8 limits to 10
+Error.stackTraceLimit = Infinity;
+
 var defaultOptions = {
   filter: function (stackframe) {
     // Filter out stackframes for this library by default
@@ -38,28 +41,18 @@ module.exports = {
       stackFrames = stackFrames.filter(opts.filter)
     }
 
-    stackFrames = ErrorStackNormalizer(stackFrames)
-
-    return Promise.resolve(stackFrames)
+    return ErrorStackNormalizer(stackFrames)
   },
 
   fromError: function StackTrace$$fromError (error, opts) {
     opts = utils.mergeObject(defaultOptions, opts)
 
-    return new Promise(function (resolve) {
-      var stackFrames = ErrorStackParser.parse(error)
-      if (typeof opts.filter === 'function') {
-        stackFrames = stackFrames.filter(opts.filter)
-      }
+    var stackFrames = ErrorStackParser.parse(error)
+    if (typeof opts.filter === 'function') {
+      stackFrames = stackFrames.filter(opts.filter)
+    }
 
-      stackFrames = ErrorStackNormalizer(stackFrames)
-
-      resolve(Promise.all(stackFrames.map(function (sf) {
-        return new Promise(function (resolve) {
-          resolve(sf)
-        })
-      })))
-    })
+    return ErrorStackNormalizer(stackFrames)
   }
 }
 

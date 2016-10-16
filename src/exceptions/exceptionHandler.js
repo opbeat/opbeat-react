@@ -42,27 +42,23 @@ ExceptionHandler.prototype._processError = function processError (error, msg, fi
     }
   }
 
-  var resolveStackFrames
+  var stackFrames
 
   if (error) {
-    resolveStackFrames = stackTrace.fromError(error)
+    stackFrames = stackTrace.fromError(error)
   } else {
-    resolveStackFrames = new Promise(function (resolve, reject) {
-      resolve([{
+    stackFrames = [{
         'fileName': file,
         'lineNumber': line,
         'columnNumber': col
-      }])
-    })
+      }]
   }
 
   var exceptionHandler = this
-  return resolveStackFrames.then(function (stackFrames) {
-    exception.stack = stackFrames || []
-    return frames.stackInfoToOpbeatException(exception).then(function (exception) {
-      var data = frames.processOpbeatException(exception, exceptionHandler._config.get('context.user'), exceptionHandler._config.get('context.extra'))
-      exceptionHandler._opbeatBackend.sendError(data)
-    })
+  exception.stack = stackFrames || []
+  return frames.stackInfoToOpbeatException(exception).then(function (exception) {
+    var data = frames.processOpbeatException(exception, exceptionHandler._config.get('context.user'), exceptionHandler._config.get('context.extra'))
+    exceptionHandler._opbeatBackend.sendError(data)
   })['catch'](function (error) {
     exceptionHandler._logger.debug(error)
   })
