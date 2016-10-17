@@ -1,12 +1,12 @@
 import '../opbeat-e2e'
 import { createOpbeatMiddleware } from '../../../../dist/opbeat-react/redux'
 import React from 'react'
-import { createStore, applyMiddleware } from 'redux'
+import { createStore, applyMiddleware, combineReducers } from 'redux'
 import thunk from 'redux-thunk'
 import ReactDOM from 'react-dom'
 
 var store = window.store = createStore(
-  counter,
+  combineReducers({counter, erroneousComponent}),
   applyMiddleware(
     thunk,
     createOpbeatMiddleware()
@@ -143,9 +143,11 @@ var IncrDecr = React.createClass({
 })
 
 function render() {
+  var state = store.getState()
   ReactDOM.render(
     React.createElement(IncrDecr, {
-      value: store.getState(),
+      value: state.counter,
+      erroneousComponent: state.erroneousComponent,
       onIncrement: function() {
         store.dispatch(increment())
       },
