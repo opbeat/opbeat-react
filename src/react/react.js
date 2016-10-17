@@ -42,4 +42,17 @@ function init (config, serviceFactory) {
   }
 }
 
-module.exports = init
+module.exports = {
+  __esModule: true,
+  default: init,
+  setUserContext: function setUserContext (userContext) {
+    if (typeof window !== 'undefined' && window.__opbeat) {
+      window.__opbeat.services.configService.set('context.user', userContext)
+    }
+  },
+  setExtraContext: function setExtraContext (data) {
+    if (typeof window !== 'undefined' && window.__opbeat) {
+      window.__opbeat.services.configService.set('context.extra', data)
+    }
+  }
+}

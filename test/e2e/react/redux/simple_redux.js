@@ -1,4 +1,5 @@
 import '../opbeat-e2e'
+import { setUserContext, setExtraContext } from  '../../../../dist/opbeat-react'
 import { createOpbeatMiddleware } from '../../../../dist/opbeat-react/redux'
 import React from 'react'
 import { createStore, applyMiddleware, combineReducers } from 'redux'
@@ -162,6 +163,9 @@ function render() {
     document.getElementById('reactMount')
   )
 }
+
+setExtraContext({'hello': 'world'})
+setUserContext({'email': 'ron@opbeat.com'})
 
 store.subscribe(render)
 

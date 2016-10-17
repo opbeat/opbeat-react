@@ -28,6 +28,30 @@ const store = createStore(
 )
 ```
 
+### Set context information
+
+It's often useful to include additional information in performance data and errors logged to Opbeat. You can do this in the following manner:
+
+```js
+import { setUserContext, setExtraContext } from 'opbeat-react'
+
+class OfficeStatus extends React.Component {
+  componentDidMount() {
+    setUserContext({
+      id: 19,
+      email: 'ron@opbeat.com',
+      username: 'roncohen'
+    })
+
+    setExtraContext({
+      coffeeLevel: 'low',
+      milkSolution: 'skim milk',
+    })
+  }
+}
+```
+
+
 ## Using minification?
 
 Install this plugin:
