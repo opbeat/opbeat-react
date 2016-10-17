@@ -29,7 +29,9 @@ function init (config, serviceFactory) {
 
     serviceContainer.services.configService.setConfig(config)
 
-    serviceContainer.services.exceptionHandler.install()
+    if (serviceContainer.services.configService.get('errorLoggingEnabled')) {
+      serviceContainer.services.exceptionHandler.install()
+    }
 
     patchCommon(serviceContainer)
     patchReact(serviceContainer)
