@@ -117,11 +117,10 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
 
 gulp.task('build:release:react', ['apply-prod-environment'], function () {
   var prodPath = './dist/opbeat-react'
-
+  var version = require('./src/react/package.json').version
+  
   gulp.src(['src/react/README.md', 'src/react/package.json'])
     .pipe(gulp.dest(prodPath))
-
-  var version = require("./" + path.join(prodPath, 'package')).version
 
   gulp.src(['src/**/*.js'], {ignore: ['**/angular/**', '**/react/**']})
     .pipe(replace(
