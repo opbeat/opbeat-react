@@ -120,7 +120,7 @@ OpbeatBackend.prototype.sendTransactions = function (transactionList) {
       if (!ctx.extra) {
         ctx.extra = {}
       }
-      ctx.extra['opbeat-module'] = opbeatBackend._config.get('VERSION')
+      ctx.extra['opbeat-module'] = opbeatBackend._config.getAgentName()
     })
 
     var filterTransactions = transactionList.filter(function (tr) {
