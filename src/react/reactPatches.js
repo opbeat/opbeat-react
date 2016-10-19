@@ -82,7 +82,17 @@ module.exports = function patchReact (serviceContainer) {
         trace.end()
 
         renderState.currRoot.trace = trace
-        genTraces(renderState.componentStats, renderState.currRoot, transactionService, transactionService.getCurrentTransaction())
+
+        var genTracesTime = performance.now()
+        var transaction = transactionService.getCurrentTransaction()
+
+        genTraces(renderState.componentStats, renderState.currRoot, transactionService, transaction)
+        var elapsed = performance.now() - genTracesTime
+
+        if(!transaction.contextInfo.debug.genTracesElapsed) {
+          transaction.contextInfo.debug.genTracesElapsed = []
+        }
+        transaction.contextInfo.debug.genTracesElapsed.push(elapsed)
       }
       return ret
     }
