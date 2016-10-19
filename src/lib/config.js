@@ -27,7 +27,8 @@ function Config () {
     libraryPathPattern: '(node_modules|bower_components|webpack)',
     context: {},
     platform: {},
-    errorLoggingEnabled: true
+    errorLoggingEnabled: true,
+    stackTraceLimit: Infinity
   }
 
   this._changeSubscription = new Subscription()

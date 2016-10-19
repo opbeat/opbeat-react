@@ -2,9 +2,6 @@ var ErrorStackParser = require('error-stack-parser')
 var StackGenerator = require('stack-generator')
 var utils = require('../lib/utils')
 
-// V8 limits to 10
-Error.stackTraceLimit = Infinity;
-
 var defaultOptions = {
   filter: function (stackframe) {
     // Filter out stackframes for this library by default

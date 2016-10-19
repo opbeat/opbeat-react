@@ -11,6 +11,10 @@ ExceptionHandler.prototype.install = function () {
   window.onerror = function (msg, file, line, col, error) {
     this._processError(error, msg, file, line, col)
   }.bind(this)
+
+  if (typeof Error !== 'undefined') {
+    Error.stackTraceLimit = this._config.get('stackTraceLimit')
+  }
 }
 
 ExceptionHandler.prototype.uninstall = function () {
