@@ -1,4 +1,4 @@
-var initOpbeat = require('../../src/react/react')
+var initOpbeat = require('../../src/react/react').default
 var createOpbeatMiddleware = require('../../src/react/redux').createOpbeatMiddleware
 var createStore = require('redux').createStore
 
