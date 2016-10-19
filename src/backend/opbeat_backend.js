@@ -116,6 +116,11 @@ OpbeatBackend.prototype.sendTransactions = function (transactionList) {
         ctx.debug.browserResponsivenessCounter = transaction.browserResponsivenessCounter
         ctx.debug.browserResponsivenessInterval = browserResponsivenessInterval
       }
+
+      if (!ctx.extra) {
+        ctx.extra = {}
+      }
+      ctx.extra['opbeat-module'] = opbeatBackend._config.get('VERSION')
     })
 
     var filterTransactions = transactionList.filter(function (tr) {
