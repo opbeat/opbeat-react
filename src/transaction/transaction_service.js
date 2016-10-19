@@ -162,8 +162,6 @@ TransactionService.prototype.startTrace = function (signature, type, options) {
   }
 
   var trace = trans.startTrace(signature, type, options)
-  // var zone = this._zoneService.getCurrentZone()
-  // trace._zone = 'Zone(' + zone.$id + ') ' // parent(' + zone.parent.$id + ') '
   return trace
 }
 
