@@ -3,6 +3,9 @@
 This is the official Opbeat module for React, redux and react-router.
 
 ## Usage
+
+Make sure to import `opbeat-react` before _anything_ else in your application.
+
 ```js
 import initOpbeat from 'opbeat-react'
 
@@ -10,11 +13,18 @@ initOpbeat({
   'orgId': '470e8f31bc7b4f4395143091fe752e8c',
   'appId': '9aac8591cc'
 })
+```
 
+If you use react-router v3.x, import 'opbeat-react/router'
+
+```js
 // enable react-router instrumentation
-import { useRouter } from 'opbeat-react/router'
-useRouter()
+import 'opbeat-react/router'
+```
 
+If you're using Redux, add the Opbeat middleware as the last middleware in your chain:
+
+```js
 // enable redux instrumentation using the middleware
 // NOTE: make sure you put the opbeat middleware last!
 import { createOpbeatMiddleware } from 'opbeat-react/redux'
@@ -58,11 +68,22 @@ Install this plugin:
 `npm install --save babel-plugin-add-react-displayname`
 
 This adds `MyComponent.displayName = 'MyComponent'` automatically to compoenents defined in your application.
-Remember to add the plugin to your `.babelrc`:
+Remember to add the plugin to your `.babelrc` or your webpack configuration:
+
+#### .babelrc:
 ```
 "plugins": [
-  ["babel-plugin-add-react-displayname"]
+  ["add-react-displayname"]
 ]
+```
+
+#### webpack.conf:
+Look for the `query` key:
+```
+query: {
+  presets: [....],
+  plugins: ["add-react-displayname"]
+}
 ```
 
 ## Support
