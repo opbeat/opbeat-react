@@ -228,6 +228,10 @@ module.exports = {
   },
 
   opbeatGlobal : function (value) {
+    if(!this.inBrowser()) {
+      return
+    }
+
     if (typeof value === 'undefined') {
       return window.__opbeat
     } else {
@@ -243,6 +247,22 @@ module.exports = {
     var classes = (domNode.getAttribute('class') || '').trim().split(/\s+/).join('.')
 
     return tag + (idName ? '#' + idName : (classes ? '.' + classes : ''))
+  },
+
+  RingBuffer: function RingBuffer (size) {
+    var pointer = 0, buffer = []
+    return {
+      getAll: function getAll () {
+        if (buffer.length < size) {
+          return buffer
+        }
+        return buffer.slice(pointer, buffer.length).concat(buffer.slice(0, pointer))
+      },
+      push: function push (item) {
+        buffer[pointer] = item
+        pointer = (pointer + 1) % size
+      }
+    }
   }
 }
 
