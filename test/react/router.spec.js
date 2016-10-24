@@ -5,7 +5,6 @@ var mount = require('enzyme').mount
 var makeSignatureFromRoutes = require('../../src/react/router').makeSignatureFromRoutes
 var pushLocation = {action: 'PUSH'}
 var replaceLocation = {action: 'REPLACE'}
-var patchRouter = require('../../src/react/router').patchRouter
 
 
 var ServiceContainer = require('../../src/common/serviceContainer')
@@ -16,7 +15,7 @@ var browserHistory = ReactRouter.browserHistory
 var Router = ReactRouter.Router
 var Route = ReactRouter.Route
 var Redirect = ReactRouter.Redirect
-
+var utils = require('../../src/lib/utils')
 
 var LoginComponent = React.createClass({
   componentDidMount: function () {
@@ -70,12 +69,11 @@ describe('react-router: captureRouteChange', function () {
   beforeAll(function () {
     serviceContainer = new ServiceContainer(new ServiceFactory())
     serviceContainer.initialize()
-
+    utils.opbeatGlobal(serviceContainer)
     // Get rid of warning 'Location '/context.html''
     browserHistory.push('/')
 
     transactionService = serviceContainer.services.transactionService
-    patchRouter(Router.prototype, serviceContainer)
 
     var tree = React.createElement(
       Router, {history: browserHistory}, [

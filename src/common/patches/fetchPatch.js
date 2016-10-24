@@ -135,19 +135,18 @@ function patchPromise (transactionService, promise, trace, shouldPatchResponse, 
     })
   }
 }
-function patchFetch (serviceContainer) {
-  var transactionService = serviceContainer.services.transactionService
 
-  var patchPromiseWithTransactionService = function (promise, trace, shouldPatchResponse) {
-    return patchPromise(transactionService, promise, trace, shouldPatchResponse)
-  } 
 
+function patchFetch () {
   if (window.fetch) {
     patchObject(window, 'fetch', function (delegate) {
       return function (self, args) { // url, urlOpts
-        if (args.length < 1) {
+        var serviceContainer
+        if (!(serviceContainer = utils.opbeatGlobal()) || args.length < 1) {
           return delegate.apply(self, args)
         }
+        var transactionService = serviceContainer.services.transactionService
+
         var url = args[0]
         var trace = transactionService.startTrace('GET ' + url, 'ext.HttpRequest.fetch', {enableStackFrames: true})
 
@@ -158,7 +157,7 @@ function patchFetch (serviceContainer) {
           transactionService.detectFinish()
         })
 
-        patchPromiseWithTransactionService(promise, trace, true)
+        patchPromise(transactionService, promise, trace, true)
         return promise
       }
     })

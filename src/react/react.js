@@ -5,37 +5,41 @@ var utils = require('../lib/utils')
 var patchReact = require('./reactPatches')
 var patchCommon = require('../common/patchCommon')
 
-function init (config, serviceFactory) {
-  if (utils.isUndefined(serviceFactory)) {
-    serviceFactory = new ServiceFactory()
-  }
+var serviceContainer = new ServiceContainer(new ServiceFactory())
 
-  var serviceContainer = new ServiceContainer(serviceFactory)
+if(!utils.inBrowser()) {
+  serviceContainer.services.logger.warn('Opbeat: Only enabled in browser.')
+  // disable
+  utils.opbeatGlobal(false)
+
+} else if(!serviceContainer.services.configService.isPlatformSupported()) {
+  serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
+  // disable
+  utils.opbeatGlobal(false)
+
+} else {
+  patchCommon()
+  patchReact()
+}
+
+function configure (config, serviceFactory) {
+  if (!utils.isUndefined(serviceFactory)) {
+    serviceContainer = new ServiceContainer(serviceFactory)
+  }
 
   // no server side support at the moment
-  if(!utils.inBrowser()) {
+  if(!utils.inBrowser() || !serviceContainer.services.configService.isPlatformSupported()) {
     return false
-  }
-
-  if (!serviceContainer.services.configService.isPlatformSupported()) {
-    serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
-
-    // disable
-    utils.opbeatGlobal(false)
-    return false
-  } else {
+  } else {  
     serviceContainer.services.configService.set('opbeatAgentName', 'opbeat-react')
-    serviceContainer.initialize()
-
+    serviceContainer.services.configService.set('reduxActionsLimit', 10)
     serviceContainer.services.configService.setConfig(config)
+    serviceContainer.initialize()
 
     if (serviceContainer.services.configService.get('errorLoggingEnabled')) {
       serviceContainer.services.exceptionHandler.install()
     }
-
-    patchCommon(serviceContainer)
-    patchReact(serviceContainer)
-
+    // instrumentation should be pass-through until we set opbeatGlobal
     utils.opbeatGlobal(serviceContainer)
 
     return serviceContainer
@@ -44,7 +48,7 @@ function init (config, serviceFactory) {
 
 module.exports = {
   __esModule: true,
-  default: init,
+  default: configure,
   setUserContext: function setUserContext (userContext) {
     if (utils.inBrowser() && utils.opbeatGlobal()) {
       utils.opbeatGlobal().services.configService.set('context.user', userContext)

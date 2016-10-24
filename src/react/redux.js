@@ -1,24 +1,24 @@
 var utils = require('../lib/utils')
 
-var passThrough = function () {
-  return function (next) {
-    return function (action) {
-      return next(action)
-    }
+var passThrough = function (next) {
+  return function (action) {
+    return next(action)
   }
 }
 
 function createOpbeatMiddleware (serviceContainer) {
-  if (!utils.inBrowser() || serviceContainer === false || utils.opbeatGlobal() === false) {
-    return passThrough
-  }
+  var transactionService
 
-  if (!serviceContainer) {
+  return function (store) {
     serviceContainer = utils.opbeatGlobal()
-  }
+    if (!serviceContainer) {
+      return passThrough
+    }
 
-  var transactionService = serviceContainer.services.transactionService
-  return function () {
+    if (!transactionService) {
+      transactionService = serviceContainer.services.transactionService
+    }
+
     return function (next) {
       return function (action) {
         var tr, ret

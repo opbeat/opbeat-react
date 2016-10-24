@@ -1,5 +1,7 @@
 var stackTrace = require('./stacktrace')
 var frames = require('./frames')
+var utils = require('../lib/utils')
+
 
 var ExceptionHandler = function (opbeatBackend, config, logger) {
   this._opbeatBackend = opbeatBackend

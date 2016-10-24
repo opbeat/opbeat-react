@@ -8,6 +8,7 @@ var getEventTarget = require('react/lib/getEventTarget')
 
 var patchMethod = require('../common/patchUtils').patchMethod
 var nodeName = require('./utils').nodeName
+var utils = require('../lib/utils')
 
 var Trace = require('../transaction/trace')
 
@@ -58,13 +59,20 @@ function RenderState () {
 }
 
 
-module.exports = function patchReact (serviceContainer) {
-  var transactionService = serviceContainer.services.transactionService
+module.exports = function patchReact () {
+  var serviceContainer
 
   var batchedUpdatePatch = function (delegate) {
     return function (self, args) {
       var ret
       var trace
+
+      if (!(serviceContainer = utils.opbeatGlobal())) {
+        // pass through
+        return delegate.apply(self, args)
+      }
+
+      var transactionService = serviceContainer.services.transactionService
 
       serviceContainer.services.zoneService.set('renderState', new RenderState())
       var batchedUpdatesStart = window.performance.now()
@@ -102,8 +110,13 @@ module.exports = function patchReact (serviceContainer) {
   ReactInjection.Updates.injectBatchingStrategy(ReactDefaultBatchingStrategy)
 
   var componentRenderPatch = function (delegate) {
+    var serviceContainer
     return function (self, args) {
-      if (args[0] && args[0].getName) {
+      if (!serviceContainer) {
+        serviceContainer = utils.opbeatGlobal()
+      }
+
+      if (serviceContainer && args[0] && args[0].getName) {
         var name = args[0].getName()
         if (name === 'TopLevelWrapper' || name === null) {
           // TopLevelWrapper or null components don't make sense to include here
@@ -152,14 +165,23 @@ module.exports = function patchReact (serviceContainer) {
   patchMethod(EventPluginUtils, 'executeDispatchesInOrder', function (delegate) {
     // for quick lookup, make this into an object
     var eventWhiteList = {}
-    var performance = serviceContainer.services.configService.get('performance')
-    var configWhiteList = performance.eventWhiteList || []
-    configWhiteList.forEach(function (ev) {
-      eventWhiteList[ev] = 1
-    })
+    var serviceContainer
+    var performanceEnabled
+    var configWhiteList
+    var transactionService
 
     return function (self, args) {
-      if (args[0] && args[0]._dispatchListeners && args[0].nativeEvent) {
+      if (!serviceContainer) {
+        serviceContainer = utils.opbeatGlobal()
+
+        var configWhiteList = serviceContainer.services.configService.get('performance.eventWhiteList')  || []
+        configWhiteList.forEach(function (ev) {
+          eventWhiteList[ev] = 1
+        })
+        transactionService = serviceContainer.services.transactionService
+      }
+
+      if (serviceContainer && args[0] && args[0]._dispatchListeners && args[0].nativeEvent) {
         var nativeEventTarget = getEventTarget(args[0].nativeEvent)
         if (nativeEventTarget) {
           // We want traces that have already started to go into a transaction
@@ -182,13 +204,20 @@ module.exports = function patchReact (serviceContainer) {
 
   var reactDom = require('react-dom')
   patchMethod(reactDom, 'render', function (delegate) {
+    var serviceContainer
+
     return function (self, args) {
-      var out
-      return serviceContainer.services.zoneService.zone.run(function () {
-        out = delegate.apply(self, args)
-        serviceContainer.services.transactionService.detectFinish()
-        return out
-      })
+      serviceContainer = serviceContainer || utils.opbeatGlobal()
+      if (serviceContainer) {
+        var out
+        return serviceContainer.services.zoneService.zone.run(function () {
+          out = delegate.apply(self, args)
+          serviceContainer.services.transactionService.detectFinish()
+          return out
+        })
+      } else {
+        return delegate.apply(self, args)
+      }
     }
   })
 }

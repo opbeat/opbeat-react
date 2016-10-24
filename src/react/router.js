@@ -53,7 +53,7 @@ function routeChange (transactionService, state) {
   transactionService.startTransaction(fullRoute, 'spa.route-change')
 }
 
-function patchRouter (router, serviceContainer) {
+function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {
     return function (self, args) {
       patchObject(self, 'createRouterObjects', function (delegate) {
@@ -64,7 +64,10 @@ function patchRouter (router, serviceContainer) {
               if (args.length === 1) {
                 return delegate.call(self, function () {
                   if (arguments.length === 2) { // error, nextState
-                    routeChange(serviceContainer.services.transactionService, arguments[1])
+                    if (utils.opbeatGlobal()) {
+                      // pass through
+                      routeChange(utils.opbeatGlobal().services.transactionService, arguments[1]) 
+                    }
                   }
                   return args[0].apply(self, arguments)
                 })
@@ -81,19 +84,15 @@ function patchRouter (router, serviceContainer) {
   })
 }
 
-function useRouter (serviceContainer) {
-  if (serviceContainer === false || !utils.inBrowser()) {
-    return
-  }
+patchRouter(Router.prototype)
 
-  if (!serviceContainer) {
-    serviceContainer = utils.opbeatGlobal()
+function useRouter() {
+  if (console && console.log) {
+    console.log("Opbeat: useRouter is deprecated and no longer needed. Just `import 'opbeat-opbeat/router'")
   }
-  patchRouter(Router.prototype, serviceContainer)
 }
 
 module.exports = {
   useRouter: useRouter,
   makeSignatureFromRoutes: makeSignatureFromRoutes,
-  patchRouter: patchRouter
 }

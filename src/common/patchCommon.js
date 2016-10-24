@@ -1,9 +1,9 @@
 var patchXMLHttpRequest = require('./patches/xhrPatch')
 var patchFetch = require('./patches/fetchPatch').patchFetch
 
-function patchCommon (serviceContainer) {
-  patchXMLHttpRequest(serviceContainer)
-  patchFetch(serviceContainer)
+function patchCommon () {
+  patchXMLHttpRequest()
+  patchFetch()
 }
 
 module.exports = patchCommon
