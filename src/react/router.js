@@ -1,5 +1,6 @@
 var patchObject = require('../common/patchUtils').patchObject
 var Router = require('react-router').Router
+var utils = require('../lib/utils')
 
 function combineRoutes (routes) {
   var pathParts = []
@@ -81,12 +82,12 @@ function patchRouter (router, serviceContainer) {
 }
 
 function useRouter (serviceContainer) {
-  if (serviceContainer === false || typeof window === 'undefined') {
+  if (serviceContainer === false || !utils.inBrowser()) {
     return
   }
 
   if (!serviceContainer) {
-    serviceContainer = window.__opbeat
+    serviceContainer = utils.opbeatGlobal()
   }
   patchRouter(Router.prototype, serviceContainer)
 }

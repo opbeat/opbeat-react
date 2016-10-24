@@ -13,7 +13,7 @@ function init (config, serviceFactory) {
   var serviceContainer = new ServiceContainer(serviceFactory)
 
   // no server side support at the moment
-  if(typeof window === 'undefined') {
+  if(!utils.inBrowser()) {
     return false
   }
 
@@ -21,7 +21,7 @@ function init (config, serviceFactory) {
     serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
 
     // disable
-    window.__opbeat = false
+    utils.opbeatGlobal(false)
     return false
   } else {
     serviceContainer.services.configService.set('opbeatAgentName', 'opbeat-react')
@@ -36,7 +36,7 @@ function init (config, serviceFactory) {
     patchCommon(serviceContainer)
     patchReact(serviceContainer)
 
-    window.__opbeat = serviceContainer
+    utils.opbeatGlobal(serviceContainer)
 
     return serviceContainer
   }
@@ -46,13 +46,13 @@ module.exports = {
   __esModule: true,
   default: init,
   setUserContext: function setUserContext (userContext) {
-    if (typeof window !== 'undefined' && window.__opbeat) {
-      window.__opbeat.services.configService.set('context.user', userContext)
+    if (utils.inBrowser() && utils.opbeatGlobal()) {
+      utils.opbeatGlobal().services.configService.set('context.user', userContext)
     }
   },
   setExtraContext: function setExtraContext (data) {
-    if (typeof window !== 'undefined' && window.__opbeat) {
-      window.__opbeat.services.configService.set('context.extra', data)
+    if (utils.inBrowser() && utils.opbeatGlobal()) {
+      utils.opbeatGlobal().services.configService.set('context.extra', data)
     }
   }
 }

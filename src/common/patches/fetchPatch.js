@@ -140,7 +140,7 @@ function patchFetch (serviceContainer) {
 
   var patchPromiseWithTransactionService = function (promise, trace, shouldPatchResponse) {
     return patchPromise(transactionService, promise, trace, shouldPatchResponse)
-  }
+  } 
 
   if (window.fetch) {
     patchObject(window, 'fetch', function (delegate) {

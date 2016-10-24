@@ -2,7 +2,7 @@ var TransactionService = require('../transaction/transaction_service')
 
 var utils = require('../lib/utils')
 
-if (typeof window != 'undefined' && typeof window.Zone === 'undefined') {
+if (utils.inBrowser() && typeof window.Zone === 'undefined') {
   require('zone.js')
 }
 

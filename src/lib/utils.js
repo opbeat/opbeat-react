@@ -223,6 +223,18 @@ module.exports = {
     return _p8() + _p8(true) + _p8(true) + _p8()
   },
 
+  inBrowser : function () {
+    return typeof window !== 'undefined'
+  },
+
+  opbeatGlobal : function (value) {
+    if (typeof value === 'undefined') {
+      return window.__opbeat
+    } else {
+      window.__opbeat = value
+    }
+  },
+
   friendlyNodeName: function (domNode) {
     var tag = domNode.tagName ? domNode.tagName.toLowerCase() : ''
     var idName = domNode.getAttribute('id')
