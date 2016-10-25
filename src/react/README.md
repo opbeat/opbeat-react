@@ -15,7 +15,7 @@ initOpbeat({
 })
 ```
 
-If you use react-router v3.x, import 'opbeat-react/router'
+If you use react-router v2.x, import 'opbeat-react/router'
 
 ```js
 // enable react-router instrumentation
