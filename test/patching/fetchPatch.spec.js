@@ -52,6 +52,10 @@ describe('patchPromise', function () {
   var p1
   var resolve, reject
 
+
+  var explodeop = function() { throw 'Ouch!' }
+  var noop = function() { }
+
   beforeEach(function () {
     funcs = {
       rejected: function (err) {
@@ -155,7 +159,7 @@ describe('patchPromise', function () {
     // when the first callback throws
     p1 = p.catch(funcs.rejected)
 
-    var p2 = p.then(function () { throw 'Ouch!' }).catch(function () { })
+    var p2 = p.then(explodeop).catch(function () { })
 
     // We can't use chaining here, because that would leave some tasks
     // thus, we use Promise.all
@@ -241,5 +245,37 @@ describe('patchPromise', function () {
     )
 
     reject('failure')
+  })
+
+  it('should handle chained promises with catch', function (done) {
+    transactionService = new MockTransactionService()
+    spyOn(transactionService, 'addTask').and.callThrough()
+    var catched = false
+    trace = transactionService.startTrace('promise-start', 'promise')
+
+    expect(transactionService.tasks.length).toEqual(0)
+
+    // fresh promise with no pending listeners
+    p = new Promise(function (onRes, onRej) {
+      resolve = onRes
+      reject = onRej
+    })
+
+    patchPromise(transactionService, p, trace, false)
+
+    // chain on the previous promise
+    var p1 = p.then(noop)
+     .then(noop).then(noop)
+     .catch(noop)
+
+    Promise.all([p1]).then(
+      function () {
+        // call rejected the right number of times
+        expect(transactionService.tasks.length).toEqual(0)
+        done()
+      }
+    )
+
+    resolve('failure')
   })
 })

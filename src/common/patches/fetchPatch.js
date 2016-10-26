@@ -19,9 +19,9 @@ function patchResponse (transactionService, response, trace) {
   })
 }
 
-function patchPromise (transactionService, promise, trace, shouldPatchResponse, thenTasksCarried) {
+function patchPromise (transactionService, promise, trace, shouldPatchResponse, thenTasksCarried, catchTasksCarried) {
   var thenTasks = thenTasksCarried || []
-  var catchTasks = []
+  var catchTasks = catchTasksCarried || []
 
   function removeTaskList (taskList) {
     taskList.forEach(function (item) {
@@ -95,11 +95,7 @@ function patchPromise (transactionService, promise, trace, shouldPatchResponse, 
           c never called:
           p.then(a, b).catch(c)
         */
-        if (reject) {
-          patchPromise(transactionService, newPromise, trace, false)
-        } else {
-          patchPromise(transactionService, newPromise, trace, false, thenTasks)
-        }
+        patchPromise(transactionService, newPromise, trace, false, thenTasks, catchTasks)
 
         return newPromise
       }
