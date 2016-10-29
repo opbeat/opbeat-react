@@ -43,19 +43,31 @@ function makeSignatureFromRoutes (routes, location) {
 function routeChange (transactionService, state) {
   var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
 
-  // end any transactions currently ongoing
   var transaction = transactionService.getCurrentTransaction()
-
   if (transaction && transaction.name !== 'ZoneTransaction') {
-    transaction.end()
+    transaction.name = fullRoute // set the parametrized route
+    transaction.type = 'spa.route-change'
   }
-
-  transactionService.startTransaction(fullRoute, 'spa.route-change')
 }
 
 function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {
     return function (self, args) {
+      if (self.props && self.props.history && self.props.history.listen) {
+        self.props.history.listen(function(location) {
+          var serviceContainer = utils.opbeatGlobal()
+          if (serviceContainer) {
+            var transactionService = serviceContainer.services.transactionService
+            var transaction = transactionService.getCurrentTransaction()
+            if (transaction && transaction.name !== 'ZoneTransaction') {
+              transaction.end()
+            }
+
+            transactionService.startTransaction(location.pathname, 'spa.route-change.concrete-route')
+          }
+        })
+      }
+
       patchObject(self, 'createRouterObjects', function (delegate) {
         return function (self, args) {
           var out = delegate.apply(self, args)

@@ -96,7 +96,9 @@ describe('react-router: captureRouteChange', function () {
     browserHistory.push('/mypath')
 
     expect(transactionService.startTransaction.calls.count()).toBe(1)
-    expect(transactionService.startTransaction).toHaveBeenCalledWith('/mypath', 'spa.route-change')
+    expect(transactionService.startTransaction).toHaveBeenCalledWith('/mypath', 'spa.route-change.concrete-route')
+
+    expect(transactionService.getCurrentTransaction().type).toBe('spa.route-change')
   })
 
   it('should handle redirects', function () {
@@ -104,8 +106,10 @@ describe('react-router: captureRouteChange', function () {
 
     expect(transactionService.startTransaction.calls.count()).toBe(2)
     expect(transactionService.startTransaction.calls.allArgs()).toEqual(
-      [['/login', 'spa.route-change'], ['/new-path', 'spa.route-change']]
+      [['/login', 'spa.route-change.concrete-route'], ['/new-path', 'spa.route-change.concrete-route']]
       )
+
+        expect(transactionService.getCurrentTransaction().type).toBe('spa.route-change')
   })
 
   afterAll(function () {
