@@ -50,10 +50,8 @@ const User = ({ params: { id } }) => (
   </div>
 )
 
-const About = () => (
-  <div>
-    <h2>About</h2>
-  </div>
-)
+// fetch('google.com').then(() => {
+//   console.log('google.com')
+// }).catch(() => console.log('trouble'))
 
-module.exports = {App, Index, Users, UsersIndex, User, About}
+module.exports = {App, Index, Users, UsersIndex, User}
