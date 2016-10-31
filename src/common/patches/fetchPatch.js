@@ -144,7 +144,7 @@ function patchFetch () {
         var transactionService = serviceContainer.services.transactionService
 
         var url = args[0]
-        var trace = transactionService.startTrace('GET ' + url, 'ext.HttpRequest.fetch', {enableStackFrames: true})
+        var trace = transactionService.startTrace('GET ' + url, 'ext.HttpRequest.fetch')
 
         var promise = delegate.apply(self, args)
 

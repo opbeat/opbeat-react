@@ -82,7 +82,7 @@ module.exports = function patchReact () {
       var renderState = serviceContainer.services.zoneService.get('renderState')
       var componentTypes = Object.keys(renderState.componentStats)
       if (componentTypes.length > 0) {
-        trace = transactionService.startTrace('batchedUpdates', 'template.update', {enableStackFrames: true})
+        trace = transactionService.startTrace('batchedUpdates', 'template.update')
         trace._start = batchedUpdatesStart
 
         var text = componentTypes.length + ' different components'
