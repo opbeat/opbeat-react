@@ -37,7 +37,8 @@ module.exports = {
   },
   opbeatSymbol: opbeatSymbol,
   patchMethod: patchMethod,
-  patchObject: patchObject
+  patchObject: patchObject,
+  isPatched: isPatched
 }
 
 function opbeatSymbol (name) {
@@ -70,6 +71,11 @@ function patchMethod (target, name, patchFn) {
     proto[name] = createNamedFn(name, patchFn(delegate, delegateName, name))
   }
   return delegate
+}
+
+function isPatched(target, name) {
+  var delegateName = opbeatSymbol(name)
+  return !!target[delegateName]
 }
 
 function createNamedFn (name, delegate) {

@@ -71,7 +71,7 @@ describe('patchPromise', function () {
       reject = onRej
     })
 
-    patchPromise(transactionService, p, trace, false)
+    patchPromise(transactionService, p, trace)
 
     spyOn(funcs, 'rejected').and.callThrough()
     spyOn(transactionService, 'detectFinish').and.callThrough()
@@ -153,7 +153,7 @@ describe('patchPromise', function () {
       reject = onRej
     })
 
-    patchPromise(transactionService, p, trace, false)
+    patchPromise(transactionService, p, trace)
 
     // wont get called, but we need to make sure we clean up the task even
     // when the first callback throws
@@ -228,7 +228,7 @@ describe('patchPromise', function () {
       reject = onRej
     })
 
-    patchPromise(transactionService, p, trace, false)
+    patchPromise(transactionService, p, trace)
 
     // chain on the previous promise
     p1 = p.then(function () { console.log('never-called') })
@@ -261,7 +261,7 @@ describe('patchPromise', function () {
       reject = onRej
     })
 
-    patchPromise(transactionService, p, trace, false)
+    patchPromise(transactionService, p, trace)
 
     // chain on the previous promise
     var p1 = p.then(noop)

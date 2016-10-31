@@ -96,79 +96,79 @@ function ZoneService (zone, logger, config) {
 
           spec.onScheduleTask(opbeatTask)
         }
-      } else if (task.type === 'eventTask' && hasTarget &&
-                 (task.source === 'HTMLScriptElement.addEventListener:error' || task.source === 'HTMLScriptElement.addEventListener:load')) {
-          // Keep track of scheduled tasks on the target
-          var scheduledTasks = task.data.target[opbeatTaskSymbol]
+      // } else if (task.type === 'eventTask' && hasTarget &&
+      //            (task.source === 'HTMLScriptElement.addEventListener:error' || task.source === 'HTMLScriptElement.addEventListener:load')) {
+      //     // Keep track of scheduled tasks on the target
+      //     var scheduledTasks = task.data.target[opbeatTaskSymbol]
           
-          var currentTransaction = window.Zone.current.get('transaction')
-          if (currentTransaction && !currentTransaction.ended) {
-            // New opbeatTask that we can add when the element get added to the dom
-            // and remove when the task has run.
-            opbeatTask = {
-              taskId: task.source + nextId++,
-              source: task.source,
-              type: task.type
-            }
+      //     var currentTransaction = window.Zone.current.get('transaction')
+      //     if (currentTransaction && !currentTransaction.ended) {
+      //       // New opbeatTask that we can add when the element get added to the dom
+      //       // and remove when the task has run.
+      //       opbeatTask = {
+      //         taskId: task.source + nextId++,
+      //         source: task.source,
+      //         type: task.type
+      //       }
 
-            if (!scheduledTasks) { // first time an event listener is added to this target
-              scheduledTasks = {
-                load: [],
-                error: [],
-                transaction: currentTransaction,
-                added: false,
-                downloadStarted: function () {
-                  if (this.added) {
-                    return
-                  }
-                  this.added = true
+      //       if (!scheduledTasks) { // first time an event listener is added to this target
+      //         scheduledTasks = {
+      //           load: [],
+      //           error: [],
+      //           transaction: currentTransaction,
+      //           added: false,
+      //           downloadStarted: function () {
+      //             if (this.added) {
+      //               return
+      //             }
+      //             this.added = true
 
-                  var node = task.data.target
+      //             var node = task.data.target
 
-                  // node was now added to DOM. Start the trace
-                  if(node[opbeatTaskSymbol].transaction) {
-                    node[opbeatTaskSymbol].trace = node[opbeatTaskSymbol].transaction.startTrace(node.src, 'resource.script')
-                  }
+      //             // node was now added to DOM. Start the trace
+      //             if(node[opbeatTaskSymbol].transaction) {
+      //               node[opbeatTaskSymbol].trace = node[opbeatTaskSymbol].transaction.startTrace(node.src, 'resource.script')
+      //             }
                   
-                  // Add all the event handlers to tasks that we will wait for
-                  for(var k = 0; k < node[opbeatTaskSymbol].load; k++) {
-                    spec.onScheduleTask(node[opbeatTaskSymbol].load[k])
-                  }
+      //             // Add all the event handlers to tasks that we will wait for
+      //             for(var k = 0; k < node[opbeatTaskSymbol].load; k++) {
+      //               spec.onScheduleTask(node[opbeatTaskSymbol].load[k])
+      //             }
 
-                  for(var k = 0; k < node[opbeatTaskSymbol].error; k++) {
-                    spec.onScheduleTask(node[opbeatTaskSymbol].error[k])
-                  }
-                }
-              }
-              task.data.target[opbeatTaskSymbol] = scheduledTasks
-              task.data.target.addEventListener('HTMLScriptElement.addEventListener:error', function() {
-                // clear the onload tasks, they will not be called
-                clearTasks(scheduledTasks.load)
-              })
+      //             for(var k = 0; k < node[opbeatTaskSymbol].error; k++) {
+      //               spec.onScheduleTask(node[opbeatTaskSymbol].error[k])
+      //             }
+      //           }
+      //         }
+      //         task.data.target[opbeatTaskSymbol] = scheduledTasks
+      //         task.data.target.addEventListener('HTMLScriptElement.addEventListener:error', function() {
+      //           // clear the onload tasks, they will not be called
+      //           clearTasks(scheduledTasks.load)
+      //         })
               
-              task.data.target.addEventListener('HTMLScriptElement.addEventListener:load', function() {
-                // clear the onerror tasks
-                clearTasks(scheduledTasks.error)
-              })
-            }
+      //         task.data.target.addEventListener('HTMLScriptElement.addEventListener:load', function() {
+      //           // clear the onerror tasks
+      //           clearTasks(scheduledTasks.error)
+      //         })
+      //       }
 
-            if (task.source === 'HTMLScriptElement.addEventListener:error') {
-              scheduledTasks.error.push(opbeatTask)
-            }else{
-              scheduledTasks.load.push(opbeatTask)
-            }
+      //       if (task.source === 'HTMLScriptElement.addEventListener:error') {
+      //         scheduledTasks.error.push(opbeatTask)
+      //       }else{
+      //         scheduledTasks.load.push(opbeatTask)
+      //       }
             
-            // set the opbeatTask on the task so we can removeTask when it actually runs 
-            task[opbeatTaskSymbol] = opbeatTask
+      //       // set the opbeatTask on the task so we can removeTask when it actually runs 
+      //       task[opbeatTaskSymbol] = opbeatTask
 
-            if (task.data.target.parentNode && task.data.target.src) {
-              task.data.target[opbeatTaskSymbol].downloadStarted()
-            }else{
-              // Give MutationObserver a chance to run before "ending" the transaction.
-              // :facepalm:
-              setTimeout(function () { setTimeout(function () {}, 0)}, 0)
-            }
-          }
+      //       if (task.data.target.parentNode && task.data.target.src) {
+      //         task.data.target[opbeatTaskSymbol].downloadStarted()
+      //       }else{
+      //         // Give MutationObserver a chance to run before "ending" the transaction.
+      //         // :facepalm:
+      //         setTimeout(function () { setTimeout(function () {}, 0)}, 0)
+      //       }
+      //     }
       } else if (task.type === 'eventTask' && hasTarget && (task.data.eventName === 'readystatechange' || task.data.eventName === 'load')) {
         task.data.target[opbeatDataSymbol].registeredEventListeners[task.data.eventName] = {resolved: false}
       } else if (task.type === 'microTask' && task.source === 'Promise.then') {

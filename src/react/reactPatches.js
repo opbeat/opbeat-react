@@ -66,8 +66,8 @@ module.exports = function patchReact () {
     return function (self, args) {
       var ret
       var trace
-
-      if (!(serviceContainer = utils.opbeatGlobal())) {
+      serviceContainer = utils.opbeatGlobal()
+      if (!serviceContainer) {
         // pass through
         return delegate.apply(self, args)
       }

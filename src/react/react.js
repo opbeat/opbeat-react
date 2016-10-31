@@ -4,6 +4,7 @@ var utils = require('../lib/utils')
 
 var patchReact = require('./reactPatches')
 var patchCommon = require('../common/patchCommon')
+var patchWebpack = require('./patchWebpack')
 
 var serviceContainer = new ServiceContainer(new ServiceFactory())
 
@@ -20,6 +21,7 @@ if(!utils.inBrowser()) {
 } else {
   patchCommon()
   patchReact()
+  patchWebpack()
 }
 
 function configure (config, serviceFactory) {
