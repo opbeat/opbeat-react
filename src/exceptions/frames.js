@@ -28,6 +28,11 @@ module.exports = {
         fileName = '(inline script)'
       }
 
+      if (fileName.indexOf(':') === 0) {
+        // We can't use frames that only have a linenumber, e.g. ':329'
+        return resolve({})
+      }
+
       // Build Opbeat frame data
       var frame = {
         'filename': fileName,
