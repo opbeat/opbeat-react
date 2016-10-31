@@ -24,8 +24,6 @@ function init () {
             if (node.nodeName.toLowerCase() == 'script' && node.src) {
               if (node[opbeatTaskSymbol]) {
                 node[opbeatTaskSymbol].downloadStarted()
-              } else {
-                node.addEventListener('onload', function () {}) // trigger our instrumentation
               }
             }
           }
@@ -35,7 +33,6 @@ function init () {
     observer.observe(document.head, {subtree: true, childList: true, attributes: true, attributeOldValue: true, attributeFilter: ['src']})
   }
 }
-
 
 
 module.exports = init

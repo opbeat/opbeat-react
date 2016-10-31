@@ -11,7 +11,7 @@
   "main": "src/opbeat-js/opbeat.js",
   "scripts": {
     "build": "gulp build:release",
-    "karma": "node node_modules/karma/bin/karma start --coverage",
+    "karma": "node node_modules/karma/bin/karma start",
     "test": "node node_modules/standard/bin/cmd.js src/**/* && gulp test:unit:sauce && gulp test:e2e",
     "prepublish": "npm run build"
   },
@@ -92,7 +92,7 @@
     "react-router": "^2.7.0",
     "redux": "^3.6.0",
     "run-sequence": "^1.1.5",
-    "selenium-standalone": "^4.8.0",
+    "selenium-standalone": "^5.8.0",
     "standard": "^5.4.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",

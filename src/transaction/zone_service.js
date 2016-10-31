@@ -160,8 +160,14 @@ function ZoneService (zone, logger, config) {
             
             // set the opbeatTask on the task so we can removeTask when it actually runs 
             task[opbeatTaskSymbol] = opbeatTask
-            // :facepalm:
-            setTimeout(function () { setTimeout(function () {}, 0)}, 0)
+
+            if (task.data.target.parentNode && task.data.target.src) {
+              task.data.target[opbeatTaskSymbol].downloadStarted()
+            }else{
+              // Give MutationObserver a chance to run before "ending" the transaction.
+              // :facepalm:
+              setTimeout(function () { setTimeout(function () {}, 0)}, 0)
+            }
           }
       } else if (task.type === 'eventTask' && hasTarget && (task.data.eventName === 'readystatechange' || task.data.eventName === 'load')) {
         task.data.target[opbeatDataSymbol].registeredEventListeners[task.data.eventName] = {resolved: false}
