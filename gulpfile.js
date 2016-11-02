@@ -86,7 +86,6 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   var dirNeedsBuilding = [
     './test/e2e/react/react',
     './test/e2e/react/redux',
-    './test/e2e/react/router',
     './test/e2e/fetch'
   ]
 
@@ -115,7 +114,7 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   })
 })
 
-gulp.task('build:release:react', ['apply-prod-environment'], function () {
+gulp.task('build:release', ['apply-prod-environment'], function () {
   var prodPath = './dist/opbeat-react'
   var version = require('./src/react/package.json').version
   
@@ -136,50 +135,6 @@ gulp.task('build:release:react', ['apply-prod-environment'], function () {
 
   var license = gulp.src(['LICENSE'])
     .pipe(gulp.dest(prodPath))
-})
-
-gulp.task('build:release', ['build:release:react'], function () {
-  var version = require('./package').version
-  var majorVersion = version.match(/^(\d).(\d).(\d)/)[1]
-
-  var versionPath = './dist/cdn/' + majorVersion
-  var prodPath = './dist/'
-
-  var integrations = require('./release/integrations')
-
-  var tasks = Object.keys(integrations)
-    .filter(function (key) { return key !== 'opbeat-react'})
-    .map(function (key) {
-      var integration = integrations[key]
-      var integrationName = key
-      var mainStream = createBuildStream(integration.entry, integration.version)
-        .pipe(gulp.dest(versionPath))
-        .pipe(gulp.dest(prodPath))
-        .pipe(gulp.dest(prodPath + integrationName))
-        .pipe(rename({
-          extname: '.min.js'
-        }))
-        .pipe(uglify())
-        .pipe(gulp.dest(versionPath))
-        .pipe(gulp.dest(prodPath))
-        .pipe(gulp.dest(prodPath + integrationName))
-
-      var filename = integration.entry.split('/')
-      filename = filename[filename.length - 1]
-
-      var packagejson = gulp.src(['./release/templates/*.json'])
-        .pipe(jeditor({
-          'name': integrationName,
-          'version': integration.version,
-          'main': filename,
-          'description': integration.description
-        }))
-        .pipe(gulp.dest(prodPath + integrationName))
-
-      return es.merge.apply(null, [mainStream, packagejson, gulp.src(['LICENSE']).pipe(gulp.dest(prodPath + integrationName))])
-    })
-
-  return es.merge.apply(null, tasks)
 })
 
 gulp.task('apply-prod-environment', function () {
@@ -286,18 +241,8 @@ gulp.task('test', function (done) {
   }, done).start()
 })
 
-gulp.task('test:e2e:protractor', function () {
-  var protractor = require('gulp-protractor').protractor
-
-  return gulp.src(['test/e2e/**/*.pspec.js'])
-    .pipe(protractor({
-      configFile: 'protractor.conf.js'
-    }))
-    .on('error', function (e) { throw e })
-})
-
 // Run end-to-end tests on the local machine using webdriver configuration
-gulp.task('test:e2e:run', ['test:e2e:protractor'], function (done) {
+gulp.task('test:e2e:run', function (done) {
   gulp.src('wdio.conf.js')
     .pipe(webdriver())
     .on('error', function () {
@@ -472,7 +417,7 @@ gulp.task('test:e2e:start-sauce', function (done) {
 })
 
 gulp.task('test:e2e', function (done) {
-  runSequence(['build', 'build:release', 'test:e2e:start-local'], ['test:e2e:protractor', 'test:e2e:phantomjs', 'test:e2e:launchsauceconnect'], 'test:e2e:sauceconnect', function (err) {
+  runSequence(['build', 'build:release', 'test:e2e:start-local'], ['test:e2e:phantomjs', 'test:e2e:launchsauceconnect'], 'test:e2e:sauceconnect', function (err) {
     if (err) {
       return taskFailed(err)
     } else {
