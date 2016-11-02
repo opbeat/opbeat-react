@@ -50,51 +50,85 @@ function routeChange (transactionService, state) {
   }
 }
 
+function patchTransitionManager (transitionManager) {
+  patchObject(transitionManager, 'listen', function (delegate) {
+      return function (self, args) {
+        if (args.length === 1) {
+          return delegate.call(self, function () {
+            if (arguments.length === 2) { // error, nextState
+              if (utils.opbeatGlobal()) {
+                // pass through
+                routeChange(utils.opbeatGlobal().services.transactionService, arguments[1]) 
+              }
+            }
+            return args[0].apply(self, arguments)
+          })
+        }
+      }
+    })
+} 
+
+function captureRouteChange (location) {
+  var serviceContainer = utils.opbeatGlobal()
+  if (serviceContainer) {
+    var transactionService = serviceContainer.services.transactionService
+    var transaction = transactionService.getCurrentTransaction()
+    if (transaction && transaction.name !== 'ZoneTransaction') {
+      transaction.end()
+    }
+
+    transactionService.startTransaction(location.pathname, 'spa.route-change.concrete-route')
+  }
+}
+
 function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {
     return function (self, args) {
       if (self.props && self.props.history && self.props.history.listen) {
-        self.props.history.listen(function(location) {
-          var serviceContainer = utils.opbeatGlobal()
-          if (serviceContainer) {
-            var transactionService = serviceContainer.services.transactionService
-            var transaction = transactionService.getCurrentTransaction()
-            if (transaction && transaction.name !== 'ZoneTransaction') {
-              transaction.end()
-            }
+        self._opbeatUnlisten = self.props.history.listen(captureRouteChange)
+      }
 
-            transactionService.startTransaction(location.pathname, 'spa.route-change.concrete-route')
+      // react-router version 2.0 has 'createRouterObjects'
+      if (self.createRouterObjects) {
+        patchObject(self, 'createRouterObjects', function (delegate) {
+          return function (self, args) {
+            var out = delegate.apply(self, args)
+            patchTransitionManager(out.transitionManager)
+            return out
           }
         })
       }
 
-      patchObject(self, 'createRouterObjects', function (delegate) {
-        return function (self, args) {
-          var out = delegate.apply(self, args)
-          patchObject(out.transitionManager, 'listen', function (delegate) {
-            return function (self, args) {
-              if (args.length === 1) {
-                return delegate.call(self, function () {
-                  if (arguments.length === 2) { // error, nextState
-                    if (utils.opbeatGlobal()) {
-                      // pass through
-                      routeChange(utils.opbeatGlobal().services.transactionService, arguments[1]) 
-                    }
-                  }
-                  return args[0].apply(self, arguments)
-                })
-              }
-            }
-          })
-          return out
+      // react-router version 3.0 has 'createTransitionManager'
+      if (self.createTransitionManager) {
+        patchObject(self, 'createTransitionManager', function (delegate) {
+          return function (self, args) {
+            var transitionManager = delegate.apply(self, args)
+            patchTransitionManager(transitionManager)
+            return transitionManager
+          }
+        })
+        if (self.props.history) {
+          captureRouteChange(self.props.history.getCurrentLocation())
         }
-      })
+      }
 
       var out = delegate.apply(self, args)
       return out
     }
+})
+
+  patchObject(router, 'componentWillUnmount', function (delegate) {
+    return function (self, args) {
+      debugger;
+      if (self._opbeatUnlisten) {
+        self._opbeatUnlisten()
+      }
+      return delegate.apply(self, args)
+    }
   })
 }
+
 
 patchRouter(Router.prototype)
 

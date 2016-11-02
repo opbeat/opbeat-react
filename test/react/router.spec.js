@@ -1,6 +1,7 @@
 var React = require('react')
 
 var mount = require('enzyme').mount
+var unmount = require('enzyme').unmount
 
 var makeSignatureFromRoutes = require('../../src/react/router').makeSignatureFromRoutes
 var pushLocation = {action: 'PUSH'}
@@ -65,8 +66,12 @@ describe('react-router: makeSignatureFromRoutes', function () {
 describe('react-router: captureRouteChange', function () {
   var transactionService
   var serviceContainer
+  var tree
+  var treeWrapper
 
-  beforeAll(function () {
+  beforeEach(function () {
+    
+
     serviceContainer = new ServiceContainer(new ServiceFactory())
     serviceContainer.initialize()
     utils.opbeatGlobal(serviceContainer)
@@ -75,7 +80,7 @@ describe('react-router: captureRouteChange', function () {
 
     transactionService = serviceContainer.services.transactionService
 
-    var tree = React.createElement(
+    tree = React.createElement(
       Router, {history: browserHistory}, [
         React.createElement(Route, {path: '/', key: '0'}),
         React.createElement(Redirect, {from: '/old-path', to: '/new-path', key: '1'}),
@@ -84,38 +89,73 @@ describe('react-router: captureRouteChange', function () {
         React.createElement(Route, {path: '/login', component: LoginComponent, key: '4'})
       ]
     )
-
-    mount(tree)
   })
 
-  beforeEach(function () {
+  it('should capture router change when mounted', function () {
     spyOn(transactionService, 'startTransaction').and.callThrough()
+
+    serviceContainer.services.zoneService.runInOpbeatZone(function() {
+      treeWrapper = mount(tree)
+
+      expect(transactionService.startTransaction.calls.count()).toBe(1)
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('/', 'spa.route-change.concrete-route')
+      
+      // has ended, so we can't use transactionService.getCurrentTransaction()
+      var lastTransaction = serviceContainer.services.zoneService.get('transaction')
+      expect(lastTransaction.type).toBe('spa.route-change')
+      expect(lastTransaction.name).toBe('/')
+    })
+
   })
 
-  it('should capture router change', function () {
-    browserHistory.push('/mypath')
 
-    expect(transactionService.startTransaction.calls.count()).toBe(1)
-    expect(transactionService.startTransaction).toHaveBeenCalledWith('/mypath', 'spa.route-change.concrete-route')
+  it('should capture router change when it changes', function () {
+    treeWrapper = mount(tree) // mount first, then add the spy
 
-    expect(transactionService.getCurrentTransaction().type).toBe('spa.route-change')
+    spyOn(transactionService, 'startTransaction').and.callThrough()
+
+    serviceContainer.services.zoneService.runInOpbeatZone(function() {
+      browserHistory.push('/mypath')
+
+      expect(transactionService.startTransaction.calls.count()).toBe(1)
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('/mypath', 'spa.route-change.concrete-route')
+
+      // has ended, so we can't use transactionService.getCurrentTransaction()
+      var lastTransaction = serviceContainer.services.zoneService.get('transaction')
+      // check that the type was updated with a parametrized route
+      expect(lastTransaction.type).toBe('spa.route-change')
+      expect(lastTransaction.name).toBe('/mypath')
+    })
   })
 
   it('should handle redirects', function () {
-    browserHistory.push('/login')
+    treeWrapper = mount(tree)
 
-    expect(transactionService.startTransaction.calls.count()).toBe(2)
-    expect(transactionService.startTransaction.calls.allArgs()).toEqual(
-      [['/login', 'spa.route-change.concrete-route'], ['/new-path', 'spa.route-change.concrete-route']]
+    spyOn(transactionService, 'startTransaction').and.callThrough()
+
+    serviceContainer.services.zoneService.runInOpbeatZone(function() {
+      
+      browserHistory.push('/login')
+
+      expect(transactionService.startTransaction.calls.count()).toBe(2)
+      expect(transactionService.startTransaction.calls.allArgs()).toEqual(
+        [['/login', 'spa.route-change.concrete-route'], ['/new-path', 'spa.route-change.concrete-route']]
       )
 
-        expect(transactionService.getCurrentTransaction().type).toBe('spa.route-change')
+      // has ended, so we can't use transactionService.getCurrentTransaction()
+      var lastTransaction = serviceContainer.services.zoneService.get('transaction')
+      expect(lastTransaction.type).toBe('spa.route-change')
+    })
   })
 
-  afterAll(function () {
+  afterEach(function () {
     if (transactionService) {
       var trans = transactionService.getCurrentTransaction()
       if (trans) trans.end()
+    }
+
+    if (treeWrapper) {
+      treeWrapper.unmount()
     }
   })
 })
