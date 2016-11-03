@@ -2,6 +2,10 @@
 
 This is the official Opbeat module for React, redux and react-router.
 
+opbeat-react will automatically measure route changes and user interactions in your application and instrument components,
+AJAX calls, Redux dispatches etc. to give you detailed insights into what kind of experience your users are having.
+opbeat-react will also automatically log exceptions to Opbeat.
+
 ## Usage
 
 Make sure to import `opbeat-react` before _anything_ else in your application.
