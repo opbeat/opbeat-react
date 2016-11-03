@@ -1,9 +1,6 @@
 var utils = require('../../e2e/utils')
 
 describe('redux-app', function () {
-  browser.url('/react/redux/index.html')
-  // browser.execute('1+1') // buuuuug
-    
   it('should have correct number of transactions and traces', function (done) {
     browser.url('/react/redux/index.html')
     browser.executeAsync(
