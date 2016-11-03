@@ -88,7 +88,7 @@ query: {
 
 ## Support
 
-`opbeat-react` works with `react-router` 2.x and `react` 0.14.x and 15.x
+`opbeat-react` works with `react-router` 2 and 3 and `react` 0.14.x and 15.x
 
 IE9 and below is not supported. But in general, every modern browser is supported. 
 

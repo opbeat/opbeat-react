@@ -120,7 +120,6 @@ function patchRouter (router) {
 
   patchObject(router, 'componentWillUnmount', function (delegate) {
     return function (self, args) {
-      debugger;
       if (self._opbeatUnlisten) {
         self._opbeatUnlisten()
       }
