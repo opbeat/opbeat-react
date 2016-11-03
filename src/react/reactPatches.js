@@ -3,7 +3,7 @@ var ReactDefaultBatchingStrategy = require('react/lib/ReactDefaultBatchingStrate
 var ReactReconciler = require('react/lib/ReactReconciler')
 var ReactInjection = require('react/lib/ReactInjection')
 var EventPluginUtils = require('react/lib/EventPluginUtils')
-
+var ReactMount = require('react/lib/ReactMount')
 var getEventTarget = require('react/lib/getEventTarget')
 
 var patchMethod = require('../common/patchUtils').patchMethod
@@ -54,6 +54,7 @@ function genTraces (componentStats, node, transactionService, transaction) {
 function RenderState () {
   return {
     'componentStats': {},
+    'componentCount': 0,
     'currRoot': {'children': []}
   }
 }
@@ -67,8 +68,8 @@ module.exports = function patchReact () {
       var ret
       var trace
       serviceContainer = utils.opbeatGlobal()
-      if (!serviceContainer) {
-        // pass through
+      if (!serviceContainer || serviceContainer.services.zoneService.get('renderState')) {
+        // pass through if not loaded or batchedUpdate is already ongoing
         return delegate.apply(self, args)
       }
 
@@ -80,13 +81,26 @@ module.exports = function patchReact () {
       ret = delegate.apply(self, args)
 
       var renderState = serviceContainer.services.zoneService.get('renderState')
+      serviceContainer.services.zoneService.set('renderState', null)
+
       var componentTypes = Object.keys(renderState.componentStats)
       if (componentTypes.length > 0) {
         trace = transactionService.startTrace('batchedUpdates', 'template.update')
         trace._start = batchedUpdatesStart
 
-        var text = componentTypes.length + ' different components'
-        trace.signature = 'Render ' + text
+        var text
+        if (renderState.currRoot.children.length > 1) {
+          var allRootComponents = renderState.currRoot.children.map(function(n) { return n.name })
+          var uniqueRootComponents = {}
+          for (var i = 0; i < allRootComponents.length; i++) {
+            uniqueRootComponents[allRootComponents[i]] = true
+          }
+          text = Object.keys(uniqueRootComponents).join(', ')
+        } else {
+          text = renderState.currRoot.children[0].name
+        }
+        
+        trace.signature = 'Render ' + text + ' (' + renderState.componentCount + ')' 
         trace.end()
 
         renderState.currRoot.trace = trace
@@ -109,6 +123,9 @@ module.exports = function patchReact () {
   patchMethod(ReactDefaultBatchingStrategy, 'batchedUpdates', batchedUpdatePatch)
   ReactInjection.Updates.injectBatchingStrategy(ReactDefaultBatchingStrategy)
 
+  // React 0.14.0+ exposes ReactMount.TopLevelWrapper
+  var ReactTopLevelWrapper = ReactMount.TopLevelWrapper
+
   var componentRenderPatch = function (delegate) {
     var serviceContainer
     return function (self, args) {
@@ -117,8 +134,19 @@ module.exports = function patchReact () {
       }
 
       if (serviceContainer && args[0] && args[0].getName) {
-        var name = args[0].getName()
-        if (name === 'TopLevelWrapper' || name === null) {
+        var component = args[0]
+        var name = component.getName()
+        // debugger;
+        if (
+            name === null || 
+            (
+              component._currentElement && component._currentElement.type &&
+                (
+                  component._currentElement.type === ReactTopLevelWrapper ||
+                  component._currentElement.type.isReactTopLevelWrapper
+                )
+            )
+        ) {
           // TopLevelWrapper or null components don't make sense to include here
           return delegate.apply(self, args)
         }
@@ -131,6 +159,8 @@ module.exports = function patchReact () {
         }
         var componentStat = renderState.componentStats[name]
         componentStat['count']++
+
+        renderState.componentCount++
 
         var shouldTrace = componentStat['count'] < 10
         var node = {'children': [], 'name': name}

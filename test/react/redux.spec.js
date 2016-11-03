@@ -62,5 +62,6 @@ describe('react-redux: opbeatMiddleware', function () {
     expect(transaction.startTrace).not.toHaveBeenCalledWith(testAction.type, 'spa.action')
 
     expect(count).toBe(1)
+    transaction.end()
   })
 })
