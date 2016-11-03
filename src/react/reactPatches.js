@@ -95,12 +95,12 @@ module.exports = function patchReact () {
           for (var i = 0; i < allRootComponents.length; i++) {
             uniqueRootComponents[allRootComponents[i]] = true
           }
-          text = Object.keys(uniqueRootComponents).join(', ')
+          text = Object.keys(uniqueRootComponents).length + " components"
         } else {
           text = renderState.currRoot.children[0].name
         }
         
-        trace.signature = 'Render ' + text + ' (' + renderState.componentCount + ')' 
+        trace.signature = text + ' (' + renderState.componentCount + ')' 
         trace.end()
 
         renderState.currRoot.trace = trace

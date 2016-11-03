@@ -53,7 +53,7 @@ describe('react: generate traces', function () {
       var wrapper = mount(React.createElement(ListOfLists))
 
       var expected = [
-        {signature: 'Render Constructor (5)', type: 'template.update'}, // Enzyme adds a wrapper :/
+        {signature: 'Constructor (5)', type: 'template.update'}, // Enzyme adds a wrapper :/
         {signature: 'Constructor', type: 'template.component'},
         {signature: 'ListOfLists', type: 'template.component'},
         {signature: 'List', type: 'template.component'},

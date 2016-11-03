@@ -61,7 +61,7 @@ describe('simple-fetch-app', function () {
       expect(transactions.traces.groups[0].kind).toBe('transaction')
 
       expect(transactions.traces.groups[1].kind).toBe('template.update')
-      expect(transactions.traces.groups[1].signature).toBe('Render component (1)')
+      expect(transactions.traces.groups[1].signature).toBe('component (1)')
 
       expect(transactions.traces.groups[2].kind).toBe('ext.HttpRequest.fetch.truncated')
       expect(transactions.traces.groups[2].signature).toBe('GET /slow-response')
