@@ -19,11 +19,16 @@ initOpbeat({
 })
 ```
 
-If you use react-router v2.x, import 'opbeat-react/router'
+If you use react-router (v2 or v3), import 'opbeat-react/router'
 
 ```js
-// enable react-router instrumentation
-import 'opbeat-react/router'
+import initOpbeat from 'opbeat-react'
+import 'opbeat-react/router' // enable react-router instrumentation
+
+initOpbeat({
+  'orgId': '470e8f31bc7b4f4395143091fe752e8c',
+  'appId': '9aac8591cc'
+})
 ```
 
 If you're using Redux, add the Opbeat middleware as the last middleware in your chain:
@@ -41,6 +46,29 @@ const store = createStore(
   )
 )
 ```
+
+## Staging and local environments
+You should create separate apps on Opbeat for production, staging and local environments. You'll get separate tokens for each app on Opbeat. You can then do something like:
+
+```js
+import initOpbeat from 'opbeat-react'
+import 'opbeat-react/router' // enable react-router instrumentation
+
+if (process.env.NODE_ENV === 'production') {
+  initOpbeat({
+    'orgId': '470e8f31bc7b4f4395143091fe752e8c',
+    'appId': '9aac8591cc' // production app id
+  })
+}else if(process.env.NODE_ENV === 'staging') {
+  initOpbeat({
+    'orgId': '470e8f31bc7b4f4395143091fe752e8c',
+    'appId': '9aac8591cc' // staging app id
+  })
+}
+// in local environments, don't call initOpbeat
+``` 
+
+This requires the webpack plugin `DefinePlugin` to be correctly set up to define `process.env`.
 
 ### Set context information
 

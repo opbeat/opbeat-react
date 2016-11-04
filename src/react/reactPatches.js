@@ -203,12 +203,14 @@ module.exports = function patchReact () {
     return function (self, args) {
       if (!serviceContainer) {
         serviceContainer = utils.opbeatGlobal()
-
-        var configWhiteList = serviceContainer.services.configService.get('performance.eventWhiteList')  || []
-        configWhiteList.forEach(function (ev) {
-          eventWhiteList[ev] = 1
-        })
-        transactionService = serviceContainer.services.transactionService
+        if (serviceContainer) {
+          // first time
+          var configWhiteList = serviceContainer.services.configService.get('performance.eventWhiteList')  || []
+          configWhiteList.forEach(function (ev) {
+            eventWhiteList[ev] = 1
+          })
+          transactionService = serviceContainer.services.transactionService
+        }
       }
 
       if (serviceContainer && args[0] && args[0]._dispatchListeners && args[0].nativeEvent) {

@@ -17,7 +17,6 @@ if(!utils.inBrowser()) {
   serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
   // disable
   utils.opbeatGlobal(false)
-
 } else {
   patchCommon()
   patchReact()
