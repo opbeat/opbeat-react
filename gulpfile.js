@@ -86,6 +86,7 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   var dirNeedsBuilding = [
     './test/e2e/react/react',
     './test/e2e/react/redux',
+    './test/e2e/react/no-init',
     './test/e2e/fetch'
   ]
 
