@@ -52,18 +52,17 @@ module.exports = {
   __esModule: true,
   default: configure,
   setUserContext: function setUserContext (userContext) {
-    if (utils.inBrowser() && utils.opbeatGlobal()) {
+    if (utils.opbeatGlobal()) {
       utils.opbeatGlobal().services.configService.set('context.user', userContext)
     }
   },
   setExtraContext: function setExtraContext (data) {
-    if (utils.inBrowser() && utils.opbeatGlobal()) {
+    if (utils.opbeatGlobal()) {
       utils.opbeatGlobal().services.configService.set('context.extra', data)
     }
   },
   captureError: function captureError(error) {
-    console.log("Error", error)
-    if (utils.inBrowser() && utils.opbeatGlobal()) {
+    if (utils.opbeatGlobal()) {
       utils.opbeatGlobal().services.exceptionHandler.processError(error)
     }
   }
