@@ -45,8 +45,8 @@ function routeChange (transactionService, state) {
 
   var transaction = transactionService.getCurrentTransaction()
   if (transaction && transaction.name !== 'ZoneTransaction') {
-    transaction.name = fullRoute // set the parametrized route
-    transaction.type = 'spa.route-change'
+    transaction.name = fullRoute // set the parameterized route
+    transaction.type = 'route-change.parameterized-roure'
   }
 }
 
@@ -77,7 +77,7 @@ function captureRouteChange (location) {
       transaction.end()
     }
 
-    transactionService.startTransaction(location.pathname, 'spa.route-change.concrete-route')
+    transactionService.startTransaction(location.pathname, 'route-change.concrete-route')
   }
 }
 

@@ -226,7 +226,7 @@ module.exports = function patchReact () {
           var trans = transactionService.getCurrentTransaction()
           if (trans && trans.name === 'ZoneTransaction' && args[0].nativeEvent.type in eventWhiteList) {
             var reactNode = nodeName(nativeEventTarget)
-            transactionService.startTransaction(reactNode + ':' + args[0].nativeEvent.type, 'spa.action')
+            transactionService.startTransaction(reactNode + ':' + args[0].nativeEvent.type, 'event.' + args[0].nativeEvent.type)
           }
         }
       }

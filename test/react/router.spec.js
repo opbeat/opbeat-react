@@ -99,7 +99,7 @@ describe('react-router: captureRouteChange', function () {
       treeWrapper = mount(tree)
 
       expect(transactionService.startTransaction.calls.count()).toBe(1)
-      expect(transactionService.startTransaction).toHaveBeenCalledWith('/', 'spa.route-change.concrete-route')
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('/', 'route-change.concrete-route')
       
       // has ended, so we can't use transactionService.getCurrentTransaction()
       // var lastTransaction = serviceContainer.services.zoneService.get('transaction')
@@ -119,7 +119,7 @@ describe('react-router: captureRouteChange', function () {
       browserHistory.push('/mypath')
 
       expect(transactionService.startTransaction.calls.count()).toBe(1)
-      expect(transactionService.startTransaction).toHaveBeenCalledWith('/mypath', 'spa.route-change.concrete-route')
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('/mypath', 'route-change.concrete-route')
 
       // has ended, so we can't use transactionService.getCurrentTransaction()
       var lastTransaction = serviceContainer.services.zoneService.get('transaction')
@@ -140,7 +140,7 @@ describe('react-router: captureRouteChange', function () {
 
       expect(transactionService.startTransaction.calls.count()).toBe(2)
       expect(transactionService.startTransaction.calls.allArgs()).toEqual(
-        [['/login', 'spa.route-change.concrete-route'], ['/new-path', 'spa.route-change.concrete-route']]
+        [['/login', 'route-change.concrete-route'], ['/new-path', 'route-change.concrete-route']]
       )
 
       // has ended, so we can't use transactionService.getCurrentTransaction()
