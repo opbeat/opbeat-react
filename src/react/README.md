@@ -93,7 +93,7 @@ class OfficeStatus extends React.Component {
 }
 ```
 
-For project with Redux, Opbeat will automatically include the content of the store as well as the `type` of the last 10 actions. This can be disabled by setting `redux.actionsCount` and `redux.sendStateOnException` to something falsy in the call to `initOpbeat`.
+For projects with Redux, Opbeat will automatically include the content of the store as well as the `type` of the last 10 actions. This can be disabled by setting `redux.actionsCount` and `redux.sendStateOnException` to something falsy in the call to `initOpbeat`.
 
 ### Manual error logging
 
