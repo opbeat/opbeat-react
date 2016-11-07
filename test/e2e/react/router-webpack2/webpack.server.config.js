@@ -23,9 +23,11 @@ module.exports = {
     __filename: true,
     __dirname: true
   },
-  resolve: {
-    modulesDirectories: [path.resolve(__dirname, '../../node_modules'), 'node_modules'],
+  resolve: { 
+    modules: [path.resolve(__dirname, '../../node_modules'), 'node_modules', __dirname],
+    // modules: [
   },
+
 
   resolveLoader: {
     modulesDirectories: [path.resolve(__dirname, '../../node_modules')]

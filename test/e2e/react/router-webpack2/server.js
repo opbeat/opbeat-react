@@ -1,4 +1,4 @@
-import '../opbeat-e2e'
+// import '../opbeat-e2e'
 import Express from 'express'
 import React from 'react'
 import createStore from './createStore'

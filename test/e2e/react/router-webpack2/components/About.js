@@ -2,7 +2,9 @@ import React from 'react'
 
 export default class About extends React.Component {
   componentWillMount() {
+    console.log("asdasd")
     console.log(window.__opbeat.services.transactionService.getCurrentTransaction())
+    console.log("asdasd1")
   }
   render() {
     return (<div>
