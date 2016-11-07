@@ -33,7 +33,8 @@ function configure (config, serviceFactory) {
     return false
   } else {  
     serviceContainer.services.configService.set('opbeatAgentName', 'opbeat-react')
-    serviceContainer.services.configService.set('reduxActionsLimit', 10)
+    serviceContainer.services.configService.set('redux.actionsCount', 10)
+    serviceContainer.services.configService.set('redux.sendStateOnException', true)
     serviceContainer.services.configService.setConfig(config)
     serviceContainer.initialize()
 
@@ -58,6 +59,12 @@ module.exports = {
   setExtraContext: function setExtraContext (data) {
     if (utils.inBrowser() && utils.opbeatGlobal()) {
       utils.opbeatGlobal().services.configService.set('context.extra', data)
+    }
+  },
+  captureError: function captureError(error) {
+    console.log("Error", error)
+    if (utils.inBrowser() && utils.opbeatGlobal()) {
+      utils.opbeatGlobal().services.exceptionHandler.processError(error)
     }
   }
 }

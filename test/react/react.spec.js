@@ -4,7 +4,8 @@ var ServiceFactory = require('../../src/common/ServiceFactory')
 var utils = require('../../src/lib/utils')
 var components = require('./components.jsx')
 var nodeName = require('../../src/react/utils').nodeName
-
+var TransportMock = require('../utils/transportMock')
+var captureError = require('../../src/react/react').captureError
 var ListOfLists = components.ListOfLists
 
 var mount = require('enzyme').mount
@@ -30,18 +31,13 @@ describe('react: nodeName', function () {
 })
 
 describe('react: generate traces', function () {
-
   var transactionService
   var serviceContainer
-  // var tree
-  // var treeWrapper
 
   beforeEach(function () {
     serviceContainer = new ServiceContainer(new ServiceFactory())
     serviceContainer.initialize()
     utils.opbeatGlobal(serviceContainer)
-    // Get rid of warning 'Location '/context.html''
-    // browserHistory.push('/')
 
     transactionService = serviceContainer.services.transactionService
   })
@@ -70,6 +66,37 @@ describe('react: generate traces', function () {
     })
 
     trans.end()
+  })
+})
+
+
+describe('react: send error', function () {
+  var transactionService
+  var serviceContainer
+  var serviceFactory
+  var transport
+
+  beforeEach(function () {
+    serviceFactory = new ServiceFactory()
+    serviceFactory.services['Transport'] = new TransportMock()
+
+    serviceContainer = new ServiceContainer(new ServiceFactory())
+    serviceContainer.initialize()
+    utils.opbeatGlobal(serviceContainer)
+
+    transactionService = serviceContainer.services.transactionService
+  })
+
+  it('sends errors', function () {
+    transport = serviceFactory.services['Transport']
+    expect(transport.errors).toEqual([])
+    transport.subscribe(function (event, errorData) {
+      if (event === 'sendError') {
+        expect(errorData.data.message).toBe('Error: test error')
+        done()
+      }
+    })
+    captureError(new Error('test error'))
   })
 })
 

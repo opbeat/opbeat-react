@@ -8,6 +8,7 @@ var passThrough = function (next) {
 
 function createOpbeatMiddleware (serviceContainer) {
   var transactionService
+  var lastActions
 
   return function (store) {
     serviceContainer = utils.opbeatGlobal()
@@ -17,6 +18,14 @@ function createOpbeatMiddleware (serviceContainer) {
 
     if (!transactionService) {
       transactionService = serviceContainer.services.transactionService
+      if (serviceContainer.services.configService.get('redux.actionsCount')) {
+        lastActions = new utils.RingBuffer(serviceContainer.services.configService.get('redux.actionsCount'))
+        serviceContainer.services.configService.set('redux._lastActions', lastActions)
+      }
+
+      if (serviceContainer.services.configService.get('redux.sendStateOnException')) {
+        serviceContainer.services.configService.set('redux._store', store)
+      }
     }
 
     return function (next) {
@@ -38,6 +47,10 @@ function createOpbeatMiddleware (serviceContainer) {
                 currTrans = transactionService.startTransaction(action.type, 'spa.action')
               }
             }
+          }
+
+          if(utils.isObject(action) && action.type && lastActions) {
+            lastActions.push(action.type)
           }
 
           ret = next(action)

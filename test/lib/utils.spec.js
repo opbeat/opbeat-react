@@ -48,3 +48,27 @@ describe('lib/utils - friendlyNodeName', function () {
     testHTMLFriendlyName('<button id="  " class=" ">text</button>', 'button')
   })
 })
+
+
+describe('lib/utils - RingBuffer', function () {
+  it('should work with when not full', function () {
+    var r = new utils.RingBuffer(4)
+
+    r.push(1)
+    r.push(2)
+
+    expect(r.getAll()).toEqual([1, 2])
+  })
+
+  it('should keep only X around', function () {
+    var r = new utils.RingBuffer(4)
+
+    r.push(1)
+    r.push(2)
+    r.push(3)
+    r.push(4)
+    r.push(5)
+
+    expect(r.getAll()).toEqual([2, 3, 4, 5])
+  })
+})

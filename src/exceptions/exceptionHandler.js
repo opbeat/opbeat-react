@@ -62,8 +62,27 @@ ExceptionHandler.prototype._processError = function processError (error, msg, fi
 
   var exceptionHandler = this
   exception.stack = stackFrames || []
+
+  var store = this._config.get('redux._store')
+  var actionBuffer = this._config.get('redux._lastActions')
+  var reactContext = {}
+
+  if (store) {
+    reactContext['Store state'] = store.getState()
+  }
+
+  if (actionBuffer) {
+    reactContext['Last ' + exceptionHandler._config.get('redux.actionsCount') + ' actions'] = actionBuffer.getAll()
+  }
+
   return frames.stackInfoToOpbeatException(exception).then(function (exception) {
-    var data = frames.processOpbeatException(exception, exceptionHandler._config.get('context.user'), exceptionHandler._config.get('context.extra'))
+    var extraContext = utils.mergeObject(exceptionHandler._config.get('context.extra'), reactContext)
+
+    var data = frames.processOpbeatException(
+      exception,
+      exceptionHandler._config.get('context.user'),
+      extraContext
+    )
     exceptionHandler._opbeatBackend.sendError(data)
   })['catch'](function (error) {
     exceptionHandler._logger.debug(error)
