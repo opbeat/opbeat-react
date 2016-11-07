@@ -14,9 +14,9 @@ Make sure to import `opbeat-react` before _anything_ else in your application.
 import initOpbeat from 'opbeat-react'
 
 initOpbeat({
-  'orgId': '470e8f31bc7b4f4395143091fe752e8c',
-  'appId': '9aac8591cc'
-})
+  orgId: '470e8f31bc7b4f4395143091fe752e8c',
+  appId: '9aac8591cc',
+});
 ```
 
 If you use react-router (v2 or v3), import 'opbeat-react/router'
@@ -26,9 +26,9 @@ import initOpbeat from 'opbeat-react'
 import 'opbeat-react/router' // enable react-router instrumentation
 
 initOpbeat({
-  'orgId': '470e8f31bc7b4f4395143091fe752e8c',
-  'appId': '9aac8591cc'
-})
+  orgId: '470e8f31bc7b4f4395143091fe752e8c',
+  appId: '9aac8591cc',
+});
 ```
 
 If you're using Redux, add the Opbeat middleware as the last middleware in your chain:
@@ -43,8 +43,8 @@ const store = createStore(
   applyMiddleware(
     thunk,
     createOpbeatMiddleware(),  // make sure this is the last one
-  )
-)
+  ),
+);
 ```
 
 ## Staging and local environments
@@ -56,14 +56,14 @@ import 'opbeat-react/router' // enable react-router instrumentation
 
 if (process.env.NODE_ENV === 'production') {
   initOpbeat({
-    'orgId': '470e8f31bc7b4f4395143091fe752e8c',
-    'appId': '9aac8591cc' // production app id
-  })
+    orgId: '470e8f31bc7b4f4395143091fe752e8c',
+    appId: '9aac8591cc', // production app id
+  });
 }else if(process.env.NODE_ENV === 'staging') {
   initOpbeat({
-    'orgId': '470e8f31bc7b4f4395143091fe752e8c',
-    'appId': '9aac8591cc' // staging app id
-  })
+    orgId: '470e8f31bc7b4f4395143091fe752e8c',
+    appId: '9aac8591cc', // staging app id
+  });
 }
 // in local environments, don't call initOpbeat
 ``` 
@@ -83,12 +83,12 @@ class OfficeStatus extends React.Component {
       id: 19,
       email: 'ron@opbeat.com',
       username: 'roncohen'
-    })
+    });
 
     setExtraContext({
       coffeeLevel: 'low',
       milkSolution: 'skim milk',
-    })
+    });
   }
 }
 ```
