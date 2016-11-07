@@ -93,6 +93,19 @@ class OfficeStatus extends React.Component {
 }
 ```
 
+### Manual error logging
+
+If you happen to manually `catch` an error, you can send it up to Opbeat like so:
+
+```js
+import { captureError } from 'opbeat-react'
+
+try {
+  throw new Error('Everything is broken')
+} catch (err) {
+  captureError(err)
+}
+```
 
 ## Using minification?
 
