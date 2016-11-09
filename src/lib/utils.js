@@ -239,6 +239,18 @@ module.exports = {
     }
   },
 
+  parseURL : function parseURL (url) {
+    var parser;
+
+    if (typeof window.URL === 'function') {
+        parser = new window.URL(url);
+    } else {
+        parser = document.createElement('a');
+        parser.href = url
+    }
+    return parser
+  },
+
   friendlyNodeName: function (domNode) {
     var tag = domNode.tagName ? domNode.tagName.toLowerCase() : ''
     var idName = domNode.getAttribute('id')

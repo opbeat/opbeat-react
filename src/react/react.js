@@ -12,7 +12,6 @@ if(!utils.inBrowser()) {
   serviceContainer.services.logger.warn('Opbeat: Only enabled in browser.')
   // disable
   utils.opbeatGlobal(false)
-
 } else if(!serviceContainer.services.configService.isPlatformSupported()) {
   serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
   // disable
@@ -76,6 +75,8 @@ function setTransactionName (transactionName, transactionType) {
       transaction.name = transactionName
       transaction.type = transactionType
     }
+    
+    return transaction
   }
 }
 

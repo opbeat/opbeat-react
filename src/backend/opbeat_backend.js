@@ -1,5 +1,7 @@
 var backendUtils = require('./backend_utils')
 var utils = require('../lib/utils')
+var captureHardNavigation = require('../common/captureHardNavigation')
+
 module.exports = OpbeatBackend
 function OpbeatBackend (transport, logger, config) {
   this._logger = logger
@@ -148,6 +150,10 @@ OpbeatBackend.prototype.sendTransactions = function (transactionList) {
 }
 
 OpbeatBackend.prototype._formatTransactions = function (transactionList) {
+  if (this._config.get('performance.initial-page-load')) {
+    transactionList.forEach(captureHardNavigation)
+  }
+  
   var transactions = this.groupTransactions(transactionList)
 
   var traces = [].concat.apply([], transactionList.map(function (trans) {

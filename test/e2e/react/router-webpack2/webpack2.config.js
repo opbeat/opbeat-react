@@ -15,6 +15,7 @@ module.exports = {
   resolveLoader: {
     modules: [path.resolve(__dirname, '../../node_modules')]
   },
+  devtool: "cheap-sourcegit -map",
   module: {
     loaders: [
       {
@@ -30,7 +31,7 @@ module.exports = {
   plugins: [
       new webpack.ProvidePlugin({
     // make fetch available
-   fetch: 'exports?self.fetch!whatwg-fetch',
+     fetch: 'exports?self.fetch!whatwg-fetch',
     })
   ]
 }

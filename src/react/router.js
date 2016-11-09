@@ -42,6 +42,7 @@ function makeSignatureFromRoutes (routes, location) {
   return fullRoute
 }
 
+var hardNavigation = true
 
 function patchTransitionManager (transitionManager) {
   patchObject(transitionManager, 'listen', function (delegate) {
@@ -52,7 +53,12 @@ function patchTransitionManager (transitionManager) {
               if (utils.opbeatGlobal()) {
                 var state = arguments[1]
                 var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
-                setTransactionName(fullRoute, 'route-change.parameterized-route') 
+                var transaction = setTransactionName(fullRoute, 'route-change.parameterized-route')
+
+                if (hardNavigation) {
+                  hardNavigation = false
+                  transaction.wasHardNavigation = true
+                }
               }
             }
             return args[0].apply(self, arguments)
@@ -60,7 +66,7 @@ function patchTransitionManager (transitionManager) {
         }
       }
     })
-} 
+}
 
 function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {

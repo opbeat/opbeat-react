@@ -29,9 +29,9 @@ Trace.prototype.start = function () {
 }
 
 Trace.prototype.calcDiff = function () {
-  if (!this._end || !this._start) {
-    return
-  }
+  // if (utils.isUndefined(this._end) || !this._start) {
+    // return
+  // }
   this._diff = this._end - this._start
 }
 
@@ -48,12 +48,8 @@ Trace.prototype.end = function () {
 }
 
 Trace.prototype.duration = function () {
-  if (!this.ended || !this._start) {
-    return null
-  }
-  this._diff = this._end - this._start
-
-  return parseFloat(this._diff)
+  this.calcDiff()
+  return this._diff
 }
 
 Trace.prototype.startTime = function () {
