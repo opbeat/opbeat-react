@@ -7,11 +7,11 @@ import ReactDOM from 'react-dom'
 import { Router, browserHistory } from 'react-router'
 import routes from './routes'
 import createStore from './createStore'
-import { syncHistoryWithStore } from 'react-router-redux'
+// import { syncHistoryWithStore } from 'react-router-redux'
 
 const store = createStore()
-const history = syncHistoryWithStore(browserHistory, store)
-
+// const history = createMemoryHistory() // syncHistoryWithStore(browserHistory, store)
+console.log("MHELLO")
 
 ReactDOM.render(
   <Router routes={routes} history={browserHistory}/>,

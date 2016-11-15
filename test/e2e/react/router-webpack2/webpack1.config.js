@@ -7,12 +7,12 @@ module.exports = {
   // This ensures that we use the test/e2e/node_modules
   // even for requires in "src". This is required for the patches to work
   // otherwise, we'll patch two different instances of React.
-  resolve: { 
-    modules: [path.resolve(__dirname, '../../node_modules'), 'node_modules', __dirname],
-    // modules: [
+  
+  resolve: {
+    modulesDirectories: [path.resolve(__dirname, '../../node_modules'), 'node_modules'],
   },
   resolveLoader: {
-    modules: [path.resolve(__dirname, '../../node_modules')]
+    modulesDirectories: [path.resolve(__dirname, '../../node_modules')]
   },
   module: {
     loaders: [
@@ -27,13 +27,6 @@ module.exports = {
     ]
   },
   plugins: [
-      new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      children: true,
-      // minChunks: 2,
-      async: true,
-      }),
-    
       new webpack.ProvidePlugin({
     // make fetch available
    fetch: 'exports?self.fetch!whatwg-fetch',

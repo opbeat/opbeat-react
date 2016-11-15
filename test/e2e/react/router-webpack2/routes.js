@@ -11,10 +11,16 @@ function loadComponent(prom) {
 }
 
 module.exports = (
-  <Route path="/" component={App}>
+ <Route path="/" component={App}>
     <IndexRoute component={Index}/>
-    <Route path="/about" getComponent={loadComponent(() => System.import('components/About.js') )} />  // async route
-    <Route path="users" component={Users}>
+      <Route path="/about1" getComponent={loadComponent(() => System.import('components/About.js') )} />
+      <Route path="/about2" getComponent={(nextState, cb) => {
+            require.ensure([], function (require) {
+            cb(null, [
+              require('./components/About').default,
+            ])
+          })}} />
+      <Route path="users" component={Users}>
       <IndexRoute component={UsersIndex}/>
       <Route path=":id" component={User}/>
     </Route>
