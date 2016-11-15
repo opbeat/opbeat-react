@@ -83,7 +83,7 @@ function captureRouteChange (location) {
 
 function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {
-    return function (self, args) {
+    return function componentWillMountWrapper (self, args) {
       if (self.props && self.props.history && self.props.history.listen) {
         self._opbeatUnlisten = self.props.history.listen(captureRouteChange)
       }
