@@ -7,7 +7,7 @@ function combineRoutes (routes) {
   var combinedRoute
 
   for (var i = 0; i < routes.length; i++) {
-    if (routes[i].path) {
+    if (routes[i].path && routes[i].path !== '/') {
       pathParts.push(routes[i].path.slice(
         routes[i].path[0] === '/' ? 1 : 0,
         routes[i].path[routes[i].path.length - 1] === '/' ? -1 : routes[i].path.length

@@ -41,6 +41,12 @@ describe('react-router: makeSignatureFromRoutes', function () {
 
     routes = [{path: '/'}, {path: 'something'}]
     expect(makeSignatureFromRoutes(routes, pushLocation)).toBe('/something')
+
+    routes = [{path: '/'}, {path: '/'}, {path: '/'}, {path: 'something'}]
+    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe('/something')
+
+    routes = [{path: '/'}, {path: '/'}, {path: '/something'}, {path: ''}]
+    expect(makeSignatureFromRoutes(routes, pushLocation)).toBe('/something')
   })
 
   it('should handle zero routes', function () {
