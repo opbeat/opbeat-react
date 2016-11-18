@@ -1,6 +1,6 @@
 var React = require('react')
 var ServiceContainer = require('../../src/common/serviceContainer')
-var ServiceFactory = require('../../src/common/ServiceFactory')
+var ServiceFactory = require('../../src/common/serviceFactory')
 var utils = require('../../src/lib/utils')
 var components = require('./components.jsx')
 var nodeName = require('../../src/react/utils').nodeName
@@ -47,16 +47,29 @@ describe('react: generate traces', function () {
 
     serviceContainer.services.zoneService.runInOpbeatZone(function() {
       var wrapper = mount(React.createElement(ListOfLists))
+      var expected
 
-      var expected = [
-        {signature: 'Constructor (5)', type: 'template.update'}, // Enzyme adds a wrapper :/
-        {signature: 'Constructor', type: 'template.component'},
-        {signature: 'ListOfLists', type: 'template.component'},
-        {signature: 'List', type: 'template.component'},
-        {signature: 'Value', type: 'template.component'},
-        {signature: 'Link', type: 'template.component'},
-        {signature: 'transaction', type: 'transaction'}
-      ]
+      // with react <15.4, enzyme will add a wrapper here
+      if (trans.traces.length === 7) {      
+        expected = [
+          {signature: 'Constructor (5)', type: 'template.update'}, // Enzyme adds a wrapper :/
+          {signature: 'Constructor', type: 'template.component'},
+          {signature: 'ListOfLists', type: 'template.component'},
+          {signature: 'List', type: 'template.component'},
+          {signature: 'Value', type: 'template.component'},
+          {signature: 'Link', type: 'template.component'},
+          {signature: 'transaction', type: 'transaction'}
+        ]
+      } else {
+        expected = [
+          {signature: 'ListOfLists (4)', type: 'template.update'},
+          {signature: 'ListOfLists', type: 'template.component'},
+          {signature: 'List', type: 'template.component'},
+          {signature: 'Value', type: 'template.component'},
+          {signature: 'Link', type: 'template.component'},
+          {signature: 'transaction', type: 'transaction'}
+        ]
+      }
       expect(trans.traces.length).toBe(expected.length)
 
       var actual = trans.traces.map(function(t) { return {signature: t.signature, type: t.type}})

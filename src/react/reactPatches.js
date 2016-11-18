@@ -1,11 +1,4 @@
-// Order here matters
-var ReactDefaultBatchingStrategy = require('react/lib/ReactDefaultBatchingStrategy')
-var ReactReconciler = require('react/lib/ReactReconciler')
-var ReactInjection = require('react/lib/ReactInjection')
-var EventPluginUtils = require('react/lib/EventPluginUtils')
-var ReactMount = require('react/lib/ReactMount')
-var getEventTarget = require('react/lib/getEventTarget')
-
+var reactInternals = require('./reactInternals')
 var patchMethod = require('../common/patchUtils').patchMethod
 var nodeName = require('./utils').nodeName
 var utils = require('../lib/utils')
@@ -120,11 +113,11 @@ module.exports = function patchReact () {
     }
   }
 
-  patchMethod(ReactDefaultBatchingStrategy, 'batchedUpdates', batchedUpdatePatch)
-  ReactInjection.Updates.injectBatchingStrategy(ReactDefaultBatchingStrategy)
+  patchMethod(reactInternals.ReactDefaultBatchingStrategy, 'batchedUpdates', batchedUpdatePatch)
+  reactInternals.ReactInjection.Updates.injectBatchingStrategy(reactInternals.ReactDefaultBatchingStrategy)
 
   // React 0.14.0+ exposes ReactMount.TopLevelWrapper
-  var ReactTopLevelWrapper = ReactMount.TopLevelWrapper
+  var ReactTopLevelWrapper = reactInternals.ReactMount.TopLevelWrapper
 
   var componentRenderPatch = function (delegate) {
     var serviceContainer
@@ -188,11 +181,11 @@ module.exports = function patchReact () {
     }
   }
 
-  patchMethod(ReactReconciler, 'mountComponent', componentRenderPatch)
-  patchMethod(ReactReconciler, 'receiveComponent', componentRenderPatch)
-  patchMethod(ReactReconciler, 'performUpdateIfNecessary', componentRenderPatch)
+  patchMethod(reactInternals.ReactReconciler, 'mountComponent', componentRenderPatch)
+  patchMethod(reactInternals.ReactReconciler, 'receiveComponent', componentRenderPatch)
+  patchMethod(reactInternals.ReactReconciler, 'performUpdateIfNecessary', componentRenderPatch)
 
-  patchMethod(EventPluginUtils, 'executeDispatchesInOrder', function (delegate) {
+  patchMethod(reactInternals.EventPluginUtils, 'executeDispatchesInOrder', function (delegate) {
     // for quick lookup, make this into an object
     var eventWhiteList = {}
     var serviceContainer
@@ -214,7 +207,7 @@ module.exports = function patchReact () {
       }
 
       if (serviceContainer && args[0] && args[0]._dispatchListeners && args[0].nativeEvent) {
-        var nativeEventTarget = getEventTarget(args[0].nativeEvent)
+        var nativeEventTarget = reactInternals.getEventTarget(args[0].nativeEvent)
         if (nativeEventTarget) {
           // We want traces that have already started to go into a transaction
           // named after the event that fired it.

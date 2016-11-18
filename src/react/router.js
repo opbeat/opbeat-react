@@ -46,7 +46,7 @@ function routeChange (transactionService, state) {
   var transaction = transactionService.getCurrentTransaction()
   if (transaction && transaction.name !== 'ZoneTransaction') {
     transaction.name = fullRoute // set the parameterized route
-    transaction.type = 'route-change.parameterized-roure'
+    transaction.type = 'route-change.parameterized-route'
   }
 }
 

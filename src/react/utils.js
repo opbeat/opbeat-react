@@ -1,5 +1,4 @@
-var ReactDOMComponentTree = require('react/lib/ReactDOMComponentTree')
-
+var ReactDOMComponentTree = require('./reactInternals').ReactDOMComponentTree
 var utils = require('../lib/utils')
 
 function nodeName (domNode) {
