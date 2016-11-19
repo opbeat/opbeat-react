@@ -122,7 +122,7 @@ gulp.task('build:release', ['apply-prod-environment'], function () {
   gulp.src(['src/react/README.md', 'src/react/package.json'])
     .pipe(gulp.dest(prodPath))
 
-  gulp.src(['src/**/*.js'], {ignore: ['**/angular/**', '**/react/**']})
+  gulp.src(['src/**/*.js'], {ignore: ['src/reactInternals', '**/angular/**', '**/react/**']})
     .pipe(replace(
       new RegExp(RegExp.escape('%%VERSION%%'), 'g'),
       'v' + version
@@ -136,6 +136,13 @@ gulp.task('build:release', ['apply-prod-environment'], function () {
 
   var license = gulp.src(['LICENSE'])
     .pipe(gulp.dest(prodPath))
+
+  // reactInternals
+  var prodPath = './dist/reactInternals'
+  gulp.src(['src/react/reactInternals/**/*'] )
+    .pipe(gulp.dest(prodPath))
+
+  
 })
 
 gulp.task('apply-prod-environment', function () {
