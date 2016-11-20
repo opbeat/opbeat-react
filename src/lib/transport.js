@@ -17,8 +17,15 @@ module.exports = {
 
 function _sendToOpbeat (endpoint, data, headers) {
   logger.log('opbeat.transport.sendToOpbeat', data)
+  var apiHost
+  if (config.get('apiHost').indexOf('http://') === 0 || config.get('apiHost').indexOf('https://') === 0)
+  {
+    apiHost = config.get('apiHost')
+  } else {
+    apiHost = 'https://' + config.get('apiHost')
+  }
 
-  var url = 'https://' + config.get('apiHost') + '/api/v1/organizations/' + config.get('orgId') + '/apps/' + config.get('appId') + '/client-side/' + endpoint + '/'
+  var url = apiHost + '/api/v1/organizations/' + config.get('orgId') + '/apps/' + config.get('appId') + '/client-side/' + endpoint + '/'
 
   return _makeRequest(url, 'POST', 'JSON', data, headers)
 }
