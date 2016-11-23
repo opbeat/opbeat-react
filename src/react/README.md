@@ -19,7 +19,7 @@ initOpbeat({
 });
 ```
 
-If you use react-router (v2 or v3), import 'opbeat-react/router'
+If you use react-router (v2 or v3), import 'opbeat-react/router'. See the [transactions api](#transactions-api) for examples without react-router. 
 
 ```js
 import initOpbeat from 'opbeat-react'
@@ -106,6 +106,37 @@ try {
   throw new Error('Everything is broken')
 } catch (err) {
   captureError(err)
+}
+```
+
+### Transactions api
+
+In Opbeat, every measurement must be connected to a transaction. Transactions can be route changes, click events etc.
+
+A simple API is exposed to let you set the name of the ongoing transaction and start new transactions.
+For example, this can be used to let Opbeat know about route changes even if you're not using a supported router.  
+
+
+* `startTransaction()`<br>
+Call this to let Opbeat know a new transaction has started.
+For example, if you're not using a supported router, you can use `startTransaction` to let Opbeat know that a route change has begun.
+
+* `setTransactionName(transactionName, transactionType)`<br>
+Set the name of the ongoing transaction to `transactionName`. For route changes, `transactionName` should be the abstract or parametrized route path (`/coffees/:beanID` and not `/coffees/99`).
+You must also specify a type. `transactionType` is an arbitrary string, but transactions of the same type are shown together in the Opbeat UI. For route changes, you should use the string `route-change`.
+`setTransactionName` will automatically call `startTransaction` if no transaction has been started yet. 
+If a transaction is already ongoing, `setTransactionName` will override any name and type previously set.
+
+Example:
+
+This is a Redux middleware that will look for actions of type `route-change-action` and signal Opbeat that a route change is going on. It relies on a magic method `myRouter.matchRoute` to convert a concrete path into the abstract route that we need. 
+```js
+const reduxTransactionDetector = store => next => action => {
+  if (typeof action === 'object' && action.type === 'route-change-action') {
+    const abstractRoute = myRouter.matchRoute(action.newLocation)
+    setTransactionName(abstractRoute, 'route-change')
+  }
+  return next(action)
 }
 ```
 

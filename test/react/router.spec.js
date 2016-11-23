@@ -69,15 +69,13 @@ describe('react-router: makeSignatureFromRoutes', function () {
   })
 })
 
-describe('react-router: captureRouteChange', function () {
+describe('react-router: setTransactionName', function () {
   var transactionService
   var serviceContainer
   var tree
   var treeWrapper
 
   beforeEach(function () {
-    
-
     serviceContainer = new ServiceContainer(new ServiceFactory())
     serviceContainer.initialize()
     utils.opbeatGlobal(serviceContainer)
@@ -105,12 +103,12 @@ describe('react-router: captureRouteChange', function () {
       treeWrapper = mount(tree)
 
       expect(transactionService.startTransaction.calls.count()).toBe(1)
-      expect(transactionService.startTransaction).toHaveBeenCalledWith('/', 'route-change.concrete-route')
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('unknown', 'unknown')
       
+      var lastTransaction = serviceContainer.services.zoneService.get('transaction')
       // has ended, so we can't use transactionService.getCurrentTransaction()
-      // var lastTransaction = serviceContainer.services.zoneService.get('transaction')
-      // expect(lastTransaction.type).toBe('spa.route-change')
-      // expect(lastTransaction.name).toBe('/')
+      expect(lastTransaction.name).toBe('/')
+      expect(lastTransaction.type).toBe('route-change.parameterized-route')
     })
 
   })
@@ -125,13 +123,12 @@ describe('react-router: captureRouteChange', function () {
       browserHistory.push('/mypath')
 
       expect(transactionService.startTransaction.calls.count()).toBe(1)
-      expect(transactionService.startTransaction).toHaveBeenCalledWith('/mypath', 'route-change.concrete-route')
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('unknown', 'unknown')
 
       // has ended, so we can't use transactionService.getCurrentTransaction()
       var lastTransaction = serviceContainer.services.zoneService.get('transaction')
-      // check that the type was updated with a parametrized route
-      // expect(lastTransaction.type).toBe('spa.route-change')
-      // expect(lastTransaction.name).toBe('/mypath')
+      expect(lastTransaction.name).toBe('/mypath')
+      expect(lastTransaction.type).toBe('route-change.parameterized-route')
     })
   })
 
@@ -145,13 +142,11 @@ describe('react-router: captureRouteChange', function () {
       browserHistory.push('/login')
 
       expect(transactionService.startTransaction.calls.count()).toBe(2)
-      expect(transactionService.startTransaction.calls.allArgs()).toEqual(
-        [['/login', 'route-change.concrete-route'], ['/new-path', 'route-change.concrete-route']]
-      )
 
       // has ended, so we can't use transactionService.getCurrentTransaction()
-      // var lastTransaction = serviceContainer.services.zoneService.get('transaction')
-      // expect(lastTransaction.type).toBe('spa.route-change')
+      var lastTransaction = serviceContainer.services.zoneService.get('transaction')
+      expect(lastTransaction.name).toBe('/new-path')
+      expect(lastTransaction.type).toBe('route-change.parameterized-route')
     })
   })
 

@@ -48,6 +48,37 @@ function configure (config, serviceFactory) {
   }
 }
 
+function startTransaction () {
+  var serviceContainer = utils.opbeatGlobal()
+  if (serviceContainer) {
+    var transactionService = serviceContainer.services.transactionService
+    var transaction = transactionService.getCurrentTransaction()
+    if (transaction && transaction.name !== 'ZoneTransaction') {
+      transaction.end()
+    }
+
+    return transactionService.startTransaction('unknown', 'unknown')
+  }
+}
+
+function setTransactionName (transactionName, transactionType) {
+  var serviceContainer = utils.opbeatGlobal()
+  if (serviceContainer) {
+    serviceContainer.services.logger.trace('setTransactionName(\'' + transactionName + '\', \'' + transactionType + '\')')
+
+    var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
+
+    if (!transaction) {
+      transaction = startTransaction()
+    }
+
+    if (transaction.name !== 'ZoneTransaction') {
+      transaction.name = transactionName
+      transaction.type = transactionType
+    }
+  }
+}
+
 module.exports = {
   __esModule: true,
   default: configure,
@@ -65,5 +96,7 @@ module.exports = {
     if (utils.opbeatGlobal()) {
       utils.opbeatGlobal().services.exceptionHandler.processError(error)
     }
-  }
+  },
+  startTransaction: startTransaction,
+  setTransactionName: setTransactionName
 }

@@ -1,6 +1,8 @@
 var patchObject = require('../common/patchUtils').patchObject
 var Router = require('react-router').Router
 var utils = require('../lib/utils')
+var startTransaction = require('./react').startTransaction
+var setTransactionName = require('./react').setTransactionName
 
 function combineRoutes (routes) {
   var pathParts = []
@@ -40,15 +42,6 @@ function makeSignatureFromRoutes (routes, location) {
   return fullRoute
 }
 
-function routeChange (transactionService, state) {
-  var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
-
-  var transaction = transactionService.getCurrentTransaction()
-  if (transaction && transaction.name !== 'ZoneTransaction') {
-    transaction.name = fullRoute // set the parameterized route
-    transaction.type = 'route-change.parameterized-route'
-  }
-}
 
 function patchTransitionManager (transitionManager) {
   patchObject(transitionManager, 'listen', function (delegate) {
@@ -57,8 +50,9 @@ function patchTransitionManager (transitionManager) {
           return delegate.call(self, function () {
             if (arguments.length === 2) { // error, nextState
               if (utils.opbeatGlobal()) {
-                // pass through
-                routeChange(utils.opbeatGlobal().services.transactionService, arguments[1]) 
+                var state = arguments[1]
+                var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
+                setTransactionName(fullRoute, 'route-change.parameterized-route') 
               }
             }
             return args[0].apply(self, arguments)
@@ -68,24 +62,11 @@ function patchTransitionManager (transitionManager) {
     })
 } 
 
-function captureRouteChange (location) {
-  var serviceContainer = utils.opbeatGlobal()
-  if (serviceContainer) {
-    var transactionService = serviceContainer.services.transactionService
-    var transaction = transactionService.getCurrentTransaction()
-    if (transaction && transaction.name !== 'ZoneTransaction') {
-      transaction.end()
-    }
-
-    transactionService.startTransaction(location.pathname, 'route-change.concrete-route')
-  }
-}
-
 function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {
     return function componentWillMountWrapper (self, args) {
       if (self.props && self.props.history && self.props.history.listen) {
-        self._opbeatUnlisten = self.props.history.listen(captureRouteChange)
+        self._opbeatUnlisten = self.props.history.listen(startTransaction)
       }
 
       // react-router version 2.0 has 'createRouterObjects'
@@ -108,8 +89,9 @@ function patchRouter (router) {
             return transitionManager
           }
         })
+
         if (self.props.history) {
-          captureRouteChange(self.props.history.getCurrentLocation())
+          startTransaction()
         }
       }
 
