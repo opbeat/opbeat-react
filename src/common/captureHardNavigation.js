@@ -5,7 +5,7 @@ var eventPairs = [
   ['connectStart', 'connectEnd', 'Connect'],
   ['requestStart', 'responseStart', 'Sending and waiting for first byte'],
   ['responseStart', 'responseEnd', 'Downloading'],
-  ['domLoading', 'domInteractive', 'Parsing'],
+  ['domLoading', 'domInteractive', 'Fetching, parsing and sync. execution'],
   ['domContentLoadedEventStart', 'domContentLoadedEventEnd', '"DOMContentLoaded" event handling'],
   ['loadEventStart', 'loadEventEnd', '"load" event handling'],
 ]
@@ -21,7 +21,9 @@ module.exports = function captureHardNavigation (transaction) {
     transaction.name += ' (initial page load)' // temporary until we support transaction types
     for(var i = 0; i < eventPairs.length; i++) {
       var transactionStart = eventPairs[0]
-      if (timings[eventPairs[i][0]] && timings[eventPairs[i][1]]) {
+      var start = timings[eventPairs[i][0]],
+          end = timings[eventPairs[i][1]]
+      if (start && end && end - start !== 0) {
         var trace = new Trace(transaction, eventPairs[i][2], "hard-navigation.browser-timing")
         trace._start = timings[eventPairs[i][0]] - baseTime
         trace._end = timings[eventPairs[i][1]] - baseTime
