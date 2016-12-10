@@ -148,6 +148,11 @@ Install this plugin:
 This adds `MyComponent.displayName = 'MyComponent'` automatically to compoenents defined in your application.
 Remember to add the plugin to your `.babelrc` or your webpack configuration:
 
+
+<b>Note on 'transform-decorators-legacy' plugin:</b> If you are using `transform-decorators-legacy`, make sure it appears in the list of plugins *after* `add-react-displayname`. 
+
+
+
 #### .babelrc:
 ```
 "plugins": [
@@ -163,6 +168,7 @@ query: {
   plugins: ["add-react-displayname"]
 }
 ```
+
 
 ## Support
 
