@@ -10,12 +10,12 @@ var ReactTopLevelWrapper = ReactMount.TopLevelWrapper
 
 
 function isTopLevelWrapper(element) {
-    return element && element.type &&
-    (
-      element.type === ReactTopLevelWrapper ||
-      element.type.isReactTopLevelWrapper
-    )
-  }
+  return element && element.type &&
+  (
+    element.type === ReactTopLevelWrapper ||
+    element.type.isReactTopLevelWrapper
+  )
+}
 
 
 var nodeName
@@ -48,6 +48,8 @@ if (ReactDOMComponentTree) {
     elements.reverse()
     return elements.join(' ')
   }
+} else {
+  nodeName = function nodeName (domNode) { return utils.friendlyNodeName(domNode) }
 }
 
 module.exports = {

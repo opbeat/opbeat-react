@@ -10,25 +10,50 @@ var ListOfLists = components.ListOfLists
 
 var mount = require('enzyme').mount
 
-describe('react: nodeName', function () {
-  it('gets the correct name for nested components', function () {
-    var wrapper = mount(React.createElement(ListOfLists))
-    var li = wrapper.find('li').node
-    expect(nodeName(li)).toBe('List ul li.item1')
 
-    var p = wrapper.find('p').node
-    expect(nodeName(p)).toBe('ListOfLists div p#paragraph')
+if (React.version.split('.')[0] > 0) {
+  // Only works for 15.0+ React
+  describe('react: nodeName', function () {
+    it('gets the correct name for nested components', function () {
+      var wrapper = mount(React.createElement(ListOfLists))
+      var li = wrapper.find('li').node
+      expect(nodeName(li)).toBe('List ul li.item1')
 
-    // nested madness
-    var span = wrapper.find('span.span1').node
-    expect(span).toBeTruthy()
-    expect(nodeName(span)).toBe('Link span.span1')
+      var p = wrapper.find('p').node
+      expect(nodeName(p)).toBe('ListOfLists div p#paragraph')
 
-    var span2 = wrapper.find('span.span2').node
-    expect(span2).toBeTruthy()
-    expect(nodeName(span2)).toBe('Value div span.span2')
+      // nested madness
+      var span = wrapper.find('span.span1').node
+      expect(span).toBeTruthy()
+      expect(nodeName(span)).toBe('Link span.span1')
+
+      var span2 = wrapper.find('span.span2').node
+      expect(span2).toBeTruthy()
+      expect(nodeName(span2)).toBe('Value div span.span2')
+    })
   })
-})
+} else {
+  // Special case for React 0.14.x
+  describe('react: nodeName', function () {
+    it('gets the correct name for nested components', function () {
+      var wrapper = mount(React.createElement(ListOfLists))
+      var li = wrapper.find('li').node
+      expect(nodeName(li)).toBe('li.item1')
+
+      var p = wrapper.find('p').node
+      expect(nodeName(p)).toBe('p#paragraph')
+
+      // nested madness
+      var span = wrapper.find('span.span1').node
+      expect(span).toBeTruthy()
+      expect(nodeName(span)).toBe('span.span1')
+
+      var span2 = wrapper.find('span.span2').node
+      expect(span2).toBeTruthy()
+      expect(nodeName(span2)).toBe('span.span2')
+    })
+  })  
+}
 
 describe('react: generate traces', function () {
   var transactionService
