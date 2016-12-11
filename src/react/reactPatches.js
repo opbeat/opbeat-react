@@ -2,6 +2,7 @@ var reactInternals = require('./reactInternals')
 var patchMethod = require('../common/patchUtils').patchMethod
 var nodeName = require('./utils').nodeName
 var utils = require('../lib/utils')
+var isTopLevelWrapper = require('./utils').isTopLevelWrapper
 
 var Trace = require('../transaction/trace')
 
@@ -116,12 +117,10 @@ module.exports = function patchReact () {
   patchMethod(reactInternals.ReactDefaultBatchingStrategy, 'batchedUpdates', batchedUpdatePatch)
   reactInternals.ReactInjection.Updates.injectBatchingStrategy(reactInternals.ReactDefaultBatchingStrategy)
 
-  // React 0.14.0+ exposes ReactMount.TopLevelWrapper
-  var ReactTopLevelWrapper = reactInternals.ReactMount.TopLevelWrapper
-
   var componentRenderPatch = function (delegate) {
     var serviceContainer
     return function (self, args) {
+      var out
       if (!serviceContainer) {
         serviceContainer = utils.opbeatGlobal()
       }
@@ -131,20 +130,12 @@ module.exports = function patchReact () {
         var name = component.getName()
         // debugger;
         if (
-            name === null || 
-            (
-              component._currentElement && component._currentElement.type &&
-                (
-                  component._currentElement.type === ReactTopLevelWrapper ||
-                  component._currentElement.type.isReactTopLevelWrapper
-                )
-            )
+            name === null || isTopLevelWrapper(component._currentElement)
         ) {
           // TopLevelWrapper or null components don't make sense to include here
           return delegate.apply(self, args)
         }
 
-        var out
         var renderState = serviceContainer.services.zoneService.get('renderState')
 
         if (!renderState.componentStats[name]) {
@@ -174,10 +165,11 @@ module.exports = function patchReact () {
         }
 
         renderState.currRoot = parent
-        return out
       } else {
-        return delegate.apply(self, args)
+        out = delegate.apply(self, args)
       }
+      return out
+
     }
   }
 
@@ -216,8 +208,10 @@ module.exports = function patchReact () {
           // invoked by the task, we should do so now.
           // because of ZoneTransactions, any trace started already will be
           // transferred.
+
+          // nodeName is only defined for 15.0+
           var trans = transactionService.getCurrentTransaction()
-          if (trans && trans.name === 'ZoneTransaction' && args[0].nativeEvent.type in eventWhiteList) {
+          if (trans && nodeName && trans.name === 'ZoneTransaction' && args[0].nativeEvent.type in eventWhiteList) {
             var reactNode = nodeName(nativeEventTarget)
             transactionService.startTransaction(reactNode + ':' + args[0].nativeEvent.type, 'event.' + args[0].nativeEvent.type)
           }

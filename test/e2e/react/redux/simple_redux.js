@@ -104,10 +104,10 @@ var IncrDecr = React.createClass({
     store.dispatch(showErroneousComponent())
   },
   render: function() {
-    const { counter, erroneousComponent, onIncrement, onDecrement } = this.props
+    const { value, erroneousComponent, onIncrement, onDecrement } = this.props
     return (
       <p>
-        Clicked: {counter} times
+        Clicked: '{counter}' times
         {' '}
         <button id="incr" onClick={onIncrement}>
           +
