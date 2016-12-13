@@ -21,7 +21,7 @@ function isTopLevelWrapper(element) {
 var nodeName
 if (ReactDOMComponentTree) {
   nodeName = function nodeName (domNode) {
-    var reactElem = ReactDOMComponentTree.getClosestInstanceFromNode(domElem)
+    var reactElem = ReactDOMComponentTree.getClosestInstanceFromNode(domNode)
     var elements = []
     var owner = reactElem._currentElement._owner
 
@@ -31,8 +31,6 @@ if (ReactDOMComponentTree) {
       elements.push(reactElem._tag)
       reactElem = reactElem._hostParent
     }
-
-    var owner = reactElem._currentElement._owner
 
     if (owner !== null) {
       elements.push(owner.getName())
