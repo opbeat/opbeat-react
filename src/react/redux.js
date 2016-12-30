@@ -38,13 +38,13 @@ function createOpbeatMiddleware (serviceContainer) {
           if (action.type && action.type.indexOf('@@') !== 0) { // doesn't start with
             if (currTrans && currTrans.name !== 'ZoneTransaction') {
               if (action.type) {
-                tr = transactionService.startTrace('dispatch ' + action.type, 'dispatch.redux')
+                tr = transactionService.startTrace('dispatch ' + action.type, 'action')
               } else {
-                tr = transactionService.startTrace('dispatch', 'dispatch.redux')
+                tr = transactionService.startTrace('dispatch', 'action')
               }
             } else {
               if (action.type) {
-                currTrans = transactionService.startTransaction(action.type, 'dispatch.redux')
+                currTrans = transactionService.startTransaction(action.type, 'action')
               }
             }
           }

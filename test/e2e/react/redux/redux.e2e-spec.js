@@ -15,7 +15,7 @@ describe('redux-app', function () {
         expect(transactions.traces.groups.length).toBe(4)
 
         expect(transactions.traces.groups[1].kind).toBe('template.update')
-        expect(transactions.traces.groups[2].kind).toBe('dispatch.redux')
+        expect(transactions.traces.groups[2].kind).toBe('action')
 
         expect(transactions.traces.raw.length).toBe(1)
         expect(transactions.traces.raw[0].length).toBe(6)
@@ -53,7 +53,7 @@ describe('redux-app', function () {
         expect(transactions.traces.raw[0].length).toBe(5)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('DECREMENT')
-        expect(transactions.transactions[0].kind).toBe('dispatch.redux')
+        expect(transactions.transactions[0].kind).toBe('action')
         utils.verifyNoBrowserErrors()
         done()
       }, function (error) {
@@ -87,13 +87,13 @@ describe('redux-app', function () {
         expect(transactions.traces.groups[2].kind).toBe('custom')
 
         expect(transactions.traces.groups[3].signature).toBe('dispatch INCREMENT')
-        expect(transactions.traces.groups[3].kind).toBe('dispatch.redux')
+        expect(transactions.traces.groups[3].kind).toBe('action')
 
         expect(transactions.traces.groups[4].signature).toBe('IncrDecr')
         expect(transactions.traces.groups[4].kind).toBe('template.component')
 
         expect(transactions.traces.groups[5].signature).toBe('dispatch DECREMENT')
-        expect(transactions.traces.groups[5].kind).toBe('dispatch.redux')
+        expect(transactions.traces.groups[5].kind).toBe('action')
 
         expect(transactions.traces.raw.length).toBe(1)
         expect(transactions.traces.raw[0].length).toBe(10)
