@@ -21,7 +21,7 @@ describe('redux-app', function () {
         expect(transactions.traces.raw[0].length).toBe(6)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('IncrDecr p button#incr:click')
-        expect(transactions.transactions[0].kind).toBe('event.click')
+        expect(transactions.transactions[0].kind).toBe('interaction')
 
         utils.verifyNoBrowserErrors()
 
@@ -99,7 +99,7 @@ describe('redux-app', function () {
         expect(transactions.traces.raw[0].length).toBe(10)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('IncrDecr p button#simpleThunkButton:click')
-        expect(transactions.transactions[0].kind).toBe('event.click')
+        expect(transactions.transactions[0].kind).toBe('interaction')
         utils.verifyNoBrowserErrors()
         done()
       }, function (error) {

@@ -53,7 +53,7 @@ function patchTransitionManager (transitionManager) {
               if (utils.opbeatGlobal()) {
                 var state = arguments[1]
                 var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
-                var transaction = setTransactionName(fullRoute, 'route-change.parameterized-route')
+                var transaction = setTransactionName(fullRoute, 'route-change')
 
                 if (hardNavigation) {
                   hardNavigation = false

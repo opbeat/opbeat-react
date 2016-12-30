@@ -108,7 +108,7 @@ describe('react-router: setTransactionName', function () {
       var lastTransaction = serviceContainer.services.zoneService.get('transaction')
       // has ended, so we can't use transactionService.getCurrentTransaction()
       expect(lastTransaction.name).toBe('/')
-      expect(lastTransaction.type).toBe('route-change.parameterized-route')
+      expect(lastTransaction.type).toBe('route-change')
     })
 
   })
@@ -128,7 +128,7 @@ describe('react-router: setTransactionName', function () {
       // has ended, so we can't use transactionService.getCurrentTransaction()
       var lastTransaction = serviceContainer.services.zoneService.get('transaction')
       expect(lastTransaction.name).toBe('/mypath')
-      expect(lastTransaction.type).toBe('route-change.parameterized-route')
+      expect(lastTransaction.type).toBe('route-change')
     })
   })
 
@@ -146,7 +146,7 @@ describe('react-router: setTransactionName', function () {
       // has ended, so we can't use transactionService.getCurrentTransaction()
       var lastTransaction = serviceContainer.services.zoneService.get('transaction')
       expect(lastTransaction.name).toBe('/new-path')
-      expect(lastTransaction.type).toBe('route-change.parameterized-route')
+      expect(lastTransaction.type).toBe('route-change')
     })
   })
 
