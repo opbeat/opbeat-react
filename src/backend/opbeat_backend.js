@@ -263,6 +263,7 @@ function groupTraces (traces) {
 
     return {
       transaction: trace.transaction.name,
+      transaction_kind: trace.transaction.type,
       signature: trace.signature,
       kind: trace.type,
       timestamp: trace.transaction._startStamp.toISOString(),
