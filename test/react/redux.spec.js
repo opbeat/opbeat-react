@@ -54,13 +54,13 @@ describe('react-redux: opbeatMiddleware', function () {
 
     middleware(api)(nextMiddleware(api)(null))(testAction)
 
-    expect(transactionService.startTransaction).toHaveBeenCalledWith(testAction.type, 'dispatch.redux')
+    expect(transactionService.startTransaction).toHaveBeenCalledWith(testAction.type, 'action')
 
     expect(count).toBe(1)
   })
 
   it('should start trace if transaction is already running', function () {
-    var transaction = transactionService.startTransaction('my-transaction', 'dispatch.redux')
+    var transaction = transactionService.startTransaction('my-transaction', 'action')
 
     spyOn(transactionService, 'startTransaction').and.callThrough()
     spyOn(transaction, 'startTrace').and.callThrough()
@@ -68,7 +68,7 @@ describe('react-redux: opbeatMiddleware', function () {
     middleware(api)(nextMiddleware(api)(null))(testAction)
 
     expect(transactionService.startTransaction).not.toHaveBeenCalled()
-    expect(transaction.startTrace).not.toHaveBeenCalledWith(testAction.type, 'dispatch.redux')
+    expect(transaction.startTrace).not.toHaveBeenCalledWith(testAction.type, 'action')
 
     expect(count).toBe(1)
     transaction.end()
