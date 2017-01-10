@@ -9,7 +9,7 @@ var eventPairs = [
   ['domContentLoadedEventStart', 'domContentLoadedEventEnd', '"DOMContentLoaded" event handling'],
   ['loadEventStart', 'loadEventEnd', '"load" event handling'],
 ]
-
+var traceThreshold = 5 * 60 * 1000;
 module.exports = function captureHardNavigation (transaction) {
   var serviceContainer = utils.opbeatGlobal()
   if (serviceContainer && transaction.wasHardNavigation && window.performance && window.performance.timing) {
@@ -29,6 +29,10 @@ module.exports = function captureHardNavigation (transaction) {
         trace.ended = true
         trace.setParent(transaction._rootTrace)
         trace.end()
+        var d = trace.duration()
+        if (d > traceThreshold || d < 0) {
+          transaction.traces.splice(transaction.traces.indexOf(trace), 1)
+        }
       }
     }
 
