@@ -94,10 +94,12 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   dirNeedsBuilding.map(function (dir) {
     console.log('Building', dir)
     var webpackConfig = require(dir + '/webpack.config.js')
-    var myConfig = Object.create(webpackConfig)
-
+    // console.log(webpackConfig)
+    // var myConfig = Object.create(webpackConfig)
+    // console.log(myConfig)
     // run webpack
-    webpack(myConfig).run(function (err, stats) {
+    webpack(webpackConfig).run(function (err, stats) {
+
       if (err) console.log(err) // throw err
       if (stats.hasErrors()) console.log('!! there were errors building', dir)
       var jsonStats = stats.toJson()

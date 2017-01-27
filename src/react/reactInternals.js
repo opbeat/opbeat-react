@@ -1,30 +1,33 @@
-var req = require.context("react", true, /lib\/(ReactDefaultBatchingStrategy|ReactReconciler|ReactInjection|EventPluginUtils|ReactMount|ReactDOMComponentTree|getEventTarget)\.js$/)
-var reqDom = require.context("react-dom", true, /lib\/(ReactDefaultBatchingStrategy|ReactReconciler|ReactInjection|EventPluginUtils|ReactMount|ReactDOMComponentTree|getEventTarget)\.js$/)
+var EventPluginUtils
+var _opbeatId = 0
+var _hooks = {}
+var out = {}
+var injected;
+var readyCBs = []
 
-function reqInternals (req) {
-  return {
-    ReactDefaultBatchingStrategy: req('./lib/ReactDefaultBatchingStrategy.js'),
-    ReactReconciler: req('./lib/ReactReconciler.js'),
-    ReactInjection: req('./lib/ReactInjection.js'),
-    EventPluginUtils: req('./lib/EventPluginUtils.js'),
-    ReactMount: req('./lib/ReactMount.js'),
-    getEventTarget: req('./lib/getEventTarget.js')
+if (typeof window !== 'undefined') {
+  if (typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined') {
+    window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {}
+  }
+  var old = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject
+  window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function (reactInternals) {
+    for(var i = 0; i<readyCBs.length; i++) {
+      readyCBs[i](reactInternals)
+    }
+    injected = reactInternals
+    
+    if (old) {
+      old.apply(this, arguments)
+    }
   }
 }
-var out
 
-// react 15.4 moved these to ReactDOM
-var useReactDOM
-try {
-  out = reqInternals(reqDom)
-  out.ReactDOMComponentTree = reqDom('./lib/ReactDOMComponentTree.js')
-} catch (e) {
-  out = reqInternals(req)
-
-  try {
-      out.ReactDOMComponentTree = req('./lib/ReactDOMComponentTree.js')
-  } catch(e) {}
+module.exports = {
+  ready: function (cb) {
+    if (injected) {
+      cb(injected)
+    }else{
+      readyCBs.push(cb)
+    }
+  }
 }
-
-
-module.exports = out 

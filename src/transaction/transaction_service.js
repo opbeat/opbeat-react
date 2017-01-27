@@ -32,7 +32,8 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
 
   function onScheduleTask (task) {
     if (!transactionService.getCurrentTransaction()) {
-      transactionService.startZoneTransaction()
+      var trans = transactionService.startZoneTransaction()
+      trans.eventTarget = task.target;
     }
 
     if (task.source === 'XMLHttpRequest.send') {
@@ -156,6 +157,7 @@ TransactionService.prototype.startTrace = function (signature, type, options) {
 
   if (trans) {
     this._logger.debug('TransactionService.startTrace', signature, type)
+    // if (trans.)
   } else {
     trans = this.startZoneTransaction(perfOptions)
     this._logger.debug('TransactionService.startTrace - ZoneTransaction', signature, type)

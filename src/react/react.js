@@ -1,8 +1,9 @@
+var patchReact = require('./reactPatches')
+var reactInternals = require('./reactInternals')
 var ServiceFactory = require('../common/serviceFactory')
 var ServiceContainer = require('../common/serviceContainer')
 var utils = require('../lib/utils')
 
-var patchReact = require('./reactPatches')
 var patchCommon = require('../common/patchCommon')
 var patchWebpack = require('./patchWebpack')
 
@@ -18,8 +19,12 @@ if(!utils.inBrowser()) {
   utils.opbeatGlobal(false)
 } else {
   patchCommon()
-  patchReact()
   patchWebpack()
+
+  // called when React injects its data
+  reactInternals.ready(function (ReactInternals) {
+    patchReact(ReactInternals)
+  })
 }
 
 function configure (config, serviceFactory) {

@@ -107,7 +107,7 @@ var IncrDecr = React.createClass({
     const { value, erroneousComponent, onIncrement, onDecrement } = this.props
     return (
       <p>
-        Clicked: '{counter}' times
+        Clicked: '{value}' times
         {' '}
         <button id="incr" onClick={onIncrement}>
           +

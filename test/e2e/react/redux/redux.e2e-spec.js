@@ -44,7 +44,7 @@ describe('redux-app', function () {
         console.log('DECREMENT')
       }
     ).then(function (response) {
-        var transactions = response.value
+        var transactions = response.valuepwd
         expect(transactions.traces.groups.length).toBe(3)
 
         expect(transactions.traces.groups[1].kind).toBe('template.update')

@@ -22,7 +22,7 @@ describe('simple-fetch-app', function () {
       var fetchedResult = response.value.fetchedResult
 
       expect(fetchedResult).toBe('some-data')
-      expect(transactions.traces.groups.length).toBe(5)
+      expect(transactions.traces.groups.length).toBe(4)
 
       expect(transactions.traces.groups[0].transaction).toBe('fetchData')
       expect(transactions.traces.groups[0].kind).toBe('transaction')

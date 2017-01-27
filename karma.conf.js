@@ -78,11 +78,6 @@ module.exports = function (config) {
     quiet: true, // for webpack noise
     noInfo: true,
     webpack: {
-      stats: {
-        chunks: false
-      },
-      quiet: true,
-      noInfo: true,
       module: {
         loaders: [
           {
@@ -101,6 +96,14 @@ module.exports = function (config) {
         // 'react': true,
         'react/addons': true,
       },
+    },
+    webpackMiddleware: {
+      stats: {
+        chunks: false
+      },
+      // quiet: true,
+      // noInfo: true,
+      devtool: 'source-map'
     },
     // browserify: {
     //   debug: true,

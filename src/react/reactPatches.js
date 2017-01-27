@@ -6,117 +6,12 @@ var isTopLevelWrapper = require('./utils').isTopLevelWrapper
 
 var Trace = require('../transaction/trace')
 
-function calcAvg (timings) {
-  var sum = 0
-  for (var j = 0; j < timings.length; j++) {
-    sum += timings[j]
-  }
-  return sum / timings.length
-}
+module.exports = function patchReact (reactInternals) {
+  var ReactReconciler = reactInternals.Reconciler
+  var ReactMount = reactInternals.Mount
+  var ComponentTree = reactInternals.ComponentTree
 
-function genTraces (componentStats, node, transactionService, transaction) {
-  var child
-  for (var i = 0; i < node.children.length; i++) {
-    child = node.children[i]
-    var trace = new Trace(transaction, child.name, 'template.component', {})
-    child.trace = trace // needed to estimate children
-    trace.setParent(node.trace)
-    if (child.start) {
-      trace._start = child.start
-      trace._end = child.end
-    } else { // estimate
-      if (i > 0) {
-        // get start from prev child
-        trace._start = node.children[i - 1].trace._end
-      } else {
-        // or parent
-        trace._start = node.trace._start
-      }
-
-      if (!componentStats[child.name].avg) {
-        componentStats[child.name].avg = calcAvg(componentStats[child.name].timings)
-      }
-      trace._end = trace._start + componentStats[child.name].avg
-    }
-
-    trace.end()
-
-    genTraces(componentStats, child, transactionService, transaction)
-  }
-}
-
-function RenderState () {
-  return {
-    'componentStats': {},
-    'componentCount': 0,
-    'currRoot': {'children': []}
-  }
-}
-
-
-module.exports = function patchReact () {
   var serviceContainer
-
-  var batchedUpdatePatch = function (delegate) {
-    return function (self, args) {
-      var ret
-      var trace
-      serviceContainer = utils.opbeatGlobal()
-      if (!serviceContainer || serviceContainer.services.zoneService.get('renderState')) {
-        // pass through if not loaded or batchedUpdate is already ongoing
-        return delegate.apply(self, args)
-      }
-
-      var transactionService = serviceContainer.services.transactionService
-
-      serviceContainer.services.zoneService.set('renderState', new RenderState())
-      var batchedUpdatesStart = window.performance.now()
-
-      ret = delegate.apply(self, args)
-
-      var renderState = serviceContainer.services.zoneService.get('renderState')
-      serviceContainer.services.zoneService.set('renderState', null)
-
-      var componentTypes = Object.keys(renderState.componentStats)
-      if (componentTypes.length > 0) {
-        trace = transactionService.startTrace('batchedUpdates', 'template.update')
-        trace._start = batchedUpdatesStart
-
-        var text
-        if (renderState.currRoot.children.length > 1) {
-          var allRootComponents = renderState.currRoot.children.map(function(n) { return n.name })
-          var uniqueRootComponents = {}
-          for (var i = 0; i < allRootComponents.length; i++) {
-            uniqueRootComponents[allRootComponents[i]] = true
-          }
-          text = Object.keys(uniqueRootComponents).length + " components"
-        } else {
-          text = renderState.currRoot.children[0].name
-        }
-        
-        trace.signature = text + ' (' + renderState.componentCount + ')' 
-        trace.end()
-
-        renderState.currRoot.trace = trace
-
-        var genTracesTime = performance.now()
-        var transaction = transactionService.getCurrentTransaction()
-
-        genTraces(renderState.componentStats, renderState.currRoot, transactionService, transaction)
-        var elapsed = performance.now() - genTracesTime
-
-        if(!transaction.contextInfo.debug.genTracesElapsed) {
-          transaction.contextInfo.debug.genTracesElapsed = []
-        }
-        transaction.contextInfo.debug.genTracesElapsed.push(elapsed)
-      }
-      return ret
-    }
-  }
-
-  patchMethod(reactInternals.ReactDefaultBatchingStrategy, 'batchedUpdates', batchedUpdatePatch)
-  reactInternals.ReactInjection.Updates.injectBatchingStrategy(reactInternals.ReactDefaultBatchingStrategy)
-
   var componentRenderPatch = function (delegate) {
     var serviceContainer
     return function (self, args) {
@@ -128,108 +23,97 @@ module.exports = function patchReact () {
       if (serviceContainer && args[0] && args[0].getName) {
         var component = args[0]
         var name = component.getName()
-        // debugger;
         if (
-            name === null || isTopLevelWrapper(component._currentElement)
+            name === null || isTopLevelWrapper(ReactMount, component._currentElement)
         ) {
           // TopLevelWrapper or null components don't make sense to include here
           return delegate.apply(self, args)
         }
 
         var renderState = serviceContainer.services.zoneService.get('renderState')
-
-        if (!renderState.componentStats[name]) {
-          renderState.componentStats[name] = {'count': 0, 'timings': []}
-        }
-        var componentStat = renderState.componentStats[name]
-        componentStat['count']++
-
-        renderState.componentCount++
-
-        var shouldTrace = componentStat['count'] < 10
-        var node = {'children': [], 'name': name}
-        var parent = renderState.currRoot
-
-        renderState.currRoot.children.push(node)
-        renderState.currRoot = node
-
-        if (shouldTrace) {
-          var start = performance.now()
-          out = delegate.apply(self, args)
-          var end = performance.now()
-          componentStat.timings.push(end - start)
-          node.start = start
-          node.end = end
-        } else {
-          out = delegate.apply(self, args)
+        var trace
+        if (!renderState) {
+          trace = serviceContainer.services.transactionService.startTrace(name, "template.component");
+          serviceContainer.services.zoneService.set('renderState', True)
         }
 
-        renderState.currRoot = parent
+        out = delegate.apply(self, args)
+        
+        if(trace) {
+          trace.end()
+          serviceContainer.services.zoneService.set('renderState', null)
+        }
+
       } else {
         out = delegate.apply(self, args)
       }
       return out
-
     }
   }
 
-  patchMethod(reactInternals.ReactReconciler, 'mountComponent', componentRenderPatch)
-  patchMethod(reactInternals.ReactReconciler, 'receiveComponent', componentRenderPatch)
-  patchMethod(reactInternals.ReactReconciler, 'performUpdateIfNecessary', componentRenderPatch)
+  patchMethod(ReactReconciler, 'mountComponent', componentRenderPatch)
+  patchMethod(ReactReconciler, 'receiveComponent', componentRenderPatch)
+  patchMethod(ReactReconciler, 'unmountComponent', componentRenderPatch)
+  patchMethod(ReactReconciler, 'performUpdateIfNecessary', componentRenderPatch)
 
-  patchMethod(reactInternals.EventPluginUtils, 'executeDispatchesInOrder', function (delegate) {
-    // for quick lookup, make this into an object
-    var eventWhiteList = {}
-    var serviceContainer
-    var performanceEnabled
-    var configWhiteList
-    var transactionService
+  // patchMethod(reactInternals.EventPluginUtils, 'executeDispatchesInOrder', function (delegate) {
+  //   // for quick lookup, make this into an object
+  //   var eventWhiteList = {}
+  //   var serviceContainer
+  //   var performanceEnabled
+  //   var configWhiteList
+  //   var transactionService
 
-    return function (self, args) {
-      if (!serviceContainer) {
-        serviceContainer = utils.opbeatGlobal()
-        if (serviceContainer) {
-          // first time
-          var configWhiteList = serviceContainer.services.configService.get('performance.eventWhiteList')  || []
-          configWhiteList.forEach(function (ev) {
-            eventWhiteList[ev] = 1
-          })
-          transactionService = serviceContainer.services.transactionService
-        }
-      }
+  //   return function (self, args) {
+  //     if (!serviceContainer) {
+  //       serviceContainer = utils.opbeatGlobal()
+  //       if (serviceContainer) {
+  //         // first time
+  //         var configWhiteList = serviceContainer.services.configService.get('performance.eventWhiteList')  || []
+  //         configWhiteList.forEach(function (ev) {
+  //           eventWhiteList[ev] = 1
+  //         })
+  //         transactionService = serviceContainer.services.transactionService
+  //       }
+  //     }
 
-      if (serviceContainer && args[0] && args[0]._dispatchListeners && args[0].nativeEvent) {
-        var nativeEventTarget = reactInternals.getEventTarget(args[0].nativeEvent)
-        if (nativeEventTarget) {
-          // We want traces that have already started to go into a transaction
-          // named after the event that fired it.
+  //     if (serviceContainer && args[0] && args[0]._dispatchListeners && args[0].nativeEvent) {
+  //       var nativeEventTarget = reactInternals.getEventTarget(args[0].nativeEvent)
+  //       if (nativeEventTarget) {
+  //         // We want traces that have already started to go into a transaction
+  //         // named after the event that fired it.
 
-          // If we have not started a transaction through the code
-          // invoked by the task, we should do so now.
-          // because of ZoneTransactions, any trace started already will be
-          // transferred.
+  //         // If we have not started a transaction through the code
+  //         // invoked by the task, we should do so now.
+  //         // because of ZoneTransactions, any trace started already will be
+  //         // transferred.
 
-          // nodeName is only defined for 15.0+
-          var trans = transactionService.getCurrentTransaction()
-          if (trans && nodeName && trans.name === 'ZoneTransaction' && args[0].nativeEvent.type in eventWhiteList) {
-            var reactNode = nodeName(nativeEventTarget)
-            transactionService.startTransaction(reactNode + ':' + args[0].nativeEvent.type, 'interaction')
-          }
-        }
-      }
-      return delegate.apply(self, args)
-    }
-  })
+  //         // nodeName is only defined for 15.0+
+  //         var trans = transactionService.getCurrentTransaction()
+  //         if (trans && nodeName && trans.name === 'ZoneTransaction' && args[0].nativeEvent.type in eventWhiteList) {
+  //           var reactNode = nodeName(nativeEventTarget)
+  //           transactionService.startTransaction(reactNode + ':' + args[0].nativeEvent.type, 'interaction')
+  //         }
+  //       }
+  //     }
+  //     return delegate.apply(self, args)
+  //   }
+  // })
 
-  var reactDom = require('react-dom')
-  patchMethod(reactDom, 'render', function (delegate) {
+  // var reactDom = require('react-dom')
+  patchMethod(ReactMount, '_renderSubtreeIntoContainer', function (delegate) {
     var serviceContainer
 
     return function (self, args) {
       serviceContainer = serviceContainer || utils.opbeatGlobal()
       if (serviceContainer) {
         var out
-        return serviceContainer.services.zoneService.zone.run(function () {
+        return serviceContainer.services.zone.run(function () {
+          serviceContainer.services.reactService = {
+            Mount: ReactMount,
+            Reconciler: ReactReconciler,
+            ComponentTree: ComponentTree,
+          }
           out = delegate.apply(self, args)
           serviceContainer.services.transactionService.detectFinish()
           return out

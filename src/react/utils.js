@@ -1,15 +1,13 @@
-var ReactDOMComponentTree = require('./reactInternals').ReactDOMComponentTree
-var ReactInstanceHandles = require('./reactInternals').ReactInstanceHandles
-var ReactMount = require('./reactInternals').ReactMount
+// var ReactDOMComponentTree = require('./reactInternals').ReactDOMComponentTree
+// var ReactMount = require('./reactInternals').ReactMount
 var utils = require('../lib/utils')
 var getReactElem, getParentReactElem
 var traverseParents
 
-// React 0.14.0+ exposes ReactMount.TopLevelWrapper
-var ReactTopLevelWrapper = ReactMount.TopLevelWrapper
+function isTopLevelWrapper(ReactMount, element) {
+  // React 0.14.0+ exposes ReactMount.TopLevelWrapper
+  var ReactTopLevelWrapper = ReactMount.TopLevelWrapper
 
-
-function isTopLevelWrapper(element) {
   return element && element.type &&
   (
     element.type === ReactTopLevelWrapper ||
@@ -17,11 +15,9 @@ function isTopLevelWrapper(element) {
   )
 }
 
-
-var nodeName
-if (ReactDOMComponentTree) {
-  nodeName = function nodeName (domNode) {
-    var reactElem = ReactDOMComponentTree.getClosestInstanceFromNode(domNode)
+var nodeName = function nodeName (ComponentTree, domNode) {
+  if (ComponentTree) {
+    var reactElem = ComponentTree.getClosestInstanceFromNode(domNode)
     var elements = []
     var owner = reactElem._currentElement._owner
 
@@ -45,9 +41,9 @@ if (ReactDOMComponentTree) {
     
     elements.reverse()
     return elements.join(' ')
+  } else {
+    return utils.friendlyNodeName(domNode)
   }
-} else {
-  nodeName = function nodeName (domNode) { return utils.friendlyNodeName(domNode) }
 }
 
 module.exports = {
