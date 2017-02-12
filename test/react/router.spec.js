@@ -3,20 +3,22 @@ var React = require('react')
 var mount = require('enzyme').mount
 var unmount = require('enzyme').unmount
 
-var makeSignatureFromRoutes = require('../../src/react/router').makeSignatureFromRoutes
+var makeSignatureFromRoutes = require('../../src/router').makeSignatureFromRoutes
 var pushLocation = {action: 'PUSH'}
 var replaceLocation = {action: 'REPLACE'}
 
+var initOpbeat = require('../../src/react').default
+var getServiceContainer = require('../../src/react').getServiceContainer
 
-var ServiceContainer = require('../../src/common/serviceContainer')
-var ServiceFactory = require('../../src/common/serviceFactory')
+var ServiceContainer = require('opbeat-js-core').ServiceContainer
+var ServiceFactory = require('opbeat-js-core').ServiceFactory
 
 var ReactRouter = require('react-router')
 var browserHistory = ReactRouter.browserHistory
 var Router = ReactRouter.Router
 var Route = ReactRouter.Route
 var Redirect = ReactRouter.Redirect
-var utils = require('../../src/lib/utils')
+var utils = require('../../src/utils')
 
 var LoginComponent = React.createClass({
   componentDidMount: function () {
@@ -76,9 +78,9 @@ describe('react-router: setTransactionName', function () {
   var treeWrapper
 
   beforeEach(function () {
-    serviceContainer = new ServiceContainer(new ServiceFactory())
-    serviceContainer.initialize()
-    utils.opbeatGlobal(serviceContainer)
+    initOpbeat()
+    serviceContainer = getServiceContainer()
+
     // Get rid of warning 'Location '/context.html''
     browserHistory.push('/')
 
@@ -99,7 +101,6 @@ describe('react-router: setTransactionName', function () {
     spyOn(transactionService, 'startTransaction').and.callThrough()
 
     serviceContainer.services.zoneService.runInOpbeatZone(function() {
-      debugger;
       treeWrapper = mount(tree)
 
       expect(transactionService.startTransaction.calls.count()).toBe(1)

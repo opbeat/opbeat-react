@@ -1,4 +1,4 @@
-import '../react/opbeat-e2e'
+import '../opbeat-e2e'
 import React from 'react'
 import ReactDOM from 'react-dom'
 

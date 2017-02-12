@@ -1,36 +1,186 @@
-# Opbeat for frontend JS
+# opbeat-react
 
-[![Build status](https://travis-ci.org/opbeat/opbeat-js.svg?branch=master)](https://travis-ci.org/opbeat/opbeat-js)
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
-<a href="https://opbeat.com" title="Opbeat"><img src="http://opbeat-brand-assets.s3-website-us-east-1.amazonaws.com/svg/logo/logo.svg" align="right" height="25px"></a>
+This is the official Opbeat module for React, redux and react-router.
+
+opbeat-react will automatically measure route changes and user interactions in your application and instrument components,
+AJAX calls, Redux dispatches etc. to give you detailed insights into what kind of experience your users are having.
+opbeat-react will also automatically log exceptions to Opbeat.
+
+## Usage
+
+Make sure to import `opbeat-react` before _anything_ else in your application.
+
+```js
+import initOpbeat from 'opbeat-react'
+
+initOpbeat({
+  orgId: '470e8f31bc7b4f4395143091fe752e8c',
+  appId: '9aac8591cc',
+});
+```
+
+If you use react-router (v2 or v3), import 'opbeat-react/router'. See the [transactions api](#transactions-api) for examples without react-router. 
+
+```js
+import initOpbeat from 'opbeat-react'
+import 'opbeat-react/router' // enable react-router instrumentation
+
+initOpbeat({
+  orgId: '470e8f31bc7b4f4395143091fe752e8c',
+  appId: '9aac8591cc',
+});
+```
+
+If you're using Redux, add the Opbeat middleware as the last middleware in your chain:
+
+```js
+// enable redux instrumentation using the middleware
+// NOTE: make sure you put the opbeat middleware last!
+import { createOpbeatMiddleware } from 'opbeat-react/redux'
+
+const store = createStore(
+  reducer,
+  applyMiddleware(
+    thunk,
+    createOpbeatMiddleware(),  // make sure this is the last one
+  ),
+);
+```
+
+## Staging and local environments
+You should create separate apps on Opbeat for production, staging and local environments. You'll get separate tokens for each app on Opbeat. You can then do something like:
+
+```js
+import initOpbeat from 'opbeat-react'
+import 'opbeat-react/router' // enable react-router instrumentation
+
+if (process.env.NODE_ENV === 'production') {
+  initOpbeat({
+    orgId: '470e8f31bc7b4f4395143091fe752e8c',
+    appId: '9aac8591cc', // production app id
+  });
+}else if(process.env.NODE_ENV === 'staging') {
+  initOpbeat({
+    orgId: '470e8f31bc7b4f4395143091fe752e8c',
+    appId: '9aac8591cc', // staging app id
+  });
+}
+// in local environments, don't call initOpbeat
+``` 
+
+This requires the webpack plugin `DefinePlugin` to be correctly set up to define `process.env`.
+
+### Set context information
+
+It's often useful to include additional information in performance data and errors logged to Opbeat. You can do this in the following manner:
+
+```js
+import { setUserContext, setExtraContext } from 'opbeat-react'
+
+class OfficeStatus extends React.Component {
+  componentDidMount() {
+    setUserContext({
+      id: 19,
+      email: 'ron@opbeat.com',
+      username: 'roncohen'
+    });
+
+    setExtraContext({
+      coffeeLevel: 'low',
+      milkSolution: 'skim milk',
+    });
+  }
+}
+```
+
+For projects with Redux, Opbeat will automatically include the content of the store as well as the `type` of the last 10 actions. This can be disabled by setting `redux.actionsCount` and `redux.sendStateOnException` to something falsy in the call to `initOpbeat`.
+
+### Manual error logging
+
+If you happen to manually `catch` an error, you can send it up to Opbeat like so:
+
+```js
+import { captureError } from 'opbeat-react'
+
+try {
+  throw new Error('Everything is broken')
+} catch (err) {
+  captureError(err)
+}
+```
+
+### Transactions api
+
+In Opbeat, every measurement must be connected to a transaction. Transactions can be route changes, click events etc.
+
+A simple API is exposed to let you set the name of the ongoing transaction and start new transactions.
+For example, this can be used to let Opbeat know about route changes even if you're not using a supported router.  
 
 
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/opbeat.svg)](https://saucelabs.com/u/opbeat)
+* `startTransaction()`<br>
+Call this to let Opbeat know a new transaction has started.
+For example, if you're not using a supported router, you can use `startTransaction` to let Opbeat know that a route change has begun.
+
+* `setTransactionName(transactionName, transactionType)`<br>
+Set the name of the ongoing transaction to `transactionName`. For route changes, `transactionName` should be the abstract or parametrized route path (`/coffees/:beanID` and not `/coffees/99`).
+You must also specify a type. `transactionType` is an arbitrary string, but transactions of the same type are shown together in the Opbeat UI. For route changes, you should use the string `route-change`.
+`setTransactionName` will automatically call `startTransaction` if no transaction has been started yet. 
+If a transaction is already ongoing, `setTransactionName` will override any name and type previously set.
+
+Example:
+
+This is a Redux middleware that will look for actions of type `route-change-action` and signal Opbeat that a route change is going on. It relies on a magic method `myRouter.matchRoute` to convert a concrete path into the abstract route that we need. 
+```js
+const reduxTransactionDetector = store => next => action => {
+  if (typeof action === 'object' && action.type === 'route-change-action') {
+    const abstractRoute = myRouter.matchRoute(action.newLocation)
+    setTransactionName(abstractRoute, 'route-change')
+  }
+  return next(action)
+}
+```
+
+## Using minification?
+
+Install this plugin:
+`npm install --save babel-plugin-add-react-displayname`
+
+This adds `MyComponent.displayName = 'MyComponent'` automatically to compoenents defined in your application.
+Remember to add the plugin to your `.babelrc` or your webpack configuration:
 
 
-This is the official frontend JavaScript module for [Opbeat](https://opbeat.com). 
+<b>Note on 'transform-decorators-legacy' plugin:</b> If you are using `transform-decorators-legacy`, make sure it appears in the list of plugins *after* `add-react-displayname`. 
 
-It enables error logging for frontend applications and performance monitoring for AngularJS applications.
 
-If you are looking for a module for your Node.js applications, please see [Opbeat for Node.js](https://github.com/opbeat/opbeat-node) on GitHub.
 
-## Documentation
+#### .babelrc:
+```
+"plugins": [
+  ["add-react-displayname"]
+]
+```
 
-- [Documentation overview](https://opbeat.com/docs/topics/javascript/)
-- [Get started with Opbeat for JavaScript](https://opbeat.com/docs/articles/get-started-with-javascript/) 
-- [Get started with Opbeat for AngularJS](https://opbeat.com/docs/articles/get-started-with-angularjs/)
-- [Module API](https://opbeat.com/docs/articles/opbeat-for-javascript-api/)
+#### webpack.conf:
+Look for the `query` key:
+```
+query: {
+  presets: [....],
+  plugins: ["add-react-displayname"]
+}
+```
 
+
+## Support
+
+`opbeat-react` works with `react-router` 2 and 3 and `react` 0.14.x and 15.x
+
+IE9 and below is not supported. But in general, every modern browser is supported. 
+
+Opbeat will automatically determine if the browser is supported and disable itself if the browser is not supported.
 
 ## Development
 
-Use `npm run karma` to continuously run unit tests during development
+Tests: `npm run karma`
 
-Use `npm test` to run both unit tests and e2e tests
+End to end tests: `./node_modules/.bin/gulp test:e2e:react-run`
 
-Use `./node_modules/.bin/tav` to run a matrix test.
-
-## License
-MIT
-
-<br>Made with ♥️ and ☕️ by Opbeat and our community.

@@ -1,4 +1,4 @@
-var patchPromise = require('../../src/common/patches/fetchPatch').patchPromise
+var patchPromise = require('../../src/fetchPatch').patchPromise
 
 function MockTrace (transactionService, signature, kind) {
   this.ended = false

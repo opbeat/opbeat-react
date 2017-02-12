@@ -1,24 +1,34 @@
 // Must be first
-var reactInternals = require('../../src/react/reactInternals')
+var reactInternals = require('../../src/reactInternals')
 
 var React = require('react')
 var ReactDOM = require('react-dom')
-var ServiceContainer = require('../../src/common/serviceContainer')
-var ServiceFactory = require('../../src/common/serviceFactory')
-var utils = require('../../src/lib/utils')
+var ServiceContainer = require('opbeat-js-core').ServiceContainer
+var ServiceFactory = require('opbeat-js-core').ServiceFactory
+var getServiceContainer = require('../../src/react').getServiceContainer
+var initOpbeat = require('../../src/react').default
+var utils = require('../../src/utils')
 var components = require('./components.jsx')
-var nodeName = require('../../src/react/utils').nodeName
 var TransportMock = require('../utils/transportMock')
-var captureError = require('../../src/react/react').captureError
+
+var captureError = require('../../src/react').captureError
 var ListOfLists = components.ListOfLists
 
 var mount = require('enzyme').mount
+var patchReact = require('../../src/reactPatches')
 
-var ReactMount;
-var ReactReconciler;
+var nodeName = utils.nodeName
+
 var ComponentTree;
+
+// needs tokens to pass "isValid"
+initOpbeat({'orgId': '', 'appId': ''})
+var serviceContainer = getServiceContainer()
+
+
 reactInternals.ready(function(internals) {
   ComponentTree = internals.ComponentTree
+  patchReact(internals, serviceContainer)
 })
 
 if (React.version.split('.')[0] > 0) {
@@ -67,23 +77,13 @@ if (React.version.split('.')[0] > 0) {
 
 describe('react: generate traces', function () {
   var transactionService
-  var serviceContainer
-
-  beforeEach(function () {
-    serviceContainer = new ServiceContainer(new ServiceFactory())
-    serviceContainer.initialize()
-    utils.opbeatGlobal(serviceContainer)
-
-    transactionService = serviceContainer.services.transactionService
-  })
 
   it('gets the correct name for nested components', function () {
-    var trans = transactionService.startTransaction('react-component-test', 'test')
-
+    transactionService = serviceContainer.services.transactionService
     serviceContainer.services.zoneService.runInOpbeatZone(function() {
+      var trans = transactionService.startTransaction('react-component-test', 'test')
       var wrapper = mount(React.createElement(ListOfLists))
       var expected
-      debugger;
       
       if (React.version.split('.')[0] > 0) {    
         // with react <15.4, enzyme will add a wrapper here.
@@ -104,32 +104,19 @@ describe('react: generate traces', function () {
       for(var i = 0; i < actual.length; i++ ){
         expect(actual[i]).toEqual(expected[i])
       }
+      trans.end()
     })
 
-    trans.end()
   })
 })
 
 
 describe('react: send error', function () {
-  var transactionService
-  var serviceContainer
-  var serviceFactory
   var transport
 
-  beforeEach(function () {
-    serviceFactory = new ServiceFactory()
-    serviceFactory.services['Transport'] = new TransportMock()
-
-    serviceContainer = new ServiceContainer(new ServiceFactory())
-    serviceContainer.initialize()
-    utils.opbeatGlobal(serviceContainer)
-
-    transactionService = serviceContainer.services.transactionService
-  })
-
   it('sends errors', function () {
-    transport = serviceFactory.services['Transport']
+    var origTransport = getServiceContainer().services.opbeatBackend._transport
+    transport = serviceContainer.services.opbeatBackend._transport = new TransportMock()
     expect(transport.errors).toEqual([])
     transport.subscribe(function (event, errorData) {
       if (event === 'sendError') {
@@ -138,6 +125,7 @@ describe('react: send error', function () {
       }
     })
     captureError(new Error('test error'))
+    serviceContainer.services.opbeatBackend._transport = origTransport
   })
 })
 

@@ -53,74 +53,73 @@ module.exports = function (config) {
       'e2e/**/*.*'
     ],
     files: [
-      'test/utils/polyfill.js',
-      'node_modules/angular/angular.js',
-      'node_modules/angular-resource/angular-resource.js',
-      'node_modules/zone.js/dist/zone.js',
-      'node_modules/angular-mocks/angular-mocks.js',
+      // 'test/utils/polyfill.js',
+      // 'node_modules/angular/angular.js',
+      // 'node_modules/angular-resource/angular-resource.js',
+      // 'node_modules/zone.js/dist/zone.js',
+      // 'node_modules/angular-mocks/angular-mocks.js',
       specPattern,
-      { pattern: 'test/exceptions/data/*.js', included: false, watched: false },
+      // { pattern: 'test/exceptions/data/*.js', included: false, watched: false },
       { pattern: 'src/**/*.js', included: false, watched: true }
     ],
-    frameworks: ['jasmine'],
+    frameworks: ['browserify', 'jasmine'],
     plugins: [
       'karma-sauce-launcher',
       'karma-failed-reporter',
       'karma-jasmine',
       'karma-spec-reporter',
-      'karma-webpack'
+      'karma-browserify',
+      // 'karma-webpack'
     ],
     browserNoActivityTimeout: 60000,
     customLaunchers: customLaunchers,
     browsers: [], // Chrome, Firefox, PhantomJS2
     captureTimeout: 120000, // on saucelabs it takes some time to capture browser
     reporters: ['spec', 'failed'],
-    quiet: true, // for webpack noise
-    noInfo: true,
-    webpack: {
-      module: {
-        loaders: [
-          {
-            test: /\.jsx?$/, loader: 'babel-loader',
-            query: {
-              presets: ['es2015', 'react']
-            } 
-          },
-          { test: /\.json$/, loader: 'json' },
-        ]
-      },
-      externals: {
-        'react/lib/ExecutionEnvironment': true,
-        'react/lib/ReactContext': true,
-        // 'react-dom': true,
-        // 'react': true,
-        'react/addons': true,
-      },
-    },
-    webpackMiddleware: {
-      stats: {
-        chunks: false
-      },
-      // quiet: true,
-      // noInfo: true,
-      devtool: 'source-map'
-    },
-    // browserify: {
-    //   debug: true,
-    //   configure: function (bundle) {
-    //     var proxyquire = require('proxyquireify')
-    //     bundle
-    //       .plugin(proxyquire.plugin)
-
-    //     // required for `enzyme` to work
-    //     bundle.on('prebundle', function () {
-    //       bundle.external('react/addons')
-    //             .external('react/lib/ReactContext')
-    //             .external('react/lib/ExecutionEnvironment')
-    //     })
-    //     bundle.transform('babelify', {presets: ['es2015', 'react']})
-    //   }
+    // webpack: {
+    //   module: {
+    //     loaders: [
+    //       {
+    //         test: /\.jsx?$/, loader: 'babel-loader',
+    //         query: {
+    //           presets: ['es2015', 'react']
+    //         } 
+    //       },
+    //       { test: /\.json$/, loader: 'json' },
+    //     ]
+    //   },
+    //   externals: {
+    //     'react/lib/ExecutionEnvironment': true,
+    //     'react/lib/ReactContext': true,
+    //     // 'react-dom': true,
+    //     // 'react': true,
+    //     'react/addons': true,
+    //   },
     // },
+    // webpackMiddleware: {
+    //   stats: {
+    //     chunks: false
+    //   },
+    //   // quiet: true,
+    //   // noInfo: true,
+    //   devtool: 'eval-source-map'
+    // },
+    browserify: {
+      debug: true,
+      configure: function (bundle) {
+        var proxyquire = require('proxyquireify')
+        bundle
+          .plugin(proxyquire.plugin)
+
+        // required for `enzyme` to work
+        bundle.on('prebundle', function () {
+          bundle.external('react/addons')
+                .external('react/lib/ReactContext')
+                .external('react/lib/ExecutionEnvironment')
+        })
+        bundle.transform('babelify', {presets: ['es2015', 'react']})
+      }
+    },
     sauceLabs: {
       testName: 'OpbeatJS',
       startConnect: false,
@@ -136,8 +135,8 @@ module.exports = function (config) {
   }
 
   cfg.preprocessors = {}
-  cfg.preprocessors[specPattern] = ['webpack']
-  cfg.preprocessors['*.jsx'] = ['webpack']
+  cfg.preprocessors[specPattern] = ['browserify']
+  cfg.preprocessors['*.jsx'] = ['browserify']
 
   var isTravis = process.env.TRAVIS
   var doCoverage = process.env.COVERAGE
@@ -145,8 +144,8 @@ module.exports = function (config) {
   var buildId
   var version = require('./package').version
 
-  console.log('MODE: ' + process.env.MODE)
-  console.log('Environment ANGULAR_VERSION: ' + process.env.ANGULAR_VERSION)
+  // console.log('MODE: ' + process.env.MODE)
+  // console.log('Environment ANGULAR_VERSION: ' + process.env.ANGULAR_VERSION)
 
   if (isTravis) {
     buildId = 'OpbeatJS@' + version + ' - TRAVIS #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')'

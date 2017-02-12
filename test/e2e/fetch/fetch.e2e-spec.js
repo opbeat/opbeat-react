@@ -1,18 +1,18 @@
-var utils = require('../e2e/utils')
-
+var utils = require('../utils')
+var handleError = utils.handleError
 
 describe('simple-fetch-app', function () {
   // build the app
 
   it('should intercept regular fetch', function (done) {
     browser.url('/fetch/index.html')
-
+ 
     browser.executeAsync(
       function(cb) {
-        window.opbeatTransport.subscribe(function(transactions) {
-
+        console.log("hello")
+        window.opbeatTransport.subscribe(function(c, transactions) {
+          console.log("hello2")
           var fetchedResult = document.getElementById('fetchResult').textContent
-
           cb({transactions: transactions, fetchedResult: fetchedResult})
         })
         document.getElementById('fetch-data').click()
@@ -33,10 +33,12 @@ describe('simple-fetch-app', function () {
       expect(transactions.traces.groups[2].signature).toBe('important custom trace')
       expect(transactions.traces.groups[2].kind).toBe('template.custom')
 
-      utils.verifyNoBrowserErrors(done)
-    }, function (error) {
-      browser.log(error)
-    })
+      expect(transactions.traces.groups[3].kind).toBe('template.component')
+      expect(transactions.traces.groups[3].signature).toBe('component')
+
+      // utils.verifyNoBrowserErrors(done)
+      done()
+    }, handleError(done))//.catch(handleError(done))
   })
 
   it('should intercept fire-and-forget fetch', function (done) {
@@ -44,7 +46,7 @@ describe('simple-fetch-app', function () {
 
     browser.executeAsync(
       function(cb) {
-        window.opbeatTransport.subscribe(function(transactions) {
+        window.opbeatTransport.subscribe(function(c, transactions) {
 
           var fetchedResult = document.getElementById('fetchResult').textContent
 
@@ -55,24 +57,19 @@ describe('simple-fetch-app', function () {
     ).then(function (response) {
       var transactions = response.value.transactions
       var fetchedResult = response.value.fetchedResult
-      expect(transactions.traces.groups.length).toBe(4)
-
+      expect(transactions.traces.groups.length).toBe(3)
+      
       expect(transactions.traces.groups[0].transaction).toBe('fetchData')
       expect(transactions.traces.groups[0].kind).toBe('transaction')
-
-      expect(transactions.traces.groups[1].kind).toBe('template.update')
-      expect(transactions.traces.groups[1].signature).toBe('component (1)')
-
-      expect(transactions.traces.groups[2].kind).toBe('ext.HttpRequest.fetch.truncated')
-      expect(transactions.traces.groups[2].signature).toBe('GET /slow-response')
-
-      expect(transactions.traces.groups[3].kind).toBe('template.component')
-      expect(transactions.traces.groups[3].signature).toBe('component')
+      
+      expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch.truncated')
+      expect(transactions.traces.groups[1].signature).toBe('GET /slow-response')
+      
+      expect(transactions.traces.groups[2].kind).toBe('template.component')
+      expect(transactions.traces.groups[2].signature).toBe('component')
 
       utils.verifyNoBrowserErrors(done)
-    }, function (error) {
-      browser.log(error)
-    })
+    }, handleError(done))//.catch(handleError(done))
   })
 
   it('should intercept rejected fetch', function (done) {
@@ -81,7 +78,7 @@ describe('simple-fetch-app', function () {
 
     browser.executeAsync(
       function(cb) {
-        window.opbeatTransport.subscribe(function(transactions) {
+        window.opbeatTransport.subscribe(function(c, transactions) {
           cb({transactions: transactions})
         })
         document.getElementById('fail-fetch-data').click()
@@ -107,9 +104,7 @@ describe('simple-fetch-app', function () {
       }catch(e) {
         console.log(e, e.stack)
       }
-    }, function (error) {
-      browser.log(error)
-    })
+    }, handleError(done))//.catch(handleError(done))
   })
 
   it('should intercept catched fetch', function (done) {
@@ -118,7 +113,7 @@ describe('simple-fetch-app', function () {
 
     browser.executeAsync(
       function(cb) {
-        window.opbeatTransport.subscribe(function(transactions) {
+        window.opbeatTransport.subscribe(function(c, transactions) {
           cb({transactions: transactions})
         })
         document.getElementById('fail-fetch-data-catch').click()
@@ -138,9 +133,7 @@ describe('simple-fetch-app', function () {
       utils.allowSomeBrowserErrors(
           'http://non-existing-host.opbeat/non-existing-file.json'
           )(done)
-    }, function (error) {
-      browser.log(error)
-    })
+    }, handleError(done)).catch(handleError(done))
   })
 
 })

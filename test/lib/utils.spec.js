@@ -1,35 +1,12 @@
-var utils = require('../../src/lib/utils')
+var utils = require('../../src/utils')
 
-describe('lib/utils', function () {
-  it('should merge objects', function () {
-    var result = utils.merge({a: 'a'}, {b: 'b', a: 'b'})
-    expect(result).toEqual(Object({a: 'b', b: 'b'}))
 
-    var deepMerged = utils.merge({a: {c: 'c'}}, {b: 'b', a: {d: 'd'}})
-    expect(deepMerged).toEqual(Object({a: Object({c: 'c', d: 'd'}), b: 'b'}))
-
-    var a = {a: {c: 'c'}}
-    deepMerged = utils.merge({}, a, {b: 'b', a: {d: 'd'}})
-    expect(deepMerged).toEqual(Object({a: Object({c: 'c', d: 'd'}), b: 'b'}))
-    expect(a).toEqual(Object({a: Object({c: 'c'})}))
-
-    deepMerged = utils.merge({a: {c: 'c'}}, {b: 'b', a: 'b'})
-    expect(deepMerged).toEqual(Object({a: 'b', b: 'b'}))
-
-    deepMerged = utils.merge({a: {c: 'c'}}, {b: 'b', a: null})
-    expect(deepMerged).toEqual(Object({a: null, b: 'b'}))
-
-    deepMerged = utils.merge({a: null}, {b: 'b', a: null})
-    expect(deepMerged).toEqual(Object({a: null, b: 'b'}))
-  })
-})
-
-describe('lib/utils - friendlyNodeName', function () {
+describe('utils - DOMNodeName', function () {
   function testHTMLFriendlyName (html, friendlyName) {
     var div = document.createElement('div')
     div.innerHTML = html
     var element = div.firstChild
-    expect(utils.friendlyNodeName(element)).toEqual(friendlyName)
+    expect(utils.DOMNodeName(element)).toEqual(friendlyName)
   }
 
   it('should get a simple friendly name with id', function () {
@@ -50,7 +27,7 @@ describe('lib/utils - friendlyNodeName', function () {
 })
 
 
-describe('lib/utils - RingBuffer', function () {
+describe('utils - RingBuffer', function () {
   it('should work with when not full', function () {
     var r = new utils.RingBuffer(4)
 

@@ -4,7 +4,6 @@ var fs = require('fs')
 var gulp = require('gulp')
 var source = require('vinyl-source-stream')
 var rename = require('gulp-rename')
-var browserify = require('browserify')
 var buffer = require('vinyl-buffer')
 var uglify = require('gulp-uglify')
 var sourcemaps = require('gulp-sourcemaps')
@@ -48,27 +47,6 @@ gulp.task('examples:serve', function () {
   })
 })
 
-function createBuildStream (mainFilePath, version) {
-  if (typeof version !== 'string') {
-    throw new Error(mainFilePath + ' Expected version as string but got:' + version)
-  }
-
-  return browserify({
-    entries: [mainFilePath],
-    standalone: '',
-    insertGlobalVars: { define: function () { return 'undefined'; }, process: function () { return 'undefined'; } }
-  }).ignore('react').ignore('react-dom').ignore('redux').ignore('react/lib/ReactUpdates').ignore('react/lib/ReactDefaultBatchingStrategy')
-    .bundle()
-    .pipe(source(mainFilePath))
-    .pipe(rename({ dirname: '' }))
-    .pipe(buffer())
-    .pipe(replace(
-      new RegExp(RegExp.escape('%%VERSION%%'), 'g'),
-      'v' + version
-    ))
-    .pipe(derequire())
-}
-
 function writeToDestinations (stream, dests) {
   var tasks = dests.map(function (destPath) {
     return stream.pipe(gulp.dest(versionPath))
@@ -82,12 +60,12 @@ function getMajorVersion () {
   return majorVersion
 }
 
-gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
+gulp.task('build:e2e', function (done) {
   var dirNeedsBuilding = [
-    './test/e2e/react/react',
-    './test/e2e/react/redux',
-    './test/e2e/react/no-init',
-    './test/e2e/fetch'
+    './test/e2e/react',
+    // './test/e2e/redux',
+    // './test/e2e/no-init',
+    // './test/e2e/fetch'
   ]
 
   var left = dirNeedsBuilding.length
@@ -99,9 +77,13 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
     // console.log(myConfig)
     // run webpack
     webpack(webpackConfig).run(function (err, stats) {
-
+      console.log(err);
       if (err) console.log(err) // throw err
       if (stats.hasErrors()) console.log('!! there were errors building', dir)
+
+      console.log(stats.toString({
+            // output options
+        }))
       var jsonStats = stats.toJson()
       if (jsonStats.errors.length > 0) {
         jsonStats.errors.forEach(function (error) {
@@ -117,62 +99,19 @@ gulp.task('build:e2e', ['apply-prod-environment'], function (done) {
   })
 })
 
-gulp.task('build:release', ['apply-prod-environment'], function () {
+gulp.task('build:release', function () {
   var prodPath = './dist/opbeat-react'
-  var version = require('./src/react/package.json').version
-  
-  gulp.src(['src/react/README.md', 'src/react/package.json'])
+  var version = require('./package.json').version
+
+  gulp.src(['./README.md', './package.json', './LICENSE'])
     .pipe(gulp.dest(prodPath))
 
-  gulp.src(['src/**/*.js'], {ignore: ['src/reactInternals', '**/angular/**', '**/react/**']})
+  gulp.src(['src/**/*.js'])
     .pipe(replace(
       new RegExp(RegExp.escape('%%VERSION%%'), 'g'),
       'v' + version
     ))
-    .pipe(gulp.dest(prodPath + '/lib'))
-
-  
-  gulp.src(['src/react/**/*.js'])
-    .pipe(replacePath(/\.\.\//g, './lib/'))
     .pipe(gulp.dest(prodPath))
-
-  var license = gulp.src(['LICENSE'])
-    .pipe(gulp.dest(prodPath))
-
-  // reactInternals
-  var prodPath = './dist/reactInternals'
-  gulp.src(['src/react/reactInternals/**/*'] )
-    .pipe(gulp.dest(prodPath))
-
-  
-})
-
-gulp.task('apply-prod-environment', function () {
-  process.env.NODE_ENV = 'production'
-})
-
-gulp.task('build', ['apply-prod-environment'], function () {
-  var integrations = require('./release/integrations')
-
-  integrations['opbeat-angular.e2e'] = {
-    version: integrations['opbeat-angular'].version,
-    entry: './test/e2e/angular/opbeat-angular.e2e.js'
-  }
-
-  var tasks = Object.keys(integrations).map(function (key) {
-    var entry = integrations[key].entry
-    var version = integrations[key].version
-    return createBuildStream(entry, version)
-      .pipe(gulp.dest('./dist/dev/'))
-      .pipe(rename({
-        extname: '.min.js'
-      }))
-      // .pipe(uglify())
-      .pipe(sourcemaps.init())
-      .pipe(gulp.dest('./dist/dev/'))
-  })
-
-  return es.merge.apply(null, tasks)
 })
 
 // Development mode
@@ -185,44 +124,6 @@ gulp.task('watch', [], function (cb) {
   // Watch JS files
   gulp.watch(['libs/**', 'src/**'], function () { runSequence('build', 'karma-run') })
   console.log('\nExample site running on http://localhost:7000/\n')
-})
-
-//
-// Deploy task
-//
-gulp.task('deploy', ['build:release'], function () {
-  // Load options from file
-  awsoptions = JSON.parse(fs.readFileSync('aws.json'))
-
-  // Hardcoded bucketname, to avoid mistakes
-  awsoptions.params = {
-    Bucket: 'opbeat-js-cdn'
-  }
-
-  // Create new publisher
-  var publisher = awspublish.create(awsoptions)
-
-  // Set headers
-  var headers = {
-    'Cache-Control': 'max-age=1800, public'
-  }
-
-  var version = require('./package').version
-  var majorVersion = version.match(/^(\d).(\d).(\d)/)[1]
-
-  var versionPath = './dist/cdn/**'
-
-  console.warn('Uploading All files in:', versionPath)
-
-  return gulp.src([versionPath])
-    // Gzip
-    .pipe(awspublish.gzip())
-    // Publish files with headers
-    .pipe(publisher.publish(headers))
-    // Create a cache file to speed up consecutive uploads
-    .pipe(publisher.cache())
-    // Print upload updates to console
-    .pipe(awspublish.reporter())
 })
 
 function runKarma (configFile, done) {
@@ -261,19 +162,6 @@ gulp.task('test:e2e:run', function (done) {
     .on('end', function () {
       return process.exit(0)
     })
-})
-
-gulp.task('test:e2e:phantomjs', function () {
-  var failSafeStream = gulp.src('wdio.phantomjs.conf.js')
-    .pipe(webdriver())
-    .on('error', function () {
-      console.log('Exiting process with status 1')
-      process.exit(1)
-    })
-    .on('end', function () {
-      console.log('Tests complete')
-    })
-  return failSafeStream
 })
 
 gulp.task('test:e2e:sauceconnect:failsafe', function () {
