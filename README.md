@@ -56,6 +56,25 @@ const store = createStore(
 );
 ```
 
+### Configuration
+
+Configuration options can be given to `initOpbeat`:
+
+* `sendStateOnException`: set to false to disable the Store state being included in error reports (default: `true`).
+* `actionsCount`: number of recent actions to keep track of and included in error reports (default: `10`).
+
+
+Example:
+
+```js
+initOpbeat({
+  orgId: '470e8f31bc7b4f4395143091fe752e8c',
+  appId: '9aac8591cc',
+  actionsCount: 50,
+  sendStateOnException: true
+});
+```
+
 ## Staging and local environments
 You should create separate apps on Opbeat for production, staging and local environments. You'll get separate tokens for each app on Opbeat. You can then do something like:
 
@@ -115,6 +134,21 @@ try {
 } catch (err) {
   captureError(err)
 }
+```
+
+### Filtering data
+
+Sometimes, you want to filter out sensitive information before it's sent up to our servers. You can do that in the following manner:
+
+```js
+import { addFilter } from 'opbeat-react'
+
+addFilter(data => {
+  if (data.extra['Store state'].password) {
+    delete data.extra['Store state'].password
+  }
+  return data  // remember to return data
+})
 ```
 
 ### Transactions api

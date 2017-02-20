@@ -158,4 +158,5 @@ module.exports = {
   startTransaction: startTransaction,
   setTransactionName: setTransactionName,
   getServiceContainer: getServiceContainer,
+  addFilter: addFilter
 }
