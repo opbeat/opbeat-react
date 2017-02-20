@@ -1,12 +1,9 @@
 {
   "name": "opbeat-react",
-  "version": "2.1.7",
+  "version": "3.0.0rc1",
   "license": "MIT",
   "description": "This is the official Opbeat module for React, redux and react-router.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/opbeat/opbeat-react"
