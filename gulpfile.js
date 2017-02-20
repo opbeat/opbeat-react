@@ -63,9 +63,9 @@ function getMajorVersion () {
 gulp.task('build:e2e', function (done) {
   var dirNeedsBuilding = [
     './test/e2e/react',
-    // './test/e2e/redux',
-    // './test/e2e/no-init',
-    // './test/e2e/fetch'
+    './test/e2e/redux',
+    './test/e2e/no-init',
+    './test/e2e/fetch'
   ]
 
   var left = dirNeedsBuilding.length
@@ -103,14 +103,14 @@ gulp.task('build:release', function () {
   var prodPath = './dist/opbeat-react'
   var version = require('./package.json').version
 
-  gulp.src(['./README.md', './package.json', './LICENSE'])
-    .pipe(gulp.dest(prodPath))
-
   gulp.src(['src/**/*.js'])
     .pipe(replace(
       new RegExp(RegExp.escape('%%VERSION%%'), 'g'),
       'v' + version
     ))
+    .pipe(gulp.dest(prodPath))
+
+  gulp.src(['./README.md', './package.json', './LICENSE'])
     .pipe(gulp.dest(prodPath))
 })
 

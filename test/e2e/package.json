@@ -9,12 +9,6 @@
   "author": "Hamidreza Jahtalab",
   "license": "ISC",
   "dependencies": {
-    "angular": "^1.5.0",
-    "angular-animate": "^1.5.0",
-    "angular-mocks": "^1.5.8",
-    "angular-resource": "^1.5.0",
-    "angular-route": "^1.5.0",
-    "angular-ui-router": "^0.2.18",
     "babel": "^6.5.1",
     "babel-core": "^6.13.2",
     "babel-loader": "^6.2.4",
