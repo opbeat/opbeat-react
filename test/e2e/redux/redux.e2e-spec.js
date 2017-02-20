@@ -7,30 +7,26 @@ describe('redux-app', function () {
       function(cb) {
         console.log("subscribing")
           window.opbeatTransport.subscribe(function(c, transactions) {
-            console.log("callbacked")
             cb(transactions)
           })
           document.getElementById('incr').click();
       }
     ).then(function (response) {
-        console.log("callbacked 1")
-
         var transactions = response.value
         expect(transactions.traces.groups.length).toBe(3)
 
-        expect(transactions.traces.groups[1].kind).toBe('template.update')
-        expect(transactions.traces.groups[2].kind).toBe('action')
+        expect(transactions.traces.groups[2].kind).toBe('template.component')
+        expect(transactions.traces.groups[1].kind).toBe('action')
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(3)
+        expect(transactions.traces.raw[0].length).toBe(5)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('IncrDecr p button#incr:click')
         expect(transactions.transactions[0].kind).toBe('interaction')
 
-        utils.verifyNoBrowserErrors()
+        utils.verifyNoBrowserErrors(done)
 
-        done()
-      }, utils.handleError(done)).catch(utils.handleError(done))
+      }, utils.handleError(done))
   })
 
 
@@ -46,10 +42,10 @@ describe('redux-app', function () {
         console.log('DECREMENT')
       }
     ).then(function (response) {
-        var transactions = response.valuepwd
+        var transactions = response.value
         expect(transactions.traces.groups.length).toBe(3)
 
-        expect(transactions.traces.groups[1].kind).toBe('template.update')
+        expect(transactions.traces.groups[1].kind).toBe('template.component')
 
         expect(transactions.traces.raw.length).toBe(1)
         expect(transactions.traces.raw[0].length).toBe(5)
@@ -58,7 +54,7 @@ describe('redux-app', function () {
         expect(transactions.transactions[0].kind).toBe('action')
         utils.verifyNoBrowserErrors()
         done()
-      }, utils.handleError(done)).catch(utils.handleError(done))
+      }, utils.handleError(done))
   })
 
 
@@ -75,7 +71,7 @@ describe('redux-app', function () {
     ).then(function (response) {
         var transactions = response.value
         
-        expect(transactions.traces.groups.length).toBe(6)
+        expect(transactions.traces.groups.length).toBe(5)
 
         expect(transactions.traces.groups[0].kind).toBe('transaction')
         expect(transactions.traces.groups[0].signature).toBe('transaction')
@@ -98,9 +94,8 @@ describe('redux-app', function () {
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('IncrDecr p button#simpleThunkButton:click')
         expect(transactions.transactions[0].kind).toBe('interaction')
-        utils.verifyNoBrowserErrors()
-        done()
-      }, utils.handleError(done)).catch(utils.handleError(done))
+        utils.verifyNoBrowserErrors(done)
+      }, utils.handleError(done))
   })
 
 
@@ -120,9 +115,8 @@ describe('redux-app', function () {
         
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.traces.groups.length).toBe(5)
-        utils.verifyNoBrowserErrors()
-        done()
-      }, utils.handleError(done)).catch(utils.handleError(done))
+        utils.verifyNoBrowserErrors(done)
+      }, utils.handleError(done))
   })
 
 
@@ -149,8 +143,6 @@ describe('redux-app', function () {
         expect(data.stacktrace.frames[0].filename).toBe('')
 
         done()
-      }, utils.handleError(done)).catch(utils.handleError(done))
+      }, utils.handleError(done))
   })
-
-  // afterEach()
 })

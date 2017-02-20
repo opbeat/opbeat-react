@@ -61,7 +61,7 @@ describe('react-router: makeSignatureFromRoutes', function () {
 
   it('should handle REPLACE routes', function () {
     var routes = [{path: '/'}, {path: 'something'}]
-    expect(makeSignatureFromRoutes(routes, replaceLocation)).toBe('/something (REPLACE)')
+    expect(makeSignatureFromRoutes(routes, replaceLocation)).toBe('/something')
   })
 
   it('should handle nested routes', function () {
@@ -91,7 +91,7 @@ describe('react-router: setTransactionName', function () {
     transactionService = serviceContainer.services.transactionService
 
     tree = React.createElement(
-      Router, {history: browserHistory}, [
+      OpbeatRouter, {history: browserHistory}, [
         React.createElement(Route, {path: '/', key: '0'}),
         React.createElement(Redirect, {from: '/old-path', to: '/new-path', key: '1'}),
         React.createElement(Route, {path: '/mypath', key: '2'}),
@@ -102,18 +102,24 @@ describe('react-router: setTransactionName', function () {
   })
 
   it('should capture router change when mounted', function () {
-    spyOn(transactionService, 'startTransaction').and.callThrough()
+    var transaction
+    var original = transactionService.startTransaction
+    spyOn(transactionService, 'startTransaction').and.callFake(function() {
+      transaction = original.apply(this, arguments)
+      return transaction
+    });
+
 
     serviceContainer.services.zoneService.runInOpbeatZone(function() {
       treeWrapper = mount(tree)
 
       expect(transactionService.startTransaction.calls.count()).toBe(1)
-      expect(transactionService.startTransaction).toHaveBeenCalledWith('unknown', 'unknown')
-      
-      var lastTransaction = serviceContainer.services.zoneService.get('transaction')
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('Unknown', 'route-change')
+      debugger;
+      // var lastTransaction = serviceContainer.services.zoneService.get('transaction')
       // has ended, so we can't use transactionService.getCurrentTransaction()
-      expect(lastTransaction.name).toBe('/')
-      expect(lastTransaction.type).toBe('route-change')
+      expect(transaction.name).toBe('/')
+      expect(transaction.type).toBe('route-change')
     })
 
   })
@@ -128,7 +134,7 @@ describe('react-router: setTransactionName', function () {
       browserHistory.push('/mypath')
 
       expect(transactionService.startTransaction.calls.count()).toBe(1)
-      expect(transactionService.startTransaction).toHaveBeenCalledWith('unknown', 'unknown')
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('Unknown', 'route-change')
 
       // has ended, so we can't use transactionService.getCurrentTransaction()
       var lastTransaction = serviceContainer.services.zoneService.get('transaction')
