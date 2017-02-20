@@ -13,8 +13,10 @@
   ],
   "homepage": "https://github.com/opbeat/opbeat-react",
   "dependencies": {
+    "loglevel": "^1.4.0"
+  },
+  "devDependencies": {
     "opbeat-js-core": "git://github.com/roncohen/opbeat-js-core#dist",
-    "loglevel": "^1.4.0",
     "zone.js": "git://github.com/jahtalab/zone.js.git#dist"
   },
   "scripts": {

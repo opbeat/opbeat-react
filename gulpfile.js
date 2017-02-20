@@ -103,10 +103,24 @@ gulp.task('build:release', function () {
   var prodPath = './dist/opbeat-react'
   var version = require('./package.json').version
 
+  gulp.src(['node_modules/opbeat-js-core/src/**/*.js'])
+    .pipe(gulp.dest(prodPath + '/opbeat-js-core'))
+
+  gulp.src(['node_modules/zone.js/dist/zone.js'])
+    .pipe(gulp.dest(prodPath))
+
   gulp.src(['src/**/*.js'])
     .pipe(replace(
       new RegExp(RegExp.escape('%%VERSION%%'), 'g'),
       'v' + version
+    ))
+    .pipe(replace(
+      new RegExp(RegExp.escape('require(\'opbeat-js-core\')'), 'g'),
+      'require(\'./opbeat-js-core/\')'
+    ))
+    .pipe(replace(
+      new RegExp(RegExp.escape('require(\'zone.js\')'), 'g'),
+      'require(\'./zone.js\')'
     ))
     .pipe(gulp.dest(prodPath))
 
