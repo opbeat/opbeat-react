@@ -10,6 +10,8 @@ var patchCommon = require('opbeat-js-core').patchCommon
 var patchWebpack = require('./patchWebpack')
 var patchFetch = require('./fetchPatch').patchFetch
 
+var addFilter = require('opbeat-js-core').addFilter
+
 require('zone.js')
 
 var serviceFactory = new ServiceFactory()
@@ -17,15 +19,17 @@ var serviceContainer = new ServiceContainer(serviceFactory)
 var enabled;
 var configured = false;
 
+var configService = serviceContainer.services.configService
+
 var ComponentTree
 
-serviceContainer.services.configService.set("VERSION", "%%VERSION%%")
-serviceContainer.services.configService.set('opbeatAgentName', 'opbeat-react')
-serviceContainer.services.configService.set('redux.actionsCount', 10)
-serviceContainer.services.configService.set('redux.sendStateOnException', true)
-serviceContainer.services.configService.set('errorLoggingEnabled', true)
-serviceContainer.services.configService.set('performance.captureInteractions', true)
-serviceContainer.services.configService.set('performance.capturePageLoad', true)
+configService.set('VERSION', '%%VERSION%%')
+configService.set('opbeatAgentName', 'opbeat-react')
+configService.set('actionsCount', 10)
+configService.set('sendStateOnException', true)
+configService.set('errorLoggingEnabled', true)
+configService.set('performance.captureInteractions', true)
+configService.set('performance.capturePageLoad', true)
 
 if(!reactUtils.inBrowser()) {
   serviceContainer.services.logger.warn('Opbeat: Only enabled in browser.')
@@ -57,10 +61,25 @@ function configure (config, serviceFactory) {
   })
 
   if (config) {
-    serviceContainer.services.configService.setConfig(config)
+    configService.setConfig(config)
   }
 
   serviceContainer.initialize()
+
+  addFilter(function (data) {
+    if (configService.get('sendStateOnException')) {
+      var store = configService.get('redux._store')
+      if (store && store.getState) {
+        data.extra['Store state'] = store.getState()
+      }
+
+      var lastActions = configService.get('redux._lastActions')
+      if (lastActions) {
+        data.extra['Last actions'] = lastActions.getAll()
+      }
+    }
+    return data
+  })
 
   serviceContainer.services.transactionService.interactionStarted = function interactionStarted (task) {
     if (task.applyArgs && task.applyArgs[0] && task.applyArgs[0].target) {

@@ -83,16 +83,20 @@ describe('react-redux: opbeatMiddleware', function () {
   })
 
   it('sends errors with store state', function (done) {
-    // _installErrorLogger(serviceContainer)
     var transport = serviceContainer.services.opbeatBackend._transport = new TransportMock()
-    debugger;
+    var configService = serviceContainer.services.configService
+    configService.set('actionsCount', 10)
+    configService.set('sendStateOnException', true)
+
+    // must dispatch at least one action before our middleware will pick up
+    middleware(api)(nextMiddleware(api)(null))(testAction)
+
     expect(transport.errors).toEqual([])
     transport.subscribe(function (event, errorData) {
       if (event === 'sendError') {
-        debugger;
         expect(errorData.data.message).toBe('Error: test error')
         expect(errorData.data.extra['Store state']).toEqual({ hello: 'world' })
-        expect(errorData.data.extra['Last 10 actions']).toEqual([ 'TEST_ACTION' ])
+        expect(errorData.data.extra['Last actions']).toEqual([ 'TEST_ACTION' ])
         done()
       }
     })
