@@ -9,6 +9,7 @@ opbeat-react will also automatically log exceptions to Opbeat.
 ## Usage
 
 Make sure to import `opbeat-react` before _anything_ else in your application.
+If you have a _vendor_ bundle that includes `React`, you need to also incluse `opbeat-react` in that bundle - before `React`.
 
 ```js
 import initOpbeat from 'opbeat-react'
@@ -19,16 +20,24 @@ initOpbeat({
 });
 ```
 
-If you use react-router (v2 or v3), import 'opbeat-react/router'. See the [transactions api](#transactions-api) for examples without react-router. 
+If you use react-router (v2 or v3), use `wrapRouter` to enable routing instrumentation. See the [transactions api](#transactions-api) for examples without react-router. 
 
 ```js
 import initOpbeat from 'opbeat-react'
-import 'opbeat-react/router' // enable react-router instrumentation
+import { Router } from 'react-router'
+import { wrapRouter } from 'opbeat-react' // enable react-router instrumentation
+
+const OpbeatRouter = wrapRouter(Router)
 
 initOpbeat({
   orgId: '470e8f31bc7b4f4395143091fe752e8c',
   appId: '9aac8591cc',
 });
+
+ReactDom.render(
+  <OpbeatRouter><Route /></OpbeatRouter>,
+  document.getElementById('react-mount')
+);
 ```
 
 If you're using Redux, add the Opbeat middleware as the last middleware in your chain:
@@ -52,7 +61,6 @@ You should create separate apps on Opbeat for production, staging and local envi
 
 ```js
 import initOpbeat from 'opbeat-react'
-import 'opbeat-react/router' // enable react-router instrumentation
 
 if (process.env.NODE_ENV === 'production') {
   initOpbeat({
