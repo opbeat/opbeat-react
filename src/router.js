@@ -1,8 +1,7 @@
 var patchObject = require('./utils').patchObject
-var Router = require('react-router').Router
 var utils = require('opbeat-js-core').utils
-var startTransaction = require('./react').startTransaction
 var setTransactionName = require('./react').setTransactionName
+var getServiceContainer = require('./react').getServiceContainer
 
 function combineRoutes (routes) {
   var pathParts = []
@@ -35,10 +34,6 @@ function makeSignatureFromRoutes (routes, location) {
     fullRoute = combineRoutes(routes)
   }
 
-  if (location.action === 'REPLACE') {
-    fullRoute += ' (REPLACE)'
-  }
-
   return fullRoute
 }
 
@@ -50,16 +45,23 @@ function patchTransitionManager (transitionManager) {
         if (args.length === 1) {
           return delegate.call(self, function () {
             if (arguments.length === 2) { // error, nextState
-              // if (utils.opbeatGlobal()) {
                 var state = arguments[1]
                 var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
-                var transaction = setTransactionName(fullRoute, 'route-change')
+                var serviceContainer = getServiceContainer()
 
-                if (transaction && hardNavigation) {
-                  hardNavigation = false
-                  transaction.wasHardNavigation = true
+                if (serviceContainer) {
+                  var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
+
+                  // set route name
+                  if (transaction.type === 'route-change') {
+                    transaction.name = fullRoute
+                  }
+
+                  if (hardNavigation) {
+                    hardNavigation = false
+                    transaction.isHardNavigation = true
+                  }
                 }
-              // }
             }
             return args[0].apply(self, arguments)
           })
@@ -68,13 +70,48 @@ function patchTransitionManager (transitionManager) {
     })
 }
 
+function startRoute(location) {
+  // A new route change happens
+  var serviceContainer = getServiceContainer()
+  if (!serviceContainer) {
+    return
+  }
+    
+  var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
+
+  if (!transaction) {
+      serviceContainer.services.logger.warn("Opbeat: Problem occured in measuring route-change. Make sure opbeat-react is loaded _before_ React. If you're using a vendor bundle, make sure Opbeat is first")
+  } else {
+    /*
+      push: route change
+      
+      replace:
+        - interaction ongoing: do nothing
+        - route-change ongoing: route change (could be a redirect)
+    */
+    if ((location && location.action && location.action !== 'REPLACE') || transaction.type !== 'interaction') {
+      if (transaction && transaction.type === 'interaction') {
+        transaction.name = 'Unknown'
+        transaction.type = 'route-change'
+      } else {
+        serviceContainer.services.transactionService.startTransaction('Unknown', 'route-change')
+      }
+    }
+  }
+}
+
 function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {
     return function componentWillMountWrapper (self, args) {
+
+      // Get notified as soon as the url changes
       if (self.props && self.props.history && self.props.history.listen) {
-        self._opbeatUnlisten = self.props.history.listen(startTransaction)
+        self._opbeatUnlisten = self.props.history.listen(function (location) {
+          startRoute(location)
+        })
       }
 
+      // Need to patch transition manager to get the matched routes.
       // react-router version 2.0 has 'createRouterObjects'
       if (self.createRouterObjects) {
         patchObject(self, 'createRouterObjects', function (delegate) {
@@ -96,8 +133,9 @@ function patchRouter (router) {
           }
         })
 
+        // When mounting, we need to start a ZoneTransaction if not already started.
         if (self.props.history) {
-          startTransaction()
+          startRoute()
         }
       }
 
@@ -116,16 +154,13 @@ function patchRouter (router) {
   })
 }
 
-
-patchRouter(Router.prototype)
-
-function useRouter() {
-  if (console && console.log) {
-    console.log("Opbeat: useRouter is deprecated and no longer needed. Just `import 'opbeat-opbeat/router'")
-  }
+// Return a new router instead of patching the original
+function wrapRouter(Router) {
+  patchRouter(Router.prototype)
+  return Router
 }
 
 module.exports = {
-  useRouter: useRouter,
+  wrapRouter: wrapRouter,
   makeSignatureFromRoutes: makeSignatureFromRoutes,
 }

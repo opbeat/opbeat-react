@@ -14,6 +14,11 @@ function isTopLevelWrapper(ReactMount, element) {
 function nodeName (ComponentTree, domNode) {
   if (ComponentTree) {
     var reactElem = ComponentTree.getClosestInstanceFromNode(domNode)
+
+    if (!reactElem) {
+      return DOMNodeName(domNode)
+    }
+    
     var elements = []
     var owner = reactElem._currentElement._owner
 
@@ -44,6 +49,13 @@ function nodeName (ComponentTree, domNode) {
 
 function DOMNodeName (domNode) {
   var tag = domNode.tagName ? domNode.tagName.toLowerCase() : ''
+  if (domNode === document) {
+    return 'document'
+  }
+
+  if (!domNode || !domNode.getAttribute) {
+    return ''
+  }
   var idName = domNode.getAttribute('id')
   idName = idName ? idName.trim() : ''
 

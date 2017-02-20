@@ -68,7 +68,9 @@ function configure (config, serviceFactory) {
       var nodeName = reactUtils.nodeName(ComponentTree, realTarget)
       var tr = serviceContainer.services.transactionService.getCurrentTransaction()
 
-      serviceContainer.services.transactionService.startTransaction(nodeName + ':' + task.applyArgs[0].type, 'interaction')
+      if (!tr || tr.name === 'ZoneTransaction') {
+        serviceContainer.services.transactionService.startTransaction(nodeName + ':' + task.applyArgs[0].type, 'interaction')
+      }
     }
   }
   
@@ -95,12 +97,9 @@ function getServiceContainer () {
 function startTransaction () {
   if (configured) {
     var transactionService = serviceContainer.services.transactionService
-    var transaction = transactionService.getCurrentTransaction()
-    if (transaction && transaction.name !== 'ZoneTransaction') {
-      transaction.end()
-    }
 
-    return transactionService.startTransaction('unknown', 'unknown')
+    // start zone transaction if necessacy
+    return transactionService.getCurrentTransaction()
   }
 }
 
@@ -114,7 +113,7 @@ function setTransactionName (transactionName, transactionType) {
       transaction = startTransaction()
     }
 
-    if (transaction.name !== 'ZoneTransaction') {
+    if (transaction/* && transaction.name !== 'ZoneTransaction'*/) {
       transaction.name = transactionName
       transaction.type = transactionType
     }
