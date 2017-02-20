@@ -28,7 +28,7 @@ function patchPromise (transactionService, promise, trace, patchArguments, thenT
         if (resolve) {
           thenTasks.push(taskId)
           args[0] = function () {
-            if (!trace.ended) {
+            if (trace && !trace.ended) {
               trace.end()
             }
 
@@ -49,7 +49,7 @@ function patchPromise (transactionService, promise, trace, patchArguments, thenT
         if (reject) {
           catchTasks.push(taskId)
           args[1] = function () {
-            if (!trace.ended) {
+            if (trace && !trace.ended) {
               trace.end()
             }
 
@@ -96,7 +96,7 @@ function patchPromise (transactionService, promise, trace, patchArguments, thenT
         var resolve = args[0]
 
         args[0] = function () {
-          if (!trace.ended) {
+          if (trace && !trace.ended) {
             trace.end()
           }
           try {

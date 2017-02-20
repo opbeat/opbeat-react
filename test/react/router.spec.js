@@ -4,10 +4,12 @@ var mount = require('enzyme').mount
 var unmount = require('enzyme').unmount
 
 var makeSignatureFromRoutes = require('../../src/router').makeSignatureFromRoutes
+var wrapRouter = require('../../src/router').wrapRouter
 var pushLocation = {action: 'PUSH'}
 var replaceLocation = {action: 'REPLACE'}
 
-var initOpbeat = require('../../src/react').default
+var initOpbeat = require('../../src/react').configure
+
 var getServiceContainer = require('../../src/react').getServiceContainer
 
 var ServiceContainer = require('opbeat-js-core').ServiceContainer
@@ -28,6 +30,8 @@ var LoginComponent = React.createClass({
     return React.createElement('div')
   }
 })
+
+const OpbeatRouter = wrapRouter(Router)
 
 describe('react-router: makeSignatureFromRoutes', function () {
   it('should correctly join paths', function () {

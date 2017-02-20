@@ -36,7 +36,10 @@ function patchFetch (serviceContainer) {
         var promise = delegate.apply(self, args)
 
         var fin = function () {
-          trace.end()
+          if (trace) {
+            trace.end()
+          }
+          
           transactionService.detectFinish()
         }
 

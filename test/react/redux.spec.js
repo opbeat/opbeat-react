@@ -1,4 +1,4 @@
-var initOpbeat = require('../../src/react').default
+var initOpbeat = require('../../src/react').configure
 // var _setServiceContainer = require('../../src/react')._setServiceContainer
 var getServiceContainer = require('../../src/react').getServiceContainer
 var captureError = require('../../src/react').captureError

@@ -25,7 +25,7 @@ serviceContainer.services.configService.set('redux.actionsCount', 10)
 serviceContainer.services.configService.set('redux.sendStateOnException', true)
 serviceContainer.services.configService.set('errorLoggingEnabled', true)
 serviceContainer.services.configService.set('performance.captureInteractions', true)
-
+serviceContainer.services.configService.set('performance.capturePageLoad', true)
 
 if(!reactUtils.inBrowser()) {
   serviceContainer.services.logger.warn('Opbeat: Only enabled in browser.')
@@ -123,9 +123,9 @@ function setTransactionName (transactionName, transactionType) {
   }
 }
 
+
 module.exports = {
-  __esModule: true,
-  default: configure,
+  configure: configure,
   setUserContext: function setUserContext (userContext) {
     serviceContainer.services.configService.set('context.user', userContext)
   },
