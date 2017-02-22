@@ -83,10 +83,9 @@ function startRoute(location) {
       serviceContainer.services.logger.warn("Opbeat: Problem occured in measuring route-change. Make sure opbeat-react is loaded _before_ React. If you're using a vendor bundle, make sure Opbeat is first")
   } else {
     /*
-      push: route change
-      
-      replace:
-        - interaction ongoing: do nothing
+    location.action == push: do a route change
+    location.action == replace:
+        - interaction ongoing: do nothing. The replace route change is likely just updating the url bar following an interaction
         - route-change ongoing: route change (could be a redirect)
     */
     if ((location && location.action && location.action !== 'REPLACE') || transaction.type !== 'interaction') {
