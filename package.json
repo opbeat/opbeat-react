@@ -1,6 +1,6 @@
 {
   "name": "opbeat-react",
-  "version": "3.0.0rc1",
+  "version": "3.0.0rc2",
   "license": "MIT",
   "description": "This is the official Opbeat module for React, redux and react-router.",
   "main": "index.js",
@@ -13,11 +13,11 @@
   ],
   "homepage": "https://github.com/opbeat/opbeat-react",
   "dependencies": {
+    "opbeat-js-core": "git://github.com/roncohen/opbeat-js-core#dist",
+    "zone.js": "git://github.com/jahtalab/zone.js.git#dist",
     "loglevel": "^1.4.0"
   },
   "devDependencies": {
-    "opbeat-js-core": "git://github.com/roncohen/opbeat-js-core#dist",
-    "zone.js": "git://github.com/jahtalab/zone.js.git#dist"
   },
   "scripts": {
     "build": "gulp build:release",
