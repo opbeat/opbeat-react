@@ -7,7 +7,7 @@ describe('redux-app', function () {
       function(cb) {
         console.log("subscribing")
           window.opbeatTransport.subscribe(function(c, transactions) {
-            cb(transactions)
+            cb(transactions.data)
           })
           document.getElementById('incr').click();
       }
@@ -36,19 +36,19 @@ describe('redux-app', function () {
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(c, transactions) {
-          cb(transactions)
+          cb(transactions.data)
         })
         window.store.dispatch({type: 'DECREMENT'})
         console.log('DECREMENT')
       }
     ).then(function (response) {
         var transactions = response.value
-        expect(transactions.traces.groups.length).toBe(3)
+        expect(transactions.traces.groups.length).toBe(2)
 
         expect(transactions.traces.groups[1].kind).toBe('template.component')
 
         expect(transactions.traces.raw.length).toBe(1)
-        expect(transactions.traces.raw[0].length).toBe(5)
+        expect(transactions.traces.raw[0].length).toBe(4)
         expect(transactions.transactions.length).toBe(1)
         expect(transactions.transactions[0].transaction).toBe('DECREMENT')
         expect(transactions.transactions[0].kind).toBe('action')
@@ -64,7 +64,7 @@ describe('redux-app', function () {
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(c, transactions) {
-          cb(transactions)
+          cb(transactions.data)
         })
         document.getElementById('simpleThunkButton').click()
       }
@@ -105,7 +105,7 @@ describe('redux-app', function () {
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(c, transactions) {
-          cb(transactions)
+          cb(transactions.data)
         })
         var elem = document.getElementsByClassName('delayedThunkButton')[0]
         elem.click()
@@ -114,7 +114,7 @@ describe('redux-app', function () {
         var transactions = response.value
         
         expect(transactions.transactions.length).toBe(1)
-        expect(transactions.traces.groups.length).toBe(5)
+        expect(transactions.traces.groups.length).toBe(4)
         utils.verifyNoBrowserErrors(done)
       }, utils.handleError(done))
   })
@@ -132,15 +132,15 @@ describe('redux-app', function () {
         elem.click()
       }
     ).then(function (response) {
-        var data = response.value[0]
+        var data = response.value.data
         expect(data.exception.type).toBe('Invariant Violation')
         expect(data.exception.value).toBe('ErroneousComponent(...): A valid React element (or null) must be returned. You may have returned undefined, an array or some other invalid object.')
-        expect(data.culprit).toBe('react/redux/bundle.js')
-        expect(data.stacktrace.frames.length).toBeGreaterThan(10)
-        expect(data.stacktrace.frames[0].colno).toBe(3)
-        expect(data.stacktrace.frames[0].lineno).toBe(248)
-        expect(data.stacktrace.frames[0]['function']).toBe('<anonymous>')
-        expect(data.stacktrace.frames[0].filename).toBe('')
+        expect(data.culprit).toBe('redux/bundle.js')
+        expect(data.stacktrace.frames.length).toBeGreaterThan(9)
+        expect(data.stacktrace.frames[0].colno).toBe(13)
+        expect(data.stacktrace.frames[0].lineno).toBe(18731)
+        expect(data.stacktrace.frames[0]['function']).toBe('_updateDOMChildren')
+        expect(data.stacktrace.frames[0].filename).toBe('redux/bundle.js')
 
         done()
       }, utils.handleError(done))

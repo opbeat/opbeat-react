@@ -45,7 +45,7 @@ function configure (config, serviceFactory) {
   if (!enabled) {
     return false
   }
-
+  
   if (!utils.isUndefined(serviceFactory)) {
     serviceContainer = new ServiceContainer(serviceFactory)
   }
@@ -93,18 +93,14 @@ function configure (config, serviceFactory) {
     }
   }
   
-  _installErrorLogger(serviceContainer)
-
-  configured = true
-
-  return serviceContainer
-}
-
-function _installErrorLogger (serviceContainer) {
   if (serviceContainer.services.configService.get('errorLoggingEnabled')) {
     serviceContainer.services.exceptionHandler = serviceFactory.getExceptionHandler()
     serviceContainer.services.exceptionHandler.install()
   }
+
+  configured = true
+
+  return serviceContainer
 }
 
 function getServiceContainer () {

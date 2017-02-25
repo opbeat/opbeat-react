@@ -7,7 +7,7 @@ describe('react-app', function () {
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(c, transactions) {
-          cb(transactions)
+          cb(transactions.data)
         })
       }
     ).then(function (response) {
@@ -32,7 +32,7 @@ describe('react-app', function () {
       function(cb) {
         window.opbeatTransport.subscribe(function(c, transactions) {
           console.log("YOYOY! 2")
-          cb(transactions)
+          cb(transactions.data)
         })
 
         document.getElementById('ES6Component').click()

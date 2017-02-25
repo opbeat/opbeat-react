@@ -13,15 +13,16 @@ describe('simple-fetch-app', function () {
         window.opbeatTransport.subscribe(function(c, transactions) {
           console.log("hello2")
           var fetchedResult = document.getElementById('fetchResult').textContent
-          cb({transactions: transactions, fetchedResult: fetchedResult})
+          cb({transactions: transactions.data, fetchedResult: fetchedResult})
         })
         document.getElementById('fetch-data').click()
       }
     ).then(function (response) {
+      
       var transactions = response.value.transactions
       var fetchedResult = response.value.fetchedResult
-
       expect(fetchedResult).toBe('some-data')
+
       expect(transactions.traces.groups.length).toBe(4)
 
       expect(transactions.traces.groups[0].transaction).toBe('fetchData')
@@ -38,7 +39,7 @@ describe('simple-fetch-app', function () {
 
       // utils.verifyNoBrowserErrors(done)
       done()
-    }, handleError(done))//.catch(handleError(done))
+    }, handleError(done)).catch(handleError(done))
   })
 
   it('should intercept fire-and-forget fetch', function (done) {
@@ -50,7 +51,7 @@ describe('simple-fetch-app', function () {
 
           var fetchedResult = document.getElementById('fetchResult').textContent
 
-          cb({transactions: transactions, fetchedResult: fetchedResult})
+          cb({transactions: transactions.data, fetchedResult: fetchedResult})
         })
         document.getElementById('fetch-data-fire-forget').click()
       }
@@ -79,7 +80,7 @@ describe('simple-fetch-app', function () {
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(c, transactions) {
-          cb({transactions: transactions})
+          cb({transactions: transactions.data})
         })
         document.getElementById('fail-fetch-data').click()
       }
@@ -114,7 +115,7 @@ describe('simple-fetch-app', function () {
     browser.executeAsync(
       function(cb) {
         window.opbeatTransport.subscribe(function(c, transactions) {
-          cb({transactions: transactions})
+          cb({transactions: transactions.data})
         })
         document.getElementById('fail-fetch-data-catch').click()
       }
