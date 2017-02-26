@@ -41,13 +41,14 @@ if(!reactUtils.inBrowser()) {
   enabled = true;
 }
 
-function configure (config, serviceFactory) {
+function configure (config, factory) {
   if (!enabled) {
     return false
   }
   
-  if (!utils.isUndefined(serviceFactory)) {
-    serviceContainer = new ServiceContainer(serviceFactory)
+  if (!utils.isUndefined(factory)) {
+    serviceContainer = new ServiceContainer(factory)
+    serviceFactory = factory
   }
 
   patchCommon(serviceContainer)

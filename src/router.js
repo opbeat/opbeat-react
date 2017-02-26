@@ -76,7 +76,7 @@ function startRoute(location) {
   if (!serviceContainer) {
     return
   }
-    
+  
   var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
 
   if (!transaction) {

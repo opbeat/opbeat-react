@@ -2,18 +2,9 @@
 
 var fs = require('fs')
 var gulp = require('gulp')
-var source = require('vinyl-source-stream')
-var rename = require('gulp-rename')
-var buffer = require('vinyl-buffer')
-var uglify = require('gulp-uglify')
-var sourcemaps = require('gulp-sourcemaps')
-var replacePath = require('gulp-replace-path')
 
 var taskListing = require('gulp-task-listing')
-var awspublish = require('gulp-awspublish')
-var injectVersion = require('gulp-inject-version')
-var derequire = require('gulp-derequire')
-var es = require('event-stream')
+
 var karma = require('karma')
 var runSequence = require('run-sequence')
 var webdriver = require('gulp-webdriver')
@@ -21,13 +12,12 @@ var selenium = require('selenium-standalone')
 var replace = require('gulp-replace')
 
 var webpack = require('webpack')
+var afterAll = require('after-all')
 
 var path = require('path')
 var connect = require('gulp-connect')
 
 require('gulp-release-tasks')(gulp)
-
-var jeditor = require('gulp-json-editor')
 
 var webdriverConfig = {
   user: process.env.SAUCE_USERNAME || 'opbeat',
@@ -47,13 +37,6 @@ gulp.task('examples:serve', function () {
   })
 })
 
-function writeToDestinations (stream, dests) {
-  var tasks = dests.map(function (destPath) {
-    return stream.pipe(gulp.dest(versionPath))
-  })
-  return es.merge.apply(null, tasks)
-}
-
 function getMajorVersion () {
   var version = require('./package').version
   var majorVersion = version.match(/^(\d).(\d).(\d)/)[1]
@@ -69,21 +52,15 @@ gulp.task('build:e2e', function (done) {
   ]
 
   var left = dirNeedsBuilding.length
-  dirNeedsBuilding.map(function (dir) {
+  var next = afterAll(done)
+  dirNeedsBuilding.forEach(function (dir) {
+    var buildDone = next()
     console.log('Building', dir)
     var webpackConfig = require(dir + '/webpack.config.js')
-    // console.log(webpackConfig)
-    // var myConfig = Object.create(webpackConfig)
-    // console.log(myConfig)
-    // run webpack
     webpack(webpackConfig).run(function (err, stats) {
-      console.log(err);
-      if (err) console.log(err) // throw err
+      if (err) throw err // throw err
       if (stats.hasErrors()) console.log('!! there were errors building', dir)
 
-      console.log(stats.toString({
-            // output options
-        }))
       var jsonStats = stats.toJson()
       if (jsonStats.errors.length > 0) {
         jsonStats.errors.forEach(function (error) {
@@ -91,17 +68,15 @@ gulp.task('build:e2e', function (done) {
         })
       }
 
-      left--
-      if (left === 0) {
-        done()
-      }
+      buildDone()
     })
   })
 })
 
-gulp.task('build:release', function () {
+gulp.task('build:release', function (done) {
   var prodPath = './dist/opbeat-react'
   var version = require('./package.json').version
+  var next = afterAll(done)
 
   gulp.src(['src/**/*.js'])
     .pipe(replace(
@@ -109,9 +84,11 @@ gulp.task('build:release', function () {
       'v' + version
     ))
     .pipe(gulp.dest(prodPath))
+    .on('end', next())
 
   gulp.src(['./README.md', './package.json', './LICENSE'])
     .pipe(gulp.dest(prodPath))
+    .on('end', next())
 })
 
 // Development mode
