@@ -138,7 +138,6 @@ describe('redux-app', function () {
         expect(data.culprit).toBe('redux/bundle.js')
         expect(data.stacktrace.frames.length).toBeGreaterThan(9)
         expect(data.stacktrace.frames[0].colno).toBe(13)
-        expect(data.stacktrace.frames[0].lineno).toBe(18731)
         expect(data.stacktrace.frames[0]['function']).toBe('_updateDOMChildren')
         expect(data.stacktrace.frames[0].filename).toBe('redux/bundle.js')
 
