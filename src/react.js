@@ -92,7 +92,7 @@ function configure (config, factory) {
         serviceContainer.services.transactionService.startTransaction(nodeName + ':' + task.applyArgs[0].type, 'interaction')
       }
     }
-  }
+  } 
   
   if (serviceContainer.services.configService.get('errorLoggingEnabled')) {
     serviceContainer.services.exceptionHandler = serviceFactory.getExceptionHandler()

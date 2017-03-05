@@ -115,9 +115,7 @@ describe('react-router: setTransactionName', function () {
 
       expect(transactionService.startTransaction.calls.count()).toBe(1)
       expect(transactionService.startTransaction).toHaveBeenCalledWith('Unknown', 'route-change')
-      debugger;
-      // var lastTransaction = serviceContainer.services.zoneService.get('transaction')
-      // has ended, so we can't use transactionService.getCurrentTransaction()
+
       expect(transaction.name).toBe('/')
       expect(transaction.type).toBe('route-change')
     })

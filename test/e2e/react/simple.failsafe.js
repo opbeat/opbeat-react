@@ -5,7 +5,7 @@ describe('failsafe react-app', function () {
   beforeEach(utils.verifyNoBrowserErrors)
 
   it('should have no errors', function (done) {
-    browser.url('/react/react/index.html')//wait(until.elementLocated(By.id('incr')))
+    browser.url('/react/index.html')
 
     browser.executeAsync(
       function(cb) {
