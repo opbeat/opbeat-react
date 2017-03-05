@@ -52,9 +52,18 @@ module.exports = function patchReact (reactInternals, serviceContainer) {
     return function (self, args) {
       if (serviceContainer) {
         var out
+        var transactionService = serviceContainer.services.transactionService
         return serviceContainer.services.zoneService.runInOpbeatZone(function () {
+          if (!transactionService.metrics['appBeforeBootstrap']) {
+            transactionService.metrics['appBeforeBootstrap'] = performance.now()
+          }
+
           out = delegate.apply(self, args)
-          serviceContainer.services.transactionService.detectFinish()
+
+          if (!transactionService.metrics['appAfterBootstrap']) {
+            transactionService.metrics['appAfterBootstrap'] = performance.now()
+          }
+          transactionService.detectFinish()
           return out
         })
       } else {

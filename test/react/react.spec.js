@@ -111,6 +111,25 @@ describe('react: generate traces', function () {
 })
 
 
+describe('react: appBeforeBootstrap and appAfterBootstrap', function () {
+  var transactionService
+
+  it('sets them correctly', function () {
+    
+    var div = document.createElement("div")
+    document.body.appendChild(div)
+
+    ReactDOM.render(React.createElement(ListOfLists), div)
+
+    transactionService = serviceContainer.services.transactionService
+
+    expect(transactionService.metrics['appBeforeBootstrap']).toBeTruthy()
+    expect(transactionService.metrics['appAfterBootstrap']).toBeTruthy()
+  })
+})
+
+
+
 describe('react: send error', function () {
   var transport
 
