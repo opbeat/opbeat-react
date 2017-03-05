@@ -21,7 +21,7 @@ function createOpbeatMiddleware () {
     if (!transactionService) {
       transactionService = serviceContainer.services.transactionService
       if (serviceContainer.services.configService.get('actionsCount')) {
-        lastActions = new RingBuffer(serviceContainer.services.configService.get('redux.actionsCount'))
+        lastActions = new RingBuffer(serviceContainer.services.configService.get('actionsCount'))
         serviceContainer.services.configService.set('redux._lastActions', lastActions)
       }
 

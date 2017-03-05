@@ -16,7 +16,8 @@ describe('react-redux: opbeatMiddleware', function () {
   var transactionService
   var opbeat
   var store
-  var testAction = {type: 'TEST_ACTION'}
+  var testAction1 = {type: 'TEST_ACTION_1'}
+  var testAction2 = {type: 'TEST_ACTION_2'}
   var middleware, count, api
   var serviceContainer = getServiceContainer()
   var serviceFactory
@@ -26,7 +27,7 @@ describe('react-redux: opbeatMiddleware', function () {
     return function (next) {
       return function (action) {
         count++
-        expect(action).toBe(testAction)
+        expect(action === testAction1 || action === testAction2).toBeTruthy()
         expect(next).toBe(null)
       }
     }
@@ -57,9 +58,9 @@ describe('react-redux: opbeatMiddleware', function () {
     expect(transactionService.startTransaction.calls.count()).toBe(0)
     expect(transactionService.getCurrentTransaction()).toBeUndefined()
 
-    middleware(api)(nextMiddleware(api)(null))(testAction)
+    middleware(api)(nextMiddleware(api)(null))(testAction1)
 
-    expect(transactionService.startTransaction).toHaveBeenCalledWith(testAction.type, 'action')
+    expect(transactionService.startTransaction).toHaveBeenCalledWith(testAction1.type, 'action')
 
     expect(count).toBe(1)
   })
@@ -71,10 +72,10 @@ describe('react-redux: opbeatMiddleware', function () {
         spyOn(transactionService, 'startTransaction').and.callThrough()
         spyOn(transaction, 'startTrace').and.callThrough()
 
-        middleware(api)(nextMiddleware(api)(null))(testAction)
+        middleware(api)(nextMiddleware(api)(null))(testAction1)
 
         expect(transactionService.startTransaction).not.toHaveBeenCalled()
-        expect(transaction.startTrace).not.toHaveBeenCalledWith(testAction.type, 'action')
+        expect(transaction.startTrace).not.toHaveBeenCalledWith(testAction1.type, 'action')
 
         expect(count).toBe(1)
         transaction.end()
@@ -89,14 +90,16 @@ describe('react-redux: opbeatMiddleware', function () {
     configService.set('sendStateOnException', true)
 
     // must dispatch at least one action before our middleware will pick up
-    middleware(api)(nextMiddleware(api)(null))(testAction)
+    middleware(api)(nextMiddleware(api)(null))(testAction1)
+    middleware(api)(nextMiddleware(api)(null))(testAction2)
+    middleware(api)(nextMiddleware(api)(null))(testAction1)
 
     expect(transport.errors).toEqual([])
     transport.subscribe(function (event, errorData) {
       if (event === 'sendError') {
         expect(errorData.data.message).toBe('Error: test error')
         expect(errorData.data.extra['Store state']).toEqual({ hello: 'world' })
-        expect(errorData.data.extra['Last actions']).toEqual([ 'TEST_ACTION' ])
+        expect(errorData.data.extra['Last actions']).toEqual([ 'TEST_ACTION_1', 'TEST_ACTION_2', 'TEST_ACTION_1' ])
         done()
       }
     })
