@@ -71,7 +71,7 @@ function configure (config, factory) {
     if (configService.get('sendStateOnException')) {
       var store = configService.get('redux._store')
       if (store && store.getState) {
-        data.extra['Store state'] = store.getState()
+        data.extra['Store state'] = JSON.parse(JSON.stringify(store.getState()))
       }
 
       var lastActions = configService.get('redux._lastActions')
