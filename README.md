@@ -136,6 +136,20 @@ try {
 }
 ```
 
+### Ignore certain routes/actions/interactions
+
+You can use the `ignoreTransactions` configuration option to ignore certain routes, actions or interactions so they don't get sent up to Opbeat. The `ignoreTransactions` option is given to `initOpbeat` along with your regular options. You specify a list of simple strings or regular expressions that are matched against the name of the transaction.
+
+```js
+initOpbeat({
+  orgId: '470e8f31bc7b4f4395143091fe752e8c',
+  appId: '9aac8591cc',
+  ignoreTransactions: ['FETCH_CATS', /^Link /]
+});
+```
+
+*Note:* Any redux actions that match the list are also ignored from "Last actions" in "Extra" that are automatically sent when errors occur.
+
 ### Filtering data
 
 Sometimes, you want to filter out sensitive information before it's sent up to our servers. You can do that in the following manner:
