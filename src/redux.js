@@ -10,7 +10,9 @@ var passThrough = function (next) {
 
 function createOpbeatMiddleware () {
   var transactionService
+  var configService
   var lastActions
+  var ignoreList
 
   return function (store) {
     var serviceContainer = getServiceContainer()
@@ -20,13 +22,14 @@ function createOpbeatMiddleware () {
 
     if (!transactionService) {
       transactionService = serviceContainer.services.transactionService
-      if (serviceContainer.services.configService.get('actionsCount')) {
-        lastActions = new RingBuffer(serviceContainer.services.configService.get('actionsCount'))
-        serviceContainer.services.configService.set('redux._lastActions', lastActions)
+      configService = serviceContainer.services.configService
+      if (configService.get('actionsCount')) {
+        lastActions = new RingBuffer(configService.get('actionsCount'))
+        configService.set('redux._lastActions', lastActions)
       }
 
-      if (serviceContainer.services.configService.get('sendStateOnException')) {
-        serviceContainer.services.configService.set('redux._store', store)
+      if (configService.get('sendStateOnException')) {
+        configService.set('redux._store', store)
       }
     }
 
@@ -51,7 +54,7 @@ function createOpbeatMiddleware () {
             }
           }
 
-          if(utils.isObject(action) && action.type && lastActions) {
+          if(utils.isObject(action) && action.type && lastActions && !transactionService.shouldIgnoreTransaction(action.type)) {
             lastActions.push(action.type)
           }
 

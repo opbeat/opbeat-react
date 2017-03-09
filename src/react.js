@@ -12,7 +12,7 @@ var patchFetch = require('./fetchPatch').patchFetch
 
 var addFilter = require('opbeat-js-core').addFilter
 
-require('zone.js')
+
 
 var serviceFactory = new ServiceFactory()
 var serviceContainer = new ServiceContainer(serviceFactory)
@@ -39,6 +39,7 @@ if(!reactUtils.inBrowser()) {
   enabled = false;
 } else {
   enabled = true;
+  require('zone.js')
 }
 
 function configure (config, factory) {
