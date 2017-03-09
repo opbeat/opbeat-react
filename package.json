@@ -1,6 +1,6 @@
 {
   "name": "opbeat-react",
-  "version": "3.0.0rc5",
+  "version": "3.0.0rc6",
   "license": "MIT",
   "description": "This is the official Opbeat module for React, redux and react-router.",
   "main": "index.js",
