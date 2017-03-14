@@ -1,6 +1,4 @@
 var patchObject = require('./utils').patchObject
-var utils = require('opbeat-js-core').utils
-var setTransactionName = require('./react').setTransactionName
 var getServiceContainer = require('./react').getServiceContainer
 
 function combineRoutes (routes) {
@@ -41,46 +39,46 @@ var hardNavigation = true
 
 function patchTransitionManager (transitionManager) {
   patchObject(transitionManager, 'listen', function (delegate) {
-      return function (self, args) {
-        if (args.length === 1) {
-          return delegate.call(self, function () {
-            if (arguments.length === 2) { // error, nextState
-                var state = arguments[1]
-                var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
-                var serviceContainer = getServiceContainer()
+    return function (self, args) {
+      if (args.length === 1) {
+        return delegate.call(self, function () {
+          if (arguments.length === 2) { // error, nextState
+            var state = arguments[1]
+            var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
+            var serviceContainer = getServiceContainer()
 
-                if (serviceContainer) {
-                  var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
+            if (serviceContainer) {
+              var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
 
                   // set route name
-                  if (transaction.type === 'route-change') {
-                    transaction.name = fullRoute
-                  }
+              if (transaction.type === 'route-change') {
+                transaction.name = fullRoute
+              }
 
-                  if (hardNavigation) {
-                    hardNavigation = false
-                    transaction.isHardNavigation = true
-                  }
-                }
+              if (hardNavigation) {
+                hardNavigation = false
+                transaction.isHardNavigation = true
+              }
             }
-            return args[0].apply(self, arguments)
-          })
-        }
+          }
+          return args[0].apply(self, arguments)
+        })
       }
-    })
+    }
+  })
 }
 
-function startRoute(location) {
+function startRoute (location) {
   // A new route change happens
   var serviceContainer = getServiceContainer()
   if (!serviceContainer) {
     return
   }
-  
+
   var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
 
   if (!transaction) {
-      serviceContainer.services.logger.warn("Opbeat: Problem occured in measuring route-change. Make sure opbeat-react is loaded _before_ React. If you're using a vendor bundle, make sure Opbeat is first")
+    serviceContainer.services.logger.warn("Opbeat: Problem occured in measuring route-change. Make sure opbeat-react is loaded _before_ React. If you're using a vendor bundle, make sure Opbeat is first")
   } else {
     /*
     location.action == push: do a route change
@@ -102,7 +100,6 @@ function startRoute(location) {
 function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {
     return function componentWillMountWrapper (self, args) {
-
       // Get notified as soon as the url changes
       if (self.props && self.props.history && self.props.history.listen) {
         self._opbeatUnlisten = self.props.history.listen(function (location) {
@@ -141,7 +138,7 @@ function patchRouter (router) {
       var out = delegate.apply(self, args)
       return out
     }
-})
+  })
 
   patchObject(router, 'componentWillUnmount', function (delegate) {
     return function (self, args) {
@@ -154,12 +151,12 @@ function patchRouter (router) {
 }
 
 // Return a new router instead of patching the original
-function wrapRouter(Router) {
+function wrapRouter (Router) {
   patchRouter(Router.prototype)
   return Router
 }
 
 module.exports = {
   wrapRouter: wrapRouter,
-  makeSignatureFromRoutes: makeSignatureFromRoutes,
+  makeSignatureFromRoutes: makeSignatureFromRoutes
 }

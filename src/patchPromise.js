@@ -35,7 +35,7 @@ function patchPromise (transactionService, promise, trace, patchArguments, thenT
             if (patchArguments) {
               patchArguments(transactionService, arguments, trace)
             }
-            
+
             try {
               return resolve.apply(this, arguments)
             } finally {

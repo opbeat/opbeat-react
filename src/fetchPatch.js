@@ -1,7 +1,6 @@
 var utils = require('opbeat-js-core').utils
 var patchObject = require('./utils').patchObject
 var patchPromise = require('./patchPromise')
-var noop = function () { }
 var patchList = ['json', 'text', 'formData', 'blob', 'arrayBuffer', 'redirect', 'error']
 
 function patchResponse (transactionService, args, trace) {
@@ -27,7 +26,7 @@ function patchFetch (serviceContainer) {
         if (!serviceContainer) {
           return delegate.apply(self, args)
         }
-        
+
         var transactionService = serviceContainer.services.transactionService
 
         var url = args[0]
@@ -39,7 +38,7 @@ function patchFetch (serviceContainer) {
           if (trace) {
             trace.end()
           }
-          
+
           transactionService.detectFinish()
         }
 

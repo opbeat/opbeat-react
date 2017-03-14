@@ -1,6 +1,6 @@
 var opbeatSymbol = require('opbeat-js-core').patchUtils.opbeatSymbol
 
-function isTopLevelWrapper(ReactMount, element) {
+function isTopLevelWrapper (ReactMount, element) {
   // React 0.14.0+ exposes ReactMount.TopLevelWrapper
   var ReactTopLevelWrapper = ReactMount.TopLevelWrapper
 
@@ -18,12 +18,12 @@ function nodeName (ComponentTree, domNode) {
     if (!reactElem) {
       return DOMNodeName(domNode)
     }
-    
+
     var elements = []
     var owner = reactElem._currentElement._owner
 
     reactElem = reactElem._hostParent
-    
+
     while (reactElem && (owner === reactElem._currentElement._owner)) {
       elements.push(reactElem._tag)
       reactElem = reactElem._hostParent
@@ -31,7 +31,7 @@ function nodeName (ComponentTree, domNode) {
 
     if (owner !== null) {
       elements.push(owner.getName())
-    } else if(reactElem && reactElem._currentElement && reactElem._currentElement._owner) {
+    } else if (reactElem && reactElem._currentElement && reactElem._currentElement._owner) {
       elements.push(reactElem._currentElement._owner.getName())
     }
 
@@ -39,7 +39,7 @@ function nodeName (ComponentTree, domNode) {
 
     // TODO: need a good way to get the name of the root component
     // (when both owner and reactElem._currentElement._owner is null)
-    
+
     elements.reverse()
     return elements.join(' ')
   } else {
@@ -65,7 +65,8 @@ function DOMNodeName (domNode) {
 }
 
 function RingBuffer (size) {
-  var pointer = 0, buffer = []
+  var pointer = 0
+  var buffer = []
   return {
     getAll: function getAll () {
       if (buffer.length < size) {
@@ -81,7 +82,7 @@ function RingBuffer (size) {
 }
 
 function opbeatGlobal (value) {
-  if(!inBrowser()) {
+  if (!inBrowser()) {
     return
   }
 
@@ -96,14 +97,14 @@ function inBrowser () {
   return typeof window !== 'undefined'
 }
 
-function createNamedFn(name, delegate) {
+function createNamedFn (name, delegate) {
   try {
     return Function('f', 'return function ' + name + '(){return f(this, arguments)}')(delegate); // eslint-disable-line
   } catch (e) {
     // if we fail, we must be CSP, just return delegate.
     return function () {
-      return delegate(this, arguments);
-    };
+      return delegate(this, arguments)
+    }
   }
 }
 

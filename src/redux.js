@@ -12,7 +12,6 @@ function createOpbeatMiddleware () {
   var transactionService
   var configService
   var lastActions
-  var ignoreList
 
   return function (store) {
     var serviceContainer = getServiceContainer()
@@ -44,7 +43,7 @@ function createOpbeatMiddleware () {
             if (currTrans && currTrans.name !== 'ZoneTransaction') {
               if (action.type) {
                 tr = transactionService.startTrace('dispatch ' + action.type, 'action')
-            } else {
+              } else {
                 tr = transactionService.startTrace('dispatch', 'action')
               }
             } else {
@@ -54,7 +53,7 @@ function createOpbeatMiddleware () {
             }
           }
 
-          if(utils.isObject(action) && action.type && lastActions && !transactionService.shouldIgnoreTransaction(action.type)) {
+          if (utils.isObject(action) && action.type && lastActions && !transactionService.shouldIgnoreTransaction(action.type)) {
             lastActions.push(action.type)
           }
 

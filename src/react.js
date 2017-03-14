@@ -12,12 +12,10 @@ var patchFetch = require('./fetchPatch').patchFetch
 
 var addFilter = require('opbeat-js-core').addFilter
 
-
-
 var serviceFactory = new ServiceFactory()
 var serviceContainer = new ServiceContainer(serviceFactory)
-var enabled;
-var configured = false;
+var enabled
+var configured = false
 
 var configService = serviceContainer.services.configService
 
@@ -31,14 +29,14 @@ configService.set('errorLoggingEnabled', true)
 configService.set('performance.captureInteractions', true)
 configService.set('performance.capturePageLoad', true)
 
-if(!reactUtils.inBrowser()) {
+if (!reactUtils.inBrowser()) {
   serviceContainer.services.logger.warn('Opbeat: Only enabled in browser.')
   enabled = false
-} else if(!serviceContainer.services.configService.isPlatformSupported()) {
+} else if (!serviceContainer.services.configService.isPlatformSupported()) {
   serviceContainer.services.logger.warn('Opbeat: Browser is not supported.')
-  enabled = false;
+  enabled = false
 } else {
-  enabled = true;
+  enabled = true
   require('zone.js')
 }
 
@@ -46,7 +44,7 @@ function configure (config, factory) {
   if (!enabled) {
     return false
   }
-  
+
   if (!utils.isUndefined(factory)) {
     serviceContainer = new ServiceContainer(factory)
     serviceFactory = factory
@@ -93,8 +91,8 @@ function configure (config, factory) {
         serviceContainer.services.transactionService.startTransaction(nodeName + ':' + task.applyArgs[0].type, 'interaction')
       }
     }
-  } 
-  
+  }
+
   if (serviceContainer.services.configService.get('errorLoggingEnabled')) {
     serviceContainer.services.exceptionHandler = serviceFactory.getExceptionHandler()
     serviceContainer.services.exceptionHandler.install()
@@ -130,15 +128,14 @@ function setTransactionName (transactionName, transactionType) {
       transaction = startTransaction()
     }
 
-    if (transaction/* && transaction.name !== 'ZoneTransaction'*/) {
+    if (transaction/* && transaction.name !== 'ZoneTransaction' */) {
       transaction.name = transactionName
       transaction.type = transactionType
     }
-    
+
     return transaction
   }
 }
-
 
 module.exports = {
   configure: configure,
@@ -148,7 +145,7 @@ module.exports = {
   setExtraContext: function setExtraContext (data) {
     serviceContainer.services.configService.set('context.extra', data)
   },
-  captureError: function captureError(error) {
+  captureError: function captureError (error) {
     if (configured) {
       serviceContainer.services.exceptionHandler.processError(error)
     }

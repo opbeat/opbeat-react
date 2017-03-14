@@ -1,13 +1,9 @@
-var reactInternals = require('./reactInternals')
 var patchMethod = require('opbeat-js-core').patchUtils.patchMethod
-var nodeName = require('./utils').nodeName
-var utils = require('./utils')
 var isTopLevelWrapper = require('./utils').isTopLevelWrapper
 
 module.exports = function patchReact (reactInternals, serviceContainer) {
   var ReactReconciler = reactInternals.Reconciler
   var ReactMount = reactInternals.Mount
-  var ComponentTree = reactInternals.ComponentTree
 
   var componentRenderPatch = function (delegate) {
     return function (self, args) {
@@ -25,17 +21,16 @@ module.exports = function patchReact (reactInternals, serviceContainer) {
         var renderState = serviceContainer.services.zoneService.get('renderState')
         var trace
         if (!renderState) {
-          trace = serviceContainer.services.transactionService.startTrace(name, "template.component");
+          trace = serviceContainer.services.transactionService.startTrace(name, 'template.component')
           serviceContainer.services.zoneService.set('renderState', true)
         }
 
         out = delegate.apply(self, args)
-        
-        if(trace) {
+
+        if (trace) {
           trace.end()
           serviceContainer.services.zoneService.set('renderState', null)
         }
-
       } else {
         out = delegate.apply(self, args)
       }
@@ -55,13 +50,13 @@ module.exports = function patchReact (reactInternals, serviceContainer) {
         var transactionService = serviceContainer.services.transactionService
         return serviceContainer.services.zoneService.runInOpbeatZone(function () {
           if (!transactionService.metrics['appBeforeBootstrap']) {
-            transactionService.metrics['appBeforeBootstrap'] = performance.now()
+            transactionService.metrics['appBeforeBootstrap'] = window.performance.now()
           }
 
           out = delegate.apply(self, args)
 
           if (!transactionService.metrics['appAfterBootstrap']) {
-            transactionService.metrics['appAfterBootstrap'] = performance.now()
+            transactionService.metrics['appAfterBootstrap'] = window.performance.now()
           }
           transactionService.detectFinish()
           return out
