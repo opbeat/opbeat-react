@@ -81,18 +81,6 @@ function RingBuffer (size) {
   }
 }
 
-function opbeatGlobal (value) {
-  if (!inBrowser()) {
-    return
-  }
-
-  if (typeof value === 'undefined') {
-    return window.__opbeat
-  } else {
-    window.__opbeat = value
-  }
-}
-
 function inBrowser () {
   return typeof window !== 'undefined'
 }
@@ -123,7 +111,6 @@ module.exports = {
   isTopLevelWrapper: isTopLevelWrapper,
   RingBuffer: RingBuffer,
   DOMNodeName: DOMNodeName,
-  opbeatGlobal: opbeatGlobal,
   inBrowser: inBrowser,
   patchObject: patchObject
 }
