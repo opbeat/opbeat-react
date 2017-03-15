@@ -1,5 +1,5 @@
 import '../opbeat-e2e'
-import '../../../../dist/opbeat-react/router'
+import { wrapRouter } from '../../../dist/opbeat-react/router'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
@@ -12,6 +12,8 @@ import createStore from './createStore'
 const store = createStore()
 // const history = createMemoryHistory() // syncHistoryWithStore(browserHistory, store)
 console.log("MHELLO")
+
+const WrappedRouter = wrapRouter(Router)
 
 ReactDOM.render(
   <Router routes={routes} history={browserHistory}/>,
