@@ -18,7 +18,7 @@ function patchResponse (transactionService, args, trace) {
     })
   }
 }
-
+var fetchTaskId = 0;
 function patchFetch (serviceContainer) {
   if (window.fetch) {
     patchObject(window, 'fetch', function (delegate) {
@@ -28,15 +28,16 @@ function patchFetch (serviceContainer) {
         }
 
         var transactionService = serviceContainer.services.transactionService
-
+        var taskId =  'fetchTask' + fetchTaskId++
         var url = args[0]
         var trace = transactionService.startTrace('GET ' + url, 'ext.HttpRequest.fetch')
-
+        transactionService.addTask(taskId)
         var promise = delegate.apply(self, args)
 
         var fin = function () {
           if (trace) {
             trace.end()
+            transactionService.removeTask(taskId)
           }
 
           transactionService.detectFinish()
@@ -44,7 +45,7 @@ function patchFetch (serviceContainer) {
 
         promise.then(fin)
 
-        patchPromise(transactionService, promise, trace, patchResponse)
+        patchPromise(transactionService, promise, trace, patchResponse, [taskId], [taskId])
         return promise
       }
     })
