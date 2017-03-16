@@ -1,16 +1,14 @@
 var fs = require('fs')
 var path = require('path')
+var webpack = require('webpack');
 
 module.exports = {
-
   entry: path.resolve(__dirname, 'server.js'),
-
   output: {
     filename: 'server.bundle.js'
   },
 
   target: 'node',
-
   // keep node_module paths out of the bundle
   externals: fs.readdirSync(path.resolve(__dirname, '../node_modules')).concat([
     'react-dom/server', 'react/addons',
@@ -23,19 +21,30 @@ module.exports = {
     __filename: true,
     __dirname: true
   },
-  resolve: { 
-    modules: [path.resolve(__dirname, '../node_modules'), 'node_modules', __dirname],
+  
+  resolve: {
+    modulesDirectories: [path.resolve(__dirname, '../node_modules'), 'node_modules'],
   },
-
-
   resolveLoader: {
     modulesDirectories: [path.resolve(__dirname, '../node_modules')]
   },
-
   module: {
     loaders: [
-      { test: /\.js$/, include: [__dirname, path.resolve(__dirname, '..', 'opbeat-e2e.js')], loader: 'babel-loader?presets[]=es2015&presets[]=react&presets[]=stage-2' }
+      {
+        test: path.resolve(__dirname, '..'), ///.js$/,
+        loader: 'babel-loader',
+        exclude: [path.resolve(__dirname, 'node_modules')],
+        query: {
+          presets: ['es2015', 'react', 'stage-1']
+        }
+      }
     ]
-  }
+  },
+  plugins: [
+      new webpack.ProvidePlugin({
+    // make fetch available
+   fetch: 'exports?self.fetch!whatwg-fetch',
+    })
+  ]
 
 }

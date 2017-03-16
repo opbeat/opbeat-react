@@ -7,15 +7,23 @@ import ReactDOM from 'react-dom'
 import { Router, browserHistory } from 'react-router'
 import routes from './routes'
 import createStore from './createStore'
-// import { syncHistoryWithStore } from 'react-router-redux'
+import { Provider } from 'react-redux'
 
 const store = createStore()
-// const history = createMemoryHistory() // syncHistoryWithStore(browserHistory, store)
-console.log("MHELLO")
 
 const WrappedRouter = wrapRouter(Router)
 
+const SillyComponent = () => <div>Hello!</div>
+
+
 ReactDOM.render(
-  <Router routes={routes} history={browserHistory}/>,
+  <SillyComponent />,
+  document.getElementById('reactMount-silly')
+)
+
+ReactDOM.render(
+  <Provider store={store}>
+    <Router routes={routes} history={browserHistory}/>
+  </Provider>,
   document.getElementById('reactMount')
 )

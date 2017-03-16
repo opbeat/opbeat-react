@@ -9,6 +9,8 @@ import routes from './routes'
 import { renderToString } from 'react-dom/server'
 import reducers from './reducers'
 
+const store = createStore()
+
 
 const app = Express()
 const port = 3000
@@ -35,7 +37,7 @@ function handleRender(req, res) {
       // You can also check renderProps.components or renderProps.routes for
       // your "not found" component or route respectively, and send a 404 as
       // below, if you're using a catch-all route.
-      res.status(200).send(renderToString(<RouterContext {...renderProps} />))
+      res.status(200).send(renderToString(<Provider store={store}><RouterContext {...renderProps} /></Provider>))
     } else {
       res.status(404).send('Not found')
     }

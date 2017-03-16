@@ -11,13 +11,13 @@ function loadComponent(prom) {
 }
 
 module.exports = (
- <Route path="/" component={App}>
+ <Route path="/router" component={App}>
     <IndexRoute component={Index}/>
-    <Route path="/about1" getComponent={loadComponent(() => System.import('about_components.js') )} />
-    <Route path="/about2" getComponent={(nextState, cb) => {
+      <Route path="/about1" getComponent={loadComponent(() => System.import('./about_component') )} />
+     <Route path="/about2" getComponent={(nextState, cb) => {
           require.ensure([], function (require) {
           cb(null, [
-            require('./about_component').default,
+              require('./about_component').default,
           ])
         })}} />
   </Route>

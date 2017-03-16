@@ -2,7 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-  entry: path.resolve(__dirname, './simple_router.js'),
+  entry: path.resolve(__dirname, './app.js'),
   output: { path: __dirname, filename: 'bundle.js' },
   // This ensures that we use the test/e2e/node_modules
   // even for requires in "src". This is required for the patches to work

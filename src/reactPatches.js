@@ -53,7 +53,9 @@ module.exports = function patchReact (reactInternals, serviceContainer) {
             transactionService.metrics['appBeforeBootstrap'] = window.performance.now()
           }
 
+          var task = transactionService.addTask()
           out = delegate.apply(self, args)
+          transactionService.removeTask(task)
 
           if (!transactionService.metrics['appAfterBootstrap']) {
             transactionService.metrics['appAfterBootstrap'] = window.performance.now()
