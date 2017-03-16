@@ -45,6 +45,7 @@ function getMajorVersion () {
 
 gulp.task('build:e2e', function (done) {
   var dirNeedsBuilding = [
+    './test/e2e/router',
     './test/e2e/react',
     './test/e2e/redux',
     './test/e2e/no-init',
