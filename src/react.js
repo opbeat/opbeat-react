@@ -37,7 +37,7 @@ if (!reactUtils.inBrowser()) {
   enabled = false
 } else {
   enabled = true
-  require('zone.js')
+  require('opbeat-zone')
 }
 
 function configure (config, factory) {
