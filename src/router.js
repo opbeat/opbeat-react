@@ -49,15 +49,16 @@ function patchTransitionManager (transitionManager) {
 
             if (serviceContainer) {
               var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
+              if (transaction) {
+                // set route name
+                if (transaction.type === 'route-change') {
+                  transaction.name = fullRoute
+                }
 
-                  // set route name
-              if (transaction.type === 'route-change') {
-                transaction.name = fullRoute
-              }
-
-              if (hardNavigation) {
-                hardNavigation = false
-                transaction.isHardNavigation = true
+                if (hardNavigation) {
+                  hardNavigation = false
+                  transaction.isHardNavigation = true
+                }
               }
             }
           }
