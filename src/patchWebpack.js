@@ -2,7 +2,7 @@ var patchUtils = require('opbeat-js-core').patchUtils
 var patchPromise = require('./patchPromise')
 var patchMethod = patchUtils.patchMethod
 
-function isPatched(target, name) {
+function isPatched (target, name) {
   var delegateName = patchUtils.opbeatSymbol(name)
   return !!target[delegateName]
 }
