@@ -83,7 +83,7 @@ describe('react-redux: opbeatMiddleware', function () {
     )
   })
 
-  it('sends errors with store state', function (done) {
+  xit('sends errors with store state', function (done) {
     var transport = serviceContainer.services.opbeatBackend._transport = new TransportMock()
     var configService = serviceContainer.services.configService
     configService.set('actionsCount', 10)
