@@ -1,6 +1,6 @@
 {
   "name": "opbeat-react",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "license": "MIT",
   "description": "This is the official Opbeat module for React, redux and react-router.",
   "main": "index.js",
@@ -13,7 +13,7 @@
   ],
   "homepage": "https://github.com/opbeat/opbeat-react",
   "dependencies": {
-    "opbeat-js-core": "^0.2.2",
+    "opbeat-js-core": "^0.2.3",
     "opbeat-zone": "^0.6.17-noexc",
     "loglevel": "^1.4.0"
   },
