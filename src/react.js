@@ -99,6 +99,7 @@ function configure (config, factory) {
   }
 
   configured = true
+  serviceContainer.services.logger.debug('Configured')
 
   return serviceContainer
 }
@@ -106,6 +107,8 @@ function configure (config, factory) {
 function getServiceContainer () {
   if (configured) {
     return serviceContainer
+  } else {
+    serviceContainer.services.logger.debug('Not configured.', new Error().stack)
   }
 }
 

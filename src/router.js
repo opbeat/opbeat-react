@@ -35,17 +35,23 @@ function makeSignatureFromRoutes (routes, location) {
   return fullRoute
 }
 
+function debugLog () {
+  var serviceContainer = getServiceContainer()
+  if (serviceContainer) serviceContainer.services.logger.debug.apply(this, arguments)
+}
+
 var hardNavigation = true
 
 function patchTransitionManager (transitionManager) {
   patchObject(transitionManager, 'listen', function (delegate) {
+    var serviceContainer
     return function (self, args) {
       if (args.length === 1) {
         return delegate.call(self, function () {
           if (arguments.length === 2) { // error, nextState
             var state = arguments[1]
             var fullRoute = makeSignatureFromRoutes(state.routes, state.location)
-            var serviceContainer = getServiceContainer()
+            serviceContainer = getServiceContainer()
 
             if (serviceContainer) {
               var transaction = serviceContainer.services.transactionService.getCurrentTransaction()
@@ -59,11 +65,17 @@ function patchTransitionManager (transitionManager) {
                   hardNavigation = false
                   transaction.isHardNavigation = true
                 }
+              } else {
+                debugLog('patchTransitionManager: getCurrentTransaction returned ', transaction)
               }
             }
+          } else {
+            debugLog('patchTransitionManager: arguments: ', arguments)
           }
           return args[0].apply(self, arguments)
         })
+      } else {
+        debugLog('patchTransitionManager: args: ', args)
       }
     }
   })
@@ -94,6 +106,8 @@ function startRoute (location) {
       } else {
         serviceContainer.services.transactionService.startTransaction('Unknown', 'route-change')
       }
+    } else {
+      serviceContainer.services.logger.debug('Skipped startTransaction', location && location.action, transaction && transaction.type)
     }
   }
 }
@@ -101,6 +115,7 @@ function startRoute (location) {
 function patchRouter (router) {
   patchObject(router, 'componentWillMount', function (delegate) {
     return function componentWillMountWrapper (self, args) {
+      debugLog('componentWillMountWrapper')
       // Get notified as soon as the url changes
       if (self.props && self.props.history && self.props.history.listen) {
         self._opbeatUnlisten = self.props.history.listen(function (location) {
@@ -118,6 +133,7 @@ function patchRouter (router) {
             return out
           }
         })
+        debugLog('patched react-router 2')
       }
 
       // react-router version 3.0 has 'createTransitionManager'
@@ -133,7 +149,13 @@ function patchRouter (router) {
         // When mounting, we need to start a ZoneTransaction if not already started.
         if (self.props.history) {
           startRoute()
+        } else {
+          var serviceContainer = getServiceContainer()
+          if (serviceContainer) {
+            serviceContainer.services.logger.debug('No self.props.history')
+          }
         }
+        debugLog('patched react-router 3')
       }
 
       var out = delegate.apply(self, args)

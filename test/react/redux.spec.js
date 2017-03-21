@@ -36,10 +36,10 @@ describe('react-redux: opbeatMiddleware', function () {
   beforeEach(function () {
     originalTransport = serviceContainer.services.opbeatBackend._transport
     serviceContainer.services.opbeatBackend._transport = new TransportMock()
-    
-    
+
+
     transactionService = serviceContainer.services.transactionService
-    
+
     var reducer = function (state, action) { return state }
     store = createStore(reducer, {'hello': 'world'})
 
