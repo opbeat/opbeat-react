@@ -117,10 +117,19 @@ function patchRouter (router) {
     return function componentWillMountWrapper (self, args) {
       debugLog('componentWillMountWrapper')
       // Get notified as soon as the url changes
+      var listener = null
       if (self.props && self.props.history && self.props.history.listen) {
-        self._opbeatUnlisten = self.props.history.listen(function (location) {
+        listener = self.props.history.listen
+      } else if (self.props.matchContext && self.props.matchContext.router.listen) {
+        listener = self.props.matchContext.router.listen
+      }
+
+      if (listener) {
+        self._opbeatUnlisten = listener(function (location) {
           startRoute(location)
         })
+      } else {
+        debugLog('no listener available')
       }
 
       // Need to patch transition manager to get the matched routes.
@@ -134,27 +143,22 @@ function patchRouter (router) {
           }
         })
         debugLog('patched react-router 2')
-      }
-
-      // react-router version 3.0 has 'createTransitionManager'
-      if (self.createTransitionManager) {
-        patchObject(self, 'createTransitionManager', function (delegate) {
-          return function (self, args) {
-            var transitionManager = delegate.apply(self, args)
-            patchTransitionManager(transitionManager)
-            return transitionManager
-          }
-        })
+      } else {
+        if (self.props.matchContext && self.props.matchContext.transitionManager) {
+          patchTransitionManager(self.props.matchContext.transitionManager)
+        } else if (self.createTransitionManager) {
+          // react-router version 3.0 has 'createTransitionManager'
+          patchObject(self, 'createTransitionManager', function (delegate) {
+            return function (self, args) {
+              var transitionManager = delegate.apply(self, args)
+              patchTransitionManager(transitionManager)
+              return transitionManager
+            }
+          })
+        }
 
         // When mounting, we need to start a ZoneTransaction if not already started.
-        if (self.props.history) {
-          startRoute()
-        } else {
-          var serviceContainer = getServiceContainer()
-          if (serviceContainer) {
-            serviceContainer.services.logger.debug('No self.props.history')
-          }
-        }
+        startRoute()
         debugLog('patched react-router 3')
       }
 

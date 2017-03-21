@@ -18,6 +18,7 @@ var ServiceFactory = require('opbeat-js-core').ServiceFactory
 var ReactRouter = require('react-router')
 var browserHistory = ReactRouter.browserHistory
 var Router = ReactRouter.Router
+var match = ReactRouter.match
 var Route = ReactRouter.Route
 var Redirect = ReactRouter.Redirect
 var utils = require('../../src/utils')
@@ -81,6 +82,14 @@ describe('react-router: setTransactionName', function () {
   var tree
   var treeWrapper
 
+  var routes = [
+      React.createElement(Route, {path: '/', key: '0'}),
+      React.createElement(Redirect, {from: '/old-path', to: '/new-path', key: '1'}),
+      React.createElement(Route, {path: '/mypath', key: '2'}),
+      React.createElement(Route, {path: '/new-path', key: '3'}),
+      React.createElement(Route, {path: '/login', component: LoginComponent, key: '4'})
+    ]
+
   beforeEach(function () {
     initOpbeat()
     serviceContainer = getServiceContainer()
@@ -91,13 +100,7 @@ describe('react-router: setTransactionName', function () {
     transactionService = serviceContainer.services.transactionService
 
     tree = React.createElement(
-      OpbeatRouter, {history: browserHistory}, [
-        React.createElement(Route, {path: '/', key: '0'}),
-        React.createElement(Redirect, {from: '/old-path', to: '/new-path', key: '1'}),
-        React.createElement(Route, {path: '/mypath', key: '2'}),
-        React.createElement(Route, {path: '/new-path', key: '3'}),
-        React.createElement(Route, {path: '/login', component: LoginComponent, key: '4'})
-      ]
+      OpbeatRouter, {history: browserHistory}, routes
     )
   })
 
@@ -147,7 +150,7 @@ describe('react-router: setTransactionName', function () {
     spyOn(transactionService, 'startTransaction').and.callThrough()
 
     serviceContainer.services.zoneService.runInOpbeatZone(function() {
-      
+
       browserHistory.push('/login')
 
       expect(transactionService.startTransaction.calls.count()).toBe(2)
@@ -156,6 +159,62 @@ describe('react-router: setTransactionName', function () {
       var lastTransaction = serviceContainer.services.zoneService.get('transaction')
       expect(lastTransaction.name).toBe('/new-path')
       expect(lastTransaction.type).toBe('route-change')
+    })
+  })
+
+  it('should capture router change when mounted with matchContext', function () {
+    var transaction
+    var original = transactionService.startTransaction
+    spyOn(transactionService, 'startTransaction').and.callFake(function() {
+      transaction = original.apply(this, arguments)
+      return transaction
+    });
+
+    serviceContainer.services.zoneService.runInOpbeatZone(function() {
+      match({ routes: routes, history: browserHistory}, (error, redirectLocation, renderProps) => {
+        tree = React.createElement(
+          OpbeatRouter, renderProps, routes
+        )
+        treeWrapper = mount(tree)
+      });
+
+      expect(transactionService.startTransaction.calls.count()).toBe(1)
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('Unknown', 'route-change')
+
+      expect(transaction.name).toBe('/')
+      expect(transaction.type).toBe('route-change')
+    })
+  })
+
+
+  it('should capture router change when it changes with matchContext', function () {
+    match({ routes: routes, history: browserHistory}, (error, redirectLocation, renderProps) => {
+      tree = React.createElement(
+        OpbeatRouter, renderProps, routes
+      )
+      treeWrapper = mount(tree)
+    });
+
+    var transaction
+    var original = transactionService.startTransaction
+    spyOn(transactionService, 'startTransaction').and.callFake(function() {
+      transaction = original.apply(this, arguments)
+      return transaction
+    });
+
+    serviceContainer.services.zoneService.runInOpbeatZone(function() {
+      browserHistory.push('/mypath')
+
+      var lastTransaction = serviceContainer.services.zoneService.get('transaction')
+      expect(lastTransaction.name).toBe('/mypath')
+      expect(lastTransaction.type).toBe('route-change')
+
+
+      // expect(transactionService.startTransaction.calls.count()).toBe(1)
+      // expect(transactionService.startTransaction).toHaveBeenCalledWith('Unknown', 'route-change')
+
+      // expect(transaction.name).toBe('/')
+      // expect(transaction.type).toBe('route-change')
     })
   })
 

@@ -41,7 +41,6 @@ describe('router-app', function () {
         rmItem('Downloading')
         rmItem('DNS') 
 
-        expect(transactions.traces.groups.length).toBe(10)
         expect(signatures.sort()).toEqual(expected.sort())
         
         done() 
