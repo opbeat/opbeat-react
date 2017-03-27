@@ -17,7 +17,7 @@ function patchPromise (transactionService, promise, trace, patchArguments, thenT
     patchObject(promise, 'then', function (delegate) {
       return function (self, args) { // resolve, reject
         var taskId = 'promiseTask' + promiseTasks++
-
+        var zone = window.Zone && window.Zone.current
         var resolve = args[0]
         var reject = args[1]
 
@@ -37,7 +37,11 @@ function patchPromise (transactionService, promise, trace, patchArguments, thenT
             }
 
             try {
-              return resolve.apply(this, arguments)
+              if (zone) {
+                return zone.run(resolve, this, arguments)
+              } else {
+                return resolve.apply(this, arguments)
+              }
             } finally {
               transactionService.removeTask(taskId)
               removeTaskList(catchTasks)
@@ -58,7 +62,11 @@ function patchPromise (transactionService, promise, trace, patchArguments, thenT
             }
 
             try {
-              return reject.apply(this, arguments)
+              if (zone) {
+                return zone.run(reject, this, arguments)
+              } else {
+                return reject.apply(this, arguments)
+              }
             } finally {
               transactionService.removeTask(taskId)
               removeTaskList(thenTasks)
