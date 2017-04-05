@@ -32,6 +32,7 @@ function nodeName (ComponentTree, domNode) {
     if (owner !== null) {
       elements.push(owner.getName())
     } else if (reactElem && reactElem._currentElement && reactElem._currentElement._owner) {
+      // On IE11 getName might return null
       elements.push(reactElem._currentElement._owner.getName())
     }
 
