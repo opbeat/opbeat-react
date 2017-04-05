@@ -287,13 +287,13 @@ gulp.task('test:e2e:react-run', function (done) {
 
 // Run all required tasks to perform remote end-to-end testing
 gulp.task('test:e2e:start-sauce', function (done) {
-  runSequence('build', 'test:e2e:launchsauceconnect', function () {
+  runSequence('build:release', 'test:e2e:launchsauceconnect', function () {
     console.log('All tasks completed.')
   })
 })
 
 gulp.task('test:e2e', function (done) {
-  runSequence(['build', 'build:release', 'test:e2e:start-local'], ['test:e2e:phantomjs', 'test:e2e:launchsauceconnect'], 'test:e2e:sauceconnect', function (err) {
+  runSequence(['build:release', 'test:e2e:start-local'], ['test:e2e:launchsauceconnect'], 'test:e2e:sauceconnect', function (err) {
     if (err) {
       return taskFailed(err)
     } else {
@@ -316,7 +316,7 @@ function sequenceSucceeded (done) {
 }
 
 gulp.task('test:unit:sauce', function (done) {
-  runSequence(['build', 'test:e2e:launchsauceconnect'], 'test', function (err) {
+  runSequence(['build:release', 'test:e2e:launchsauceconnect'], 'test', function (err) {
     if (err) {
       return taskFailed(err)
     } else {
