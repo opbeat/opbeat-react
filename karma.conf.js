@@ -33,7 +33,7 @@ module.exports = function (config) {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
       platform: 'Windows 10',
-      version: '20.10240'
+      version: '13'
     },
     'SL_ANDROID4.4': {
       base: 'SauceLabs',
