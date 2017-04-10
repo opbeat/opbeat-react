@@ -1,8 +1,10 @@
-# opbeat-react
+# Opbeat for React
+
+<a href="https://opbeat.com" title="Opbeat"><img src="http://opbeat-brand-assets.s3-website-us-east-1.amazonaws.com/svg/logo/logo.svg" align="right" height="25px"></a>
 
 This is the official Opbeat module for React, redux and react-router.
 
-opbeat-react will automatically measure route changes and user interactions in your application and instrument components,
+`opbeat-react` will automatically measure route changes and user interactions in your application and instrument components,
 AJAX calls, Redux dispatches etc. to give you detailed insights into what kind of experience your users are having.
 opbeat-react will also automatically log exceptions to Opbeat.
 
@@ -240,3 +242,5 @@ Tests: `npm run karma`
 
 End to end tests: `./node_modules/.bin/gulp test:e2e:react-run`
 
+
+<br>Made with ♥️ and ☕️ by Opbeat and our community.
