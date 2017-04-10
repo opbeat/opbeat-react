@@ -61,7 +61,7 @@ function patchTransitionManager (transitionManager) {
                   transaction.name = fullRoute
                 }
 
-                if (hardNavigation) {
+                if (hardNavigation && transaction.type === 'route-change') {
                   hardNavigation = false
                   transaction.isHardNavigation = true
                 }
