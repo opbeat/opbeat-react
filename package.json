@@ -57,5 +57,20 @@
     "build": "gulp build:release",
     "karma": "node node_modules/karma/bin/karma start",
     "test": "node node_modules/standard/bin/cmd.js src/**/* && gulp test:unit:sauce && gulp test:e2e"
+  },
+  "standard": {
+    "globals": [
+      "jasmine",
+      "describe",
+      "beforeEach",
+      "afterEach",
+      "it",
+      "xit",
+      "expect",
+      "fail",
+      "spyOn",
+      "browser",
+      "xdescribe"
+    ]
   }
 }
