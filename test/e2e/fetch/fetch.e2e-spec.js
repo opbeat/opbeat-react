@@ -6,19 +6,20 @@ describe('simple-fetch-app', function () {
 
   it('should intercept regular fetch', function (done) {
     browser.url('/fetch/index.html')
- 
-    browser.executeAsync(
-      function(cb) {
-        console.log("hello")
-        window.opbeatTransport.subscribe(function(c, transactions) {
-          console.log("hello2")
-          var fetchedResult = document.getElementById('fetchResult').textContent
-          cb({transactions: transactions.data, fetchedResult: fetchedResult})
-        })
-        document.getElementById('fetch-data').click()
-      }
+      .executeAsync(
+        function (cb) {
+          console.log('hello')
+          if (!window.opbeatTransport) {
+            throw new Error('window.opbeatTransport is undefined, readyState:' + document.readyState)
+          }
+          window.opbeatTransport.subscribe(function (c, transactions) {
+            console.log('hello2')
+            var fetchedResult = document.getElementById('fetchResult').textContent
+            cb({transactions: transactions.data, fetchedResult: fetchedResult})
+          })
+          document.getElementById('fetch-data').click()
+        }
     ).then(function (response) {
-      
       var transactions = response.value.transactions
       var fetchedResult = response.value.fetchedResult
       expect(fetchedResult).toBe('some-data')
@@ -46,9 +47,8 @@ describe('simple-fetch-app', function () {
     browser.url('/fetch/index.html')
 
     browser.executeAsync(
-      function(cb) {
-        window.opbeatTransport.subscribe(function(c, transactions) {
-
+      function (cb) {
+        window.opbeatTransport.subscribe(function (c, transactions) {
           var fetchedResult = document.getElementById('fetchResult').textContent
 
           cb({transactions: transactions.data, fetchedResult: fetchedResult})
@@ -59,33 +59,32 @@ describe('simple-fetch-app', function () {
       var transactions = response.value.transactions
       var fetchedResult = response.value.fetchedResult
       expect(transactions.traces.groups.length).toBe(3)
-      
+
       expect(transactions.traces.groups[0].transaction).toBe('fetchData')
       expect(transactions.traces.groups[0].kind).toBe('transaction')
-      
+
       expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch.truncated')
       expect(transactions.traces.groups[1].signature).toBe('GET /slow-response')
-      
+
       expect(transactions.traces.groups[2].kind).toBe('template.component')
       expect(transactions.traces.groups[2].signature).toBe('component')
 
       utils.verifyNoBrowserErrors(done)
-    }, handleError(done))//.catch(handleError(done))
+    }, handleError(done)) // .catch(handleError(done))
   })
 
   it('should intercept rejected fetch', function (done) {
     browser.url('/fetch/index.html')
-    browser.refresh()
-
-    browser.executeAsync(
-      function(cb) {
-        window.opbeatTransport.subscribe(function(c, transactions) {
-          cb({transactions: transactions.data})
-        })
-        document.getElementById('fail-fetch-data').click()
-      }
+      .refresh()
+      .executeAsync(
+        function (cb) {
+          window.opbeatTransport.subscribe(function (c, transactions) {
+            cb({transactions: transactions.data})
+          })
+          document.getElementById('fail-fetch-data').click()
+        }
     ).then(function (response) {
-      try{
+      try {
         var transactions = response.value.transactions
 
         expect(transactions.traces.groups.length).toBe(3)
@@ -97,44 +96,36 @@ describe('simple-fetch-app', function () {
 
         expect(transactions.traces.groups[2].signature).toBe('important reject trace')
         expect(transactions.traces.groups[2].kind).toBe('template.custom')
-
-        utils.allowSomeBrowserErrors(
-          'http://non-existing-host.opbeat/non-existing-file.json'
-          )(done)
-
-      }catch(e) {
+        utils.allowSomeBrowserErrors(['http://non-existing-host.opbeat/non-existing-file.json', 'Uncaught (in promise): TypeError: Failed to fetch', 'Unhandled Promise rejection'], done)
+      } catch (e) {
         console.log(e, e.stack)
       }
-    }, handleError(done))//.catch(handleError(done))
+    }, handleError(done)) // .catch(handleError(done))
   })
 
   it('should intercept catched fetch', function (done) {
     browser.url('/fetch/index.html')
-    browser.refresh()
-
-    browser.executeAsync(
-      function(cb) {
-        window.opbeatTransport.subscribe(function(c, transactions) {
-          cb({transactions: transactions.data})
-        })
-        document.getElementById('fail-fetch-data-catch').click()
-      }
+      .refresh()
+      .executeAsync(
+        function (cb) {
+          window.opbeatTransport.subscribe(function (c, transactions) {
+            cb({transactions: transactions.data})
+          })
+          document.getElementById('fail-fetch-data-catch').click()
+        }
     ).then(function (response) {
       var transactions = response.value.transactions
       expect(transactions.traces.groups.length).toBe(3)
-      
+
       expect(transactions.traces.groups[0].transaction).toBe('failFetchDataWithCatch')
       expect(transactions.traces.groups[0].kind).toBe('transaction')
-      
+
       expect(transactions.traces.groups[1].kind).toBe('ext.HttpRequest.fetch')
       expect(transactions.traces.groups[1].signature).toBe('GET http://non-existing-host.opbeat/non-existing-file.json')
 
       expect(transactions.traces.groups[2].signature).toBe('important catched trace')
       expect(transactions.traces.groups[2].kind).toBe('template.custom')
-      utils.allowSomeBrowserErrors(
-          'http://non-existing-host.opbeat/non-existing-file.json'
-          )(done)
+      utils.allowSomeBrowserErrors(['http://non-existing-host.opbeat/non-existing-file.json', 'Uncaught (in promise): TypeError: Failed to fetch', 'Unhandled Promise rejection'], done)
     }, handleError(done)).catch(handleError(done))
   })
-
 })
