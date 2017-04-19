@@ -1,6 +1,6 @@
-export MODE=saucelabs_optional
-export SAUCE_USERNAME=opbeat
-export SAUCE_ACCESS_KEY=de42e589-1450-41a2-8a44-90aa00c15168
+export MODE=saucelabs
+export SAUCE_USERNAME=opbeat-react
+export SAUCE_ACCESS_KEY=699838bc-49b3-4c92-adf0-690ba855e0d6
 
 echo $MODE
 
