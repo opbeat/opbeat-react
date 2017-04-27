@@ -20,8 +20,8 @@ var connect = require('gulp-connect')
 require('gulp-release-tasks')(gulp)
 
 var webdriverConfig = {
-  user: process.env.SAUCE_USERNAME || 'opbeat',
-  key: process.env.SAUCE_ACCESS_KEY || 'de42e589-1450-41a2-8a44-90aa00c15168',
+  user: process.env.SAUCE_USERNAME || 'opbeat-react',
+  key: process.env.SAUCE_ACCESS_KEY || '699838bc-49b3-4c92-adf0-690ba855e0d6',
   host: process.env.SAUCE_HOST || 'ondemand.saucelabs.com',
   port: process.env.SAUCE_PORT || 80,
   baseUrl: process.env.SAUCE_BASEURL || 'http://localhost:8000'
@@ -211,10 +211,10 @@ gulp.task('test:e2e:serve', function () {
       middlewares.push(connect.favicon())
 
       // used to test truncated XHR traces
-      middlewares.push(function(request, response, next) {
+      middlewares.push(function (request, response, next) {
         if (request.url == '/slow-response') {
-          setTimeout(function() { response.write("Slow!"); response.end()}, 5000)
-        }else{
+          setTimeout(function () { response.write('Slow!'); response.end()}, 5000)
+        }else {
           next()
         }
       })
@@ -293,7 +293,7 @@ gulp.task('test:e2e:start-sauce', function (done) {
 })
 
 gulp.task('test:e2e', function (done) {
-  runSequence(['build:release', 'test:e2e:start-local'], ['test:e2e:launchsauceconnect'], 'test:e2e:sauceconnect', function (err) {
+  runSequence('build:e2e', ['build:release', 'test:e2e:start-local'], ['test:e2e:launchsauceconnect'], 'test:e2e:sauceconnect', function (err) {
     if (err) {
       return taskFailed(err)
     } else {

@@ -34,6 +34,7 @@
     "karma-browserify": "^5.1.1",
     "karma-chrome-launcher": "^2.0.0",
     "karma-failed-reporter": "0.0.3",
+    "karma-firefox-launcher": "^1.0.1",
     "karma-jasmine": "^1.1.0",
     "karma-sauce-launcher": "^1.1.0",
     "karma-spec-reporter": "0.0.30",
@@ -44,6 +45,7 @@
     "react-router": "^3.0.2",
     "redux": "^3.6.0",
     "run-sequence": "^1.2.2",
+    "sauce-connect-launcher": "^1.2.0",
     "selenium-standalone": "^5.8.0",
     "standard": "^10.0.0",
     "watchify": "^3.9.0",
@@ -55,5 +57,20 @@
     "build": "gulp build:release",
     "karma": "node node_modules/karma/bin/karma start",
     "test": "node node_modules/standard/bin/cmd.js src/**/* && gulp test:unit:sauce && gulp test:e2e"
+  },
+  "standard": {
+    "globals": [
+      "jasmine",
+      "describe",
+      "beforeEach",
+      "afterEach",
+      "it",
+      "xit",
+      "expect",
+      "fail",
+      "spyOn",
+      "browser",
+      "xdescribe"
+    ]
   }
 }

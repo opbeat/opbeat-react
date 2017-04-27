@@ -2,9 +2,11 @@ var utils = require('../utils')
 
 describe('no-init', function () {
   it('should disable when not initialized', function (done) {
+
     browser.url('/no-init/index.html')
 
-    browser.executeAsync(
+    browser.waitForExist('#hello')
+    .executeAsync(
       function(cb) {
         document.getElementById('hello').click()
         cb()
