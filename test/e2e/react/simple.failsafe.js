@@ -1,32 +1,27 @@
-var utils = require('../utils')
-
 describe('failsafe react-app', function () {
-  // build the app
-  beforeEach(utils.verifyNoBrowserErrors)
+  // Can't use utils.verifyNoBrowserErrors since console is not available in ie9
 
   it('should have no errors', function (done) {
-    browser.url('/react/index.html')
-
-    browser.executeAsync(
-      function(cb) {
-        render()
-        cb()
-      }
+    browser
+      .url('/react/index.html')
+      .executeAsync(
+        function (cb) {
+          var errors = []
+          window.onerror = function (error, url, line) {
+            errors.push(error)
+            console.log(error)
+          }
+          setTimeout(function () {
+            cb(errors)
+          }, 1000)
+        }
     ).then(function (response) {
-        // var transactions = response.value
-        // expect(transactions.traces.groups.length).toBe(2)
-        // expect(transactions.traces.groups[1].kind).toBe("template.update")
+      var errors = response.value
+      expect(errors.length).toBe(0)
 
-        // expect(transactions.traces.raw.length).toBe(1)
-        // expect(transactions.traces.raw[0].length).toBe(3)
-
-        // expect(transactions.transactions.length).toBe(1)
-        // expect(transactions.transactions[0].transaction).toBe('demo')
-        done()
-      }, function (error) {
-        browser.log(error)
-      })
+      done()
+    }, function (error) {
+      browser.log(error)
+    })
   })
-
-  afterEach(utils.verifyNoBrowserErrors)
 })
