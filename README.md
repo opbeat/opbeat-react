@@ -1,6 +1,9 @@
 # Opbeat for React
 
+[![Build status](https://travis-ci.org/opbeat/opbeat-react.svg?branch=master)](https://travis-ci.org/opbeat/opbeat-react)
 <a href="https://opbeat.com" title="Opbeat"><img src="http://opbeat-brand-assets.s3-website-us-east-1.amazonaws.com/svg/logo/logo.svg" align="right" height="25px"></a>
+
+[![Build Status](https://saucelabs.com/browser-matrix/opbeat-react.svg)](https://saucelabs.com/beta/builds/285d40cc9e9d4aa28dcb82eb79e77a45)
 
 This is the official Opbeat module for React, redux and react-router.
 
