@@ -16,4 +16,4 @@ e2e_test/libs
 
 coverage
 
-bundle.js
+*bundle.js
