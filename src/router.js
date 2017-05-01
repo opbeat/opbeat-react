@@ -10,7 +10,7 @@ function combineRoutes (routes) {
       pathParts.push(routes[i].path.slice(
         routes[i].path[0] === '/' ? 1 : 0,
         routes[i].path[routes[i].path.length - 1] === '/' ? -1 : routes[i].path.length
-        )
+      )
       )
     }
   }
@@ -93,21 +93,16 @@ function startRoute (location) {
   if (!transaction) {
     serviceContainer.services.logger.warn("Opbeat: Problem occured in measuring route-change. Make sure opbeat-react is loaded _before_ React. If you're using a vendor bundle, make sure Opbeat is first")
   } else {
-    /*
-    location.action == push: do a route change
-    location.action == replace:
-        - interaction ongoing: do nothing. The replace route change is likely just updating the url bar following an interaction
-        - route-change ongoing: route change (could be a redirect)
-    */
-    if ((location && location.action && location.action !== 'REPLACE') || transaction.type !== 'interaction') {
-      if (transaction && transaction.type === 'interaction') {
+    // startRoute is called multiple times with action == replace during a single transaction
+    if (location && location.action && location.action === 'REPLACE') {
+      serviceContainer.services.logger.debug('Skipped startTransaction', location && location.action, transaction && transaction.type)
+    } else {
+      if (transaction.type === 'interaction') {
         transaction.name = 'Unknown'
         transaction.type = 'route-change'
       } else {
         serviceContainer.services.transactionService.startTransaction('Unknown', 'route-change')
       }
-    } else {
-      serviceContainer.services.logger.debug('Skipped startTransaction', location && location.action, transaction && transaction.type)
     }
   }
 }
