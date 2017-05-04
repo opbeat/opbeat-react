@@ -1,3 +1,14 @@
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/opbeat/opbeat-react/compare/3.0.3...v3.1.0) (2017-05-04)
+
+
+### Bug Fixes
+
+* **router:** only set hard navigation if transaction is a route-change ([#4](https://github.com/opbeat/opbeat-react/issues/4)) ([233628b](https://github.com/opbeat/opbeat-react/commit/233628b))
+* ignore REPLACE actions ([b66a814](https://github.com/opbeat/opbeat-react/commit/b66a814))
+
+
+
 <a name="3.0.3"></a>
 ## [3.0.3](https://github.com/opbeat/opbeat-react/compare/0.0.22...3.0.3) (2017-03-27)
 
