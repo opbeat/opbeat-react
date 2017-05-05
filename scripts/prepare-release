@@ -1,0 +1,74 @@
+#!/bin/bash
+
+if [[ $# -lt 1 || "$1" != "patch" && "$1" != "minor" ]];
+then
+    echo "Usage: $0 <version_type - [patch|minor]>"
+    exit
+fi
+
+git diff-index --quiet HEAD
+GITSTATUS=$?
+if [ $GITSTATUS -ne 0 ];
+then
+    echo "Git working directory not clean. Aborting.";
+    exit
+fi
+
+if ls -l node_modules/ | grep ^l | grep -q "opbeat-js-core"
+then
+    echo "opbeat-js-core is linked use 'npm unlink opbeat-js-core && npm i opbeat-js-core' to unlink it. Aborting.";
+    exit
+fi
+
+git checkout master
+git remote update
+
+if [[ `git rev-parse HEAD` != `git rev-parse origin/master` ]]
+then
+    echo "Different state between local and origin. Aborting.";
+    exit
+fi
+
+gulp build:release && npm test
+TEST_RESULT=$?
+if [[ TEST_RESULT -ne 0 ]];
+then
+    echo "Test failed. Aborting.";
+    exit
+fi
+
+VERSION_TYPE="$1"
+echo "$VERSION_TYPE"
+
+npm version $VERSION_TYPE --no-git-tag-version
+PACKAGE_VERSION=`node -e "console.log(require('./package.json').version);"`
+TAG_NAME="v$PACKAGE_VERSION"
+
+conventional-changelog -p angular -i CHANGELOG.md -s
+
+git diff
+
+read -r -p "Are these changes OK (Make changes if necessary)? [y/N] " RESPONSE
+echo " "
+
+if ! [[ $RESPONSE =~ ^([yY][eE][sS]|[yY])$ ]];
+then
+    echo "Rolling back changes."
+    git checkout -- package.json CHANGELOG.md
+    exit
+fi
+
+# todo: check travis status
+# BRANCH_NAME="release-$TAG_NAME"
+# git checkout -b $BRANCH_NAME
+
+git add package.json CHANGELOG.md
+git commit -m "chore: version $PACKAGE_VERSION"
+git tag -a $TAG_NAME -m "version $PACKAGE_VERSION"
+
+gulp build:release
+
+# git push origin $BRANCH_NAME
+
+
+echo "All done. ($TAG_NAME)"

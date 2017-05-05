@@ -9,7 +9,8 @@
     "url": "https://github.com/opbeat/opbeat-react"
   },
   "contributors": [
-    "Ron Cohen <ron@opbeat.com>"
+    "Ron Cohen <ron@opbeat.com>",
+    "Hamidreza Jahtalab"
   ],
   "homepage": "https://github.com/opbeat/opbeat-react",
   "dependencies": {
