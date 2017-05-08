@@ -9,7 +9,7 @@ class PlainApp extends React.Component {
   }
   render() {
     return (
-      <div>
+      <div id="router-app">
         <h1>APP!</h1>
         <ul>
           <li><Link to="/">/</Link></li>

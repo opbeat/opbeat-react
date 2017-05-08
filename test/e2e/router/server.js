@@ -20,7 +20,7 @@ const port = 3000
 app.use(handleRender)
 app.listen(port)
 
-console.log("Listening on ", port)
+console.log("Router app ssr listening on ", port)
 
 function handleRender(req, res) {
 

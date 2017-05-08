@@ -45,11 +45,12 @@ function getMajorVersion () {
 
 gulp.task('build:e2e', function (done) {
   var dirNeedsBuilding = [
-    './test/e2e/router',
-    './test/e2e/react',
-    './test/e2e/redux',
-    './test/e2e/no-init',
-    './test/e2e/fetch'
+    './test/e2e/router/webpack.config.js',
+    './test/e2e/router/webpack.server.config.js',
+    './test/e2e/react/webpack.config.js',
+    './test/e2e/redux/webpack.config.js',
+    './test/e2e/no-init/webpack.config.js',
+    './test/e2e/fetch/webpack.config.js'
   ]
 
   var left = dirNeedsBuilding.length
@@ -57,7 +58,7 @@ gulp.task('build:e2e', function (done) {
   dirNeedsBuilding.forEach(function (dir) {
     var buildDone = next()
     console.log('Building', dir)
-    var webpackConfig = require(dir + '/webpack.config.js')
+    var webpackConfig = require(dir)
     webpack(webpackConfig).run(function (err, stats) {
       if (err) throw err // throw err
       if (stats.hasErrors()) console.log('!! there were errors building', dir)
@@ -224,6 +225,16 @@ gulp.task('test:e2e:serve', function () {
   })
 })
 
+gulp.task('test:e2e:run-ssr', function () {
+  var childProcess = require('child_process')
+  var path = require('path')
+  var cp = childProcess.fork(path.join(__dirname, 'test/e2e/router/server.bundle.js'))
+  cp.on('exit', function (code, signal) {
+    console.log('Exited', {code: code, signal: signal})
+  })
+  cp.on('error', console.error.bind(console))
+})
+
 function onExit (callback) {
   function exitHandler (err) {
     try {
@@ -274,7 +285,7 @@ gulp.task('test:e2e:selenium', function (done) {
   })
 })
 
-gulp.task('test:e2e:start-local', ['test:e2e:serve', 'test:e2e:selenium'])
+gulp.task('test:e2e:start-local', ['test:e2e:serve', 'test:e2e:selenium', 'test:e2e:run-ssr'])
 gulp.task('test:e2e:react-run', function (done) {
   runSequence('build:release', 'build:e2e', 'test:e2e:start-local', 'test:e2e:run', function (err) {
     if (err) {
