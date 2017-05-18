@@ -10,7 +10,31 @@ function loadComponent(prom) {
   }
 }
 
-module.exports = (
+
+var plainRoutes = {
+  path:'/router',
+  component:App,
+  indexRoute:{
+    component:Index
+  },
+  childRoutes:[
+    {
+      path:'/about1',
+      getComponent:loadComponent(() => System.import('./about_component') )
+    },
+    {
+      path:'/about2',
+      getComponent:(nextState, cb) => {
+          require.ensure([], function (require) {
+          cb(null, [
+              require('./about_component').default,
+          ])
+        })}
+    }
+  ]
+}
+
+var routes =  (
  <Route path="/router" component={App}>
     <IndexRoute component={Index}/>
       <Route path="/about1" getComponent={loadComponent(() => System.import('./about_component') )} />
@@ -22,3 +46,5 @@ module.exports = (
         })}} />
   </Route>
 )
+
+module.exports = routes

@@ -56,8 +56,9 @@ describe('react-router: makeSignatureFromRoutes', function () {
     expect(makeSignatureFromRoutes(routes, pushLocation)).toBe('/something')
   })
 
-  it('should handle zero routes', function () {
+  it('should handle zero or undefined routes', function () {
     expect(makeSignatureFromRoutes([], pushLocation)).toBe('unknown')
+    expect(makeSignatureFromRoutes(undefined, pushLocation)).toBe('unknown')
   })
 
   it('should handle REPLACE routes', function () {

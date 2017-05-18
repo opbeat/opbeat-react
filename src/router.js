@@ -22,7 +22,7 @@ function combineRoutes (routes) {
 }
 
 function makeSignatureFromRoutes (routes, location) {
-  if (routes.length < 1) {
+  if (!routes || routes.length < 1) {
     return 'unknown'
   }
   var fullRoute
