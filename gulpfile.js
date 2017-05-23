@@ -229,8 +229,9 @@ gulp.task('test:e2e:run-ssr', function () {
   var childProcess = require('child_process')
   var path = require('path')
   var cp = childProcess.fork(path.join(__dirname, 'test/e2e/router/server.bundle.js'))
-  cp.on('exit', function (code, signal) {
-    console.log('Exited', {code: code, signal: signal})
+
+  onExit(function () {
+    cp.kill()
   })
   cp.on('error', console.error.bind(console))
 })
