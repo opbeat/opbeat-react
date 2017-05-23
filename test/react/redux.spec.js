@@ -4,23 +4,19 @@ var getServiceContainer = require('../../src/react').getServiceContainer
 var captureError = require('../../src/react').captureError
 var createOpbeatMiddleware = require('../../src/redux').createOpbeatMiddleware
 var createStore = require('redux').createStore
-var ServiceFactory = require('opbeat-js-core').ServiceFactory
-var ServiceContainer = require('opbeat-js-core').ServiceContainer
+
 
 var TransportMock = require('../utils/transportMock')
 
 initOpbeat({'orgId': '', 'appId': ''})
 
-
 describe('react-redux: opbeatMiddleware', function () {
   var transactionService
-  var opbeat
   var store
   var testAction1 = {type: 'TEST_ACTION_1'}
   var testAction2 = {type: 'TEST_ACTION_2'}
   var middleware, count, api
   var serviceContainer = getServiceContainer()
-  var serviceFactory
   var originalTransport
 
   var nextMiddleware = function (api) {
@@ -33,10 +29,19 @@ describe('react-redux: opbeatMiddleware', function () {
     }
   }
 
+  function testingMiddleware (api, expectedAction) {
+    return function (next) {
+      return function (action) {
+        count++
+        expect(action).toBe(expectedAction)
+        expect(next).toBe(null)
+      }
+    }
+  }
+
   beforeEach(function () {
     originalTransport = serviceContainer.services.opbeatBackend._transport
     serviceContainer.services.opbeatBackend._transport = new TransportMock()
-
 
     transactionService = serviceContainer.services.transactionService
 
@@ -66,20 +71,20 @@ describe('react-redux: opbeatMiddleware', function () {
   })
 
   it('should start trace if transaction is already running', function () {
-    serviceContainer.services.zoneService.runInOpbeatZone(function() {
-        var transaction = transactionService.startTransaction('my-transaction', 'action')
+    serviceContainer.services.zoneService.runInOpbeatZone(function () {
+      var transaction = transactionService.startTransaction('my-transaction', 'action')
 
-        spyOn(transactionService, 'startTransaction').and.callThrough()
-        spyOn(transaction, 'startTrace').and.callThrough()
+      spyOn(transactionService, 'startTransaction').and.callThrough()
+      spyOn(transaction, 'startTrace').and.callThrough()
 
-        middleware(api)(nextMiddleware(api)(null))(testAction1)
+      middleware(api)(nextMiddleware(api)(null))(testAction1)
 
-        expect(transactionService.startTransaction).not.toHaveBeenCalled()
-        expect(transaction.startTrace).not.toHaveBeenCalledWith(testAction1.type, 'action')
+      expect(transactionService.startTransaction).not.toHaveBeenCalled()
+      expect(transaction.startTrace).not.toHaveBeenCalledWith(testAction1.type, 'action')
 
-        expect(count).toBe(1)
-        transaction.end()
-      }
+      expect(count).toBe(1)
+      transaction.end()
+    }
     )
   })
 
@@ -107,7 +112,43 @@ describe('react-redux: opbeatMiddleware', function () {
     captureError(err)
   })
 
-  afterEach(function() {
+  it('should support Objects as action.type', function () {
+    spyOn(transactionService, 'startTransaction').and.callThrough()
+
+    expect(transactionService.startTransaction.calls.count()).toBe(0)
+    expect(transactionService.getCurrentTransaction()).toBeUndefined()
+
+    var testObjectAction = {type: {test: 'TEST_OBJECT_ACTION'}}
+    middleware(api)(testingMiddleware(api, testObjectAction)(null))(testObjectAction)
+    expect(transactionService.startTransaction).toHaveBeenCalledWith('[object Object]', 'action')
+
+    // need to end transaction manually since we're using singleton serviceContainer
+    serviceContainer.services.zoneService.runInOpbeatZone(function () {
+      var tr = transactionService.getCurrentTransaction()
+      tr.end()
+    })
+    expect(count).toBe(1)
+  })
+
+  if (typeof Symbol === 'function') {
+    it('should support Symbol as action.type', function () {
+      spyOn(transactionService, 'startTransaction').and.callThrough()
+
+      expect(transactionService.startTransaction.calls.count()).toBe(0)
+      expect(transactionService.getCurrentTransaction()).toBeUndefined()
+
+      var testSymbolAction = {type: Symbol.for('TEST_ACTION')}
+
+      middleware(api)(testingMiddleware(api, testSymbolAction)(null))(testSymbolAction)
+      expect(transactionService.startTransaction).toHaveBeenCalledWith('Symbol(TEST_ACTION)', 'action')
+
+      expect(count).toBe(1)
+    })
+  } else {
+    console.log('Symbol api is not supported. Ignoring test!')
+  }
+
+  afterEach(function () {
     serviceContainer.services.opbeatBackend._transport = originalTransport
   })
 })

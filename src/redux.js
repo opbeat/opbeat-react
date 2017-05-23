@@ -39,22 +39,22 @@ function createOpbeatMiddleware () {
         serviceContainer.services.zoneService.zone.run(function () {
           var currTrans
           currTrans = transactionService.getCurrentTransaction()
-          if (action.type && action.type.indexOf('@@') !== 0) { // doesn't start with
-            if (currTrans && currTrans.name !== 'ZoneTransaction') {
-              if (action.type) {
-                tr = transactionService.startTrace('dispatch ' + action.type, 'action')
+          var actionType
+          if (typeof action.type !== 'undefined' && action.type !== null) { // Supporting typeof action.type === 'symbol' and other types
+            actionType = String(action.type)
+            //  Redux internal action types start with '@@' and they're strings as opposed to Symbols
+            if (actionType.indexOf('@@') !== 0) { // doesn't start with '@@'
+              if (currTrans && currTrans.name !== 'ZoneTransaction') {
+                tr = transactionService.startTrace('dispatch ' + actionType, 'action')
               } else {
-                tr = transactionService.startTrace('dispatch', 'action')
-              }
-            } else {
-              if (action.type) {
-                currTrans = transactionService.startTransaction(action.type, 'action')
+                currTrans = transactionService.startTransaction(actionType, 'action')
               }
             }
           }
+          // Ignoring undefined or null action.type
 
-          if (utils.isObject(action) && action.type && lastActions && !transactionService.shouldIgnoreTransaction(action.type)) {
-            lastActions.push(action.type)
+          if (utils.isObject(action) && actionType && lastActions && !transactionService.shouldIgnoreTransaction(actionType)) {
+            lastActions.push(actionType)
           }
 
           ret = next(action)
