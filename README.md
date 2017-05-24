@@ -40,7 +40,7 @@ initOpbeat({
 });
 
 ReactDom.render(
-  <OpbeatRouter><Route /></OpbeatRouter>,
+  <OpbeatRouter><Router /></OpbeatRouter>,
   document.getElementById('react-mount')
 );
 ```
