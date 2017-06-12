@@ -29,10 +29,12 @@ If you use react-router (v2 or v3), use `wrapRouter` to enable routing instrumen
 
 ```js
 import initOpbeat from 'opbeat-react'
-import { Router } from 'react-router'
+import { Router, Route } from 'react-router'
 import { wrapRouter } from 'opbeat-react' // enable react-router instrumentation
 
 const OpbeatRouter = wrapRouter(Router)
+
+const Home = () => <h1>Home</h1>
 
 initOpbeat({
   orgId: '470e8f31bc7b4f4395143091fe752e8c',
@@ -40,7 +42,9 @@ initOpbeat({
 });
 
 ReactDom.render(
-  <OpbeatRouter><Route /></OpbeatRouter>,
+  <OpbeatRouter>
+    <Route path='/' component={Home} />
+  </OpbeatRouter>,
   document.getElementById('react-mount')
 );
 ```
