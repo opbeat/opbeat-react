@@ -1,3 +1,18 @@
+<a name="3.2.0"></a>
+# [3.2.0](https://github.com/opbeat/opbeat-react/compare/v3.1.0...v3.2.0) (2017-06-14)
+
+
+### Bug Fixes
+
+* **router:** handle undefined routes ([49062fc](https://github.com/opbeat/opbeat-react/commit/49062fc))
+
+
+### Features
+
+* **redux:** support Symbols  and other types as action.type ([be7a891](https://github.com/opbeat/opbeat-react/commit/be7a891))
+
+
+
 <a name="3.1.0"></a>
 # [3.1.0](https://github.com/opbeat/opbeat-react/compare/3.0.3...v3.1.0) (2017-05-04)
 
