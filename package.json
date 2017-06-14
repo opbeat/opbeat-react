@@ -14,9 +14,9 @@
   ],
   "homepage": "https://github.com/opbeat/opbeat-react",
   "dependencies": {
+    "loglevel": "^1.4.0",
     "opbeat-js-core": "^0.2.3",
-    "opbeat-zone": "^0.6.17-noexc",
-    "loglevel": "^1.4.0"
+    "opbeat-zone": "^0.8.12-prm"
   },
   "devDependencies": {
     "after-all": "^2.0.2",
