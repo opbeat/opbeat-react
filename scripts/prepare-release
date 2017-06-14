@@ -3,7 +3,7 @@
 if [[ $# -lt 1 || "$1" != "patch" && "$1" != "minor" ]];
 then
     echo "Usage: $0 <version_type - [patch|minor]>"
-    exit
+    exit 1
 fi
 
 git diff-index --quiet HEAD
@@ -11,13 +11,13 @@ GITSTATUS=$?
 if [ $GITSTATUS -ne 0 ];
 then
     echo "Git working directory not clean. Aborting.";
-    exit
+    exit 1
 fi
 
 if ls -l node_modules/ | grep ^l | grep -q "opbeat-js-core"
 then
     echo "opbeat-js-core is linked use 'npm unlink opbeat-js-core && npm i opbeat-js-core' to unlink it. Aborting.";
-    exit
+    exit 1
 fi
 
 git checkout master
@@ -26,7 +26,7 @@ git remote update
 if [[ `git rev-parse HEAD` != `git rev-parse origin/master` ]]
 then
     echo "Different state between local and origin. Aborting.";
-    exit
+    exit 1
 fi
 
 gulp build:release && npm test
@@ -34,7 +34,7 @@ TEST_RESULT=$?
 if [[ TEST_RESULT -ne 0 ]];
 then
     echo "Test failed. Aborting.";
-    exit
+    exit 1
 fi
 
 VERSION_TYPE="$1"
@@ -55,7 +55,7 @@ if ! [[ $RESPONSE =~ ^([yY][eE][sS]|[yY])$ ]];
 then
     echo "Rolling back changes."
     git checkout -- package.json CHANGELOG.md
-    exit
+    exit 1
 fi
 
 # todo: check travis status
