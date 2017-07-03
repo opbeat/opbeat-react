@@ -36,8 +36,7 @@
     "systemjs-plugin-css": "^0.1.27",
     "traceur": "0.0.102",
     "webpack": "^1.12.12",
-    "webpack-dev-server": "^1.14.1",
-    "opbeat-zone": "^0.6.17-noexc"
+    "webpack-dev-server": "^1.14.1"
   },
   "devDependencies": {
     "babel-preset-stage-2": "^6.22.0",
