@@ -2,7 +2,7 @@ var utils = require('../utils')
 
 describe('router-server', function () {
   it('should render the app', function (done) {
-    browser.url('http://localhost:3000/router/')
+    browser.url('http://localhost:8001/router/')
       // .waitForExist('#hello')
       .getText('#router-app')
       .then(function (response) {

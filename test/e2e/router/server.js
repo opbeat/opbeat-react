@@ -13,7 +13,7 @@ const store = createStore()
 
 
 const app = Express()
-const port = 3000
+const port = 8001
 
 
 // This is fired every time the server side receives a request
