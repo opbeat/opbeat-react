@@ -1,20 +1,20 @@
 var React = require('react')
 var Link = require('react-router').Link
 
-var List = React.createClass({
-  render: function () {
+class List extends React.Component {
+  render() {
     return (
-        <ul>
-            <li className='item1' onClick={console.log('clicked')}>Item</li>
-            <li><Value value={nameJSX}/></li>
-            <li>Item</li>
-        </ul>
+      <ul>
+        <li className='item1' onClick={console.log('clicked')}>Item</li>
+        <li><Value value={nameJSX} /></li>
+        <li>Item</li>
+      </ul>
     )
   }
-})
+}
 
-var ListOfLists = React.createClass({
-  render: function () {
+class ListOfLists extends React.Component {
+  render() {
     return (
       <div>
         <List />
@@ -22,7 +22,7 @@ var ListOfLists = React.createClass({
       </div>
     )
   }
-})
+}
 
 const nameJSX = (
   <div>
@@ -33,7 +33,7 @@ const nameJSX = (
   </div>
 )
 
-function Value ({value}) {
+function Value({ value }) {
   return <span>{value}</span>
 }
 

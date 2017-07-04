@@ -23,7 +23,9 @@ var Route = ReactRouter.Route
 var Redirect = ReactRouter.Redirect
 var utils = require('../../src/utils')
 
-var LoginComponent = React.createClass({
+var createReactClass = require('create-react-class')
+
+var LoginComponent = createReactClass({
   componentDidMount: function () {
     browserHistory.push('/new-path')
   },

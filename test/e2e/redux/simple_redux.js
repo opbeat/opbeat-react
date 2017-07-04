@@ -86,26 +86,36 @@ function erroneousComponent(state, action) {
   return !state && action.type == 'SHOW_ERRONEOUS_COMPONENT'
 }
 
-var IncrDecr = React.createClass({
-  incrementIfOdd: function() {
+class IncrDecr extends React.Component {
+  constructor(){
+    super()
+    this.incrementIfOdd = this.incrementIfOdd.bind(this)
+    this.incrementAsync = this.incrementAsync.bind(this)
+    this.simpleThunkDispatcher = this.simpleThunkDispatcher.bind(this)
+    this.delayedDispatchThunk = this.delayedDispatchThunk.bind(this)
+    this.showErroneousComponent = this.showErroneousComponent.bind(this)
+
+  }
+
+  incrementIfOdd() {
     if (this.props.value % 2 !== 0) {
       this.props.onIncrement()
     }
-  },
-  incrementAsync: function () {
+  }
+  incrementAsync() {
     setTimeout(this.props.onIncrement, 1000)
-  },
-  simpleThunkDispatcher : function () {
+  }
+  simpleThunkDispatcher () {
     this.props.simpleThunkDispatcher()
-  },
-  delayedDispatchThunk : function (event) {
+  }
+  delayedDispatchThunk (event) {
     event.preventDefault()
     this.props.delayedDispatchThunk()
-  },
-  showErroneousComponent: function() {
+  }
+  showErroneousComponent () {
     store.dispatch(showErroneousComponent())
-  },
-  render: function() {
+  }
+  render () {
     const { value, erroneousComponent, onIncrement, onDecrement } = this.props
     return (
       <p>
@@ -143,7 +153,7 @@ var IncrDecr = React.createClass({
       </p>
     )
   }
-})
+}
 
 function render() {
   var state = store.getState()

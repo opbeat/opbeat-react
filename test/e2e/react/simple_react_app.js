@@ -3,13 +3,13 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 
-var CompositeComponent = React.createClass({
-  render: function() {
+class CompositeComponent extends React.Component {
+  render () {
     return (
       <span>Composite component</span>
     )
   }
-})
+}
 
 class ES6Component extends React.Component {
   render() {

@@ -2,11 +2,16 @@ import '../opbeat-e2e'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-var component = React.createClass({
-  getInitialState: function() {
-    return {fetchedData: {label: null}}
-  },
-  fetchData: function() {
+class component extends React.Component{
+  constructor() {
+    super()
+    this.state = {fetchedData: {label: null}}
+    this.fetchData = this.fetchData.bind(this)
+    this.fetchDataFireAndForget = this.fetchDataFireAndForget.bind(this)
+    this.failFetchData = this.failFetchData.bind(this)
+    this.failFetchDataWithCatch = this.failFetchDataWithCatch.bind(this)
+  }
+  fetchData() {
     window.opbeat.services.transactionService.startTransaction('fetchData', 'fake')
 
     fetch('./test.json')
@@ -19,13 +24,13 @@ var component = React.createClass({
       this.setState({fetchedDataLabel: json.label})
       trace.end()
     })
-  },
-  fetchDataFireAndForget: function() {
+  }
+  fetchDataFireAndForget() {
     window.opbeat.services.transactionService.startTransaction('fetchData', 'fake')
     fetch('/slow-response')
     this.setState({fetchedDataLabel: "Sent fire and forget"})
-  },
-  failFetchData: function() {
+  }
+  failFetchData() {
     window.opbeat.services.transactionService.startTransaction('failFetchData', 'fake')
     fetch('http://non-existing-host.opbeat/non-existing-file.json')
       .then((resp) => {
@@ -35,8 +40,8 @@ var component = React.createClass({
       var trace = window.opbeat.services.transactionService.startTrace('important reject trace', 'template.custom')
       trace.end()
     })
-  },
-  failFetchDataWithCatch: function() {
+  }
+  failFetchDataWithCatch() {
     window.opbeat.services.transactionService.startTransaction('failFetchDataWithCatch', 'fake')
     fetch('http://non-existing-host.opbeat/non-existing-file.json')
       .then((resp) => {
@@ -46,8 +51,8 @@ var component = React.createClass({
       var trace = window.opbeat.services.transactionService.startTrace('important catched trace', 'template.custom')
       trace.end()
     })
-  },
-  render: function() {
+  }
+  render() {
     const { fetchedDataLabel } = this.state
     return (
       <p>
@@ -60,7 +65,7 @@ var component = React.createClass({
       </p>
     )
   }
-})
+}
 
 function render() {
   ReactDOM.render(

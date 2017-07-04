@@ -35,6 +35,7 @@ if (React.version.split('.')[0] > 0) {
   // Only works for 15.0+ React
   describe('react: nodeName', function () {
     it('gets the correct name for nested components', function () {
+      debugger;
       var wrapper = mount(React.createElement(ListOfLists))
       var li = wrapper.find('li').node
       expect(nodeName(ComponentTree, li)).toBe('List ul li.item1')
