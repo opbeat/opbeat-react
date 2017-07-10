@@ -12,8 +12,22 @@ class List extends React.Component {
     )
   }
 }
+List.displayName = 'List'
 
 class ListOfLists extends React.Component {
+  render() {
+    return (
+      <div>
+        <List />
+        <p id='paragraph'>Hello world!</p>
+      </div>
+    )
+  }
+}
+ListOfLists.displayName = 'ListOfLists'
+
+
+class NoDisplayName extends React.Component {
   render() {
     return (
       <div>
@@ -39,5 +53,6 @@ function Value({ value }) {
 
 module.exports = {
   List: List,
-  ListOfLists: ListOfLists
+  ListOfLists: ListOfLists,
+  NoDisplayName: NoDisplayName
 }

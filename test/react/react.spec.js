@@ -19,14 +19,20 @@ var patchReact = require('../../src/reactPatches')
 
 var nodeName = utils.nodeName
 
-var ComponentTree;
+var ComponentTree
 
 // needs tokens to pass "isValid"
 initOpbeat({'orgId': '', 'appId': ''})
 var serviceContainer = getServiceContainer()
 
+var supportsTypeName = false
+class Pointless {
+}
+if (Pointless.name === 'Pointless') {
+  supportsTypeName = true
+}
 
-reactInternals.ready(function(internals) {
+reactInternals.ready(function (internals) {
   ComponentTree = internals.ComponentTree
   patchReact(internals, serviceContainer)
 })
@@ -35,7 +41,7 @@ if (React.version.split('.')[0] > 0) {
   // Only works for 15.0+ React
   describe('react: nodeName', function () {
     it('gets the correct name for nested components', function () {
-      debugger;
+      debugger
       var wrapper = mount(React.createElement(ListOfLists))
       var li = wrapper.find('li').node
       expect(nodeName(ComponentTree, li)).toBe('List ul li.item1')
@@ -50,8 +56,19 @@ if (React.version.split('.')[0] > 0) {
 
       var span2 = wrapper.find('span.span2').node
       expect(span2).toBeTruthy()
-      // on IE11 nodeName returns " div span.span2"
-      // expect(nodeName(ComponentTree, span2)).toBe('Value div span.span2')
+    // on IE11 nodeName returns " div span.span2"
+    // expect(nodeName(ComponentTree, span2)).toBe('Value div span.span2')
+    })
+
+    it('should not break if the browser does not support type names', function () {
+      var wrapper = mount(React.createElement(components.NoDisplayName))
+      var p = wrapper.find('p').node
+      var expectedName = nodeName(ComponentTree, p)
+      if (supportsTypeName) {
+        expect(expectedName).toBe('NoDisplayName div p#paragraph')
+      } else {
+        expect(expectedName).toBe(' div p#paragraph')
+      }
     })
   })
 } else {
@@ -74,7 +91,7 @@ if (React.version.split('.')[0] > 0) {
       expect(span2).toBeTruthy()
       expect(nodeName(ComponentTree, span2)).toBe('span.span2')
     })
-  })  
+  })
 }
 
 describe('react: generate traces', function () {
@@ -82,12 +99,12 @@ describe('react: generate traces', function () {
 
   it('gets the correct name for nested components', function () {
     transactionService = serviceContainer.services.transactionService
-    serviceContainer.services.zoneService.runInOpbeatZone(function() {
+    serviceContainer.services.zoneService.runInOpbeatZone(function () {
       var trans = transactionService.startTransaction('react-component-test', 'test')
       var wrapper = mount(React.createElement(ListOfLists))
       var expected
-      
-      if (React.version.split('.')[0] > 0) {    
+
+      if (React.version.split('.')[0] > 0) {
         // with react <15.4, enzyme will add a wrapper here.
         expected = [
           {signature: 'ListOfLists', type: 'template.component'},
@@ -98,27 +115,23 @@ describe('react: generate traces', function () {
           {signature: 'Constructor', type: 'template.component'}, // Enzyme adds a wrapper :/
           {signature: 'transaction', type: 'transaction'}
         ]
-
       }
       expect(trans.traces.length).toBe(expected.length)
 
-      var actual = trans.traces.map(function(t) { return {signature: t.signature, type: t.type}})
-      for(var i = 0; i < actual.length; i++ ){
+      var actual = trans.traces.map(function (t) { return {signature: t.signature, type: t.type}})
+      for (var i = 0; i < actual.length; i++) {
         expect(actual[i]).toEqual(expected[i])
       }
       trans.end()
     })
-
   })
 })
-
 
 describe('react: appBeforeBootstrap and appAfterBootstrap', function () {
   var transactionService
 
   it('sets them correctly', function () {
-    
-    var div = document.createElement("div")
+    var div = document.createElement('div')
     document.body.appendChild(div)
 
     ReactDOM.render(React.createElement(ListOfLists), div)
@@ -129,8 +142,6 @@ describe('react: appBeforeBootstrap and appAfterBootstrap', function () {
     expect(transactionService.metrics['appAfterBootstrap']).toBeTruthy()
   })
 })
-
-
 
 describe('react: send error', function () {
   var transport
@@ -149,5 +160,3 @@ describe('react: send error', function () {
     serviceContainer.services.opbeatBackend._transport = origTransport
   })
 })
-
-
