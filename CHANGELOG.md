@@ -1,3 +1,13 @@
+<a name="3.4.0"></a>
+# [3.4.0](https://github.com/opbeat/opbeat-react/compare/v3.3.0...v3.4.0) (2017-07-10)
+
+
+### Features
+
+* support react[@15](https://github.com/15).5 ([648f1e5](https://github.com/opbeat/opbeat-react/commit/648f1e5))
+
+
+
 <a name="3.3.0"></a>
 # [3.3.0](https://github.com/opbeat/opbeat-react/compare/v3.2.0...v3.3.0) (2017-07-03)
 
