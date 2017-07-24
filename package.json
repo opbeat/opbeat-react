@@ -41,7 +41,7 @@
     "karma-jasmine": "^1.1.0",
     "karma-sauce-launcher": "^1.1.0",
     "karma-spec-reporter": "0.0.30",
-    "opbeat-test": "^0.1.0",
+    "opbeat-test": "0.1.0",
     "proxyquireify": "^3.2.1",
     "react-router": "^3.0.2",
     "redux": "^3.6.0",

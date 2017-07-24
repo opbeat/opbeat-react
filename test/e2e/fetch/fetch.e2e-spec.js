@@ -1,4 +1,4 @@
-var utils = require('../utils')
+var utils = require('opbeat-test/webdriverio-utils')
 var handleError = utils.handleError
 
 describe('simple-fetch-app', function () {

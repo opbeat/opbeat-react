@@ -1,4 +1,4 @@
-var utils = require('../utils')
+var utils = require('opbeat-test/webdriverio-utils')
 
 describe('no-init', function () {
   it('should disable when not initialized', function (done) {

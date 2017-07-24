@@ -1,4 +1,4 @@
-var utils = require('../utils')
+var utils = require('opbeat-test/webdriverio-utils')
 
 describe('router-server', function () {
   it('should render the app', function (done) {

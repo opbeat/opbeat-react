@@ -1,4 +1,4 @@
-var utils = require('../utils')
+var utils = require('opbeat-test/webdriverio-utils')
 
 describe('router-app', function () {
   it('should send one transaction on load', function (done) {

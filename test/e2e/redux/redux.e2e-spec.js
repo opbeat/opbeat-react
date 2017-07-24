@@ -1,4 +1,4 @@
-var utils = require('../utils')
+var utils = require('opbeat-test/webdriverio-utils')
 
 describe('redux-app', function () {
   it('should have correct number of transactions and traces', function (done) {

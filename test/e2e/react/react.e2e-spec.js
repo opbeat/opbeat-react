@@ -1,4 +1,4 @@
-var utils = require('../utils')
+var utils = require('opbeat-test/webdriverio-utils')
 
 describe('react-app', function () {
   it('should have the correct number of traces', function (done) {
