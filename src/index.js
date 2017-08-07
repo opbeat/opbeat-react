@@ -11,5 +11,6 @@ module.exports = {
   setTransactionName: opbeatReact.setTransactionName,
   getServiceContainer: opbeatReact.getServiceContainer,
   addFilter: opbeatReact.addFilter,
+  setStateCopier: opbeatReact.setStateCopier,
   wrapRouter: wrapRouter
 }
