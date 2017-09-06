@@ -12,10 +12,7 @@ exports.config = {
     './test/e2e/**/*.e2e-spec.js'
   ],
   // Patterns to exclude.
-  exclude: [
-    './test/e2e/node_modules/**/*.*'
-  // 'path/to/excluded/files'
-  ],
+  exclude: [],
   maxInstances: 1,
 
   //

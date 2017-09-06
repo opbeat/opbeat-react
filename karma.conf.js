@@ -21,6 +21,8 @@ module.exports = function (config) {
       bundle.external('react/addons')
         .external('react/lib/ReactContext')
         .external('react/lib/ExecutionEnvironment')
+        .external('react-dom/test-utils')
+        .external('react-test-renderer/shallow')
     })
     bundle.transform('babelify', {presets: ['es2015', 'react']})
   }
