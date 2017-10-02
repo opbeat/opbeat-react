@@ -14,7 +14,7 @@ opbeat-react will also automatically log exceptions to Opbeat.
 ## Usage
 
 Make sure to import `opbeat-react` before _anything_ else in your application.
-If you have a _vendor_ bundle that includes `React`, you need to also incluse `opbeat-react` in that bundle - before `React`.
+If you have a _vendor_ bundle that includes `React`, you need to also include `opbeat-react` in that bundle - before `React`.
 
 ```js
 import initOpbeat from 'opbeat-react'
@@ -210,7 +210,7 @@ const reduxTransactionDetector = store => next => action => {
 Install this plugin:
 `npm install --save babel-plugin-add-react-displayname`
 
-This adds `MyComponent.displayName = 'MyComponent'` automatically to compoenents defined in your application.
+This adds `MyComponent.displayName = 'MyComponent'` automatically to components defined in your application.
 Remember to add the plugin to your `.babelrc` or your webpack configuration:
 
 
