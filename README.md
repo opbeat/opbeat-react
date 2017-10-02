@@ -27,7 +27,7 @@ initOpbeat({
 
 If you use react-router (v2 or v3), use `wrapRouter` to enable routing instrumentation. See the [transactions api](#transactions-api) for examples without react-router. 
 
-```js
+```jsx harmony
 import initOpbeat from 'opbeat-react'
 import { Router, Route } from 'react-router'
 import { wrapRouter } from 'opbeat-react' // enable react-router instrumentation
