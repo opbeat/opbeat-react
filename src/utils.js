@@ -107,11 +107,16 @@ function patchObject (target, name, patchFn) {
   return delegate
 }
 
+function defaultCopyState (state) {
+  return JSON.parse(JSON.stringify(state))
+}
+
 module.exports = {
   nodeName: nodeName,
   isTopLevelWrapper: isTopLevelWrapper,
   RingBuffer: RingBuffer,
   DOMNodeName: DOMNodeName,
   inBrowser: inBrowser,
-  patchObject: patchObject
+  patchObject: patchObject,
+  defaultCopyState: defaultCopyState
 }

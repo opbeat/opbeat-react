@@ -70,7 +70,8 @@ function configure (config, factory) {
     if (configService.get('sendStateOnException')) {
       var store = configService.get('redux._store')
       if (store && store.getState) {
-        data.extra['Store state'] = JSON.parse(JSON.stringify(store.getState()))
+        var copyState = getStateCopier()
+        data.extra['Store state'] = copyState(store.getState())
       }
 
       var lastActions = configService.get('redux._lastActions')
@@ -140,6 +141,20 @@ function setTransactionName (transactionName, transactionType) {
   }
 }
 
+function getStateCopier () {
+  var copy = configService.get('redux._copyState')
+
+  if (copy) {
+    return copy
+  }
+
+  return reactUtils.defaultCopyState
+}
+
+function setStateCopier (copy) {
+  configService.set('redux._copyState', copy)
+}
+
 module.exports = {
   configure: configure,
   setUserContext: function setUserContext (userContext) {
@@ -156,5 +171,6 @@ module.exports = {
   startTransaction: startTransaction,
   setTransactionName: setTransactionName,
   getServiceContainer: getServiceContainer,
-  addFilter: addFilter
+  addFilter: addFilter,
+  setStateCopier: setStateCopier
 }
