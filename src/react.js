@@ -37,13 +37,14 @@ if (!reactUtils.inBrowser()) {
   enabled = false
 } else {
   enabled = true
-  require('opbeat-zone')
 }
 
 function configure (config, factory) {
   if (!enabled) {
     return false
   }
+
+  require('opbeat-zone')
 
   if (!utils.isUndefined(factory)) {
     serviceContainer = new ServiceContainer(factory)
